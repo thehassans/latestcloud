@@ -88,35 +88,49 @@ RESPONSE STYLE:
 
 // Validate API key endpoint
 router.post('/validate', async (req, res) => {
+  console.log('AI Agent validation request received');
   const { apiKey } = req.body;
 
   if (!apiKey) {
+    console.log('No API key provided');
     return res.status(400).json({ valid: false, message: 'API key is required' });
   }
 
+  console.log('Validating API key (first 10 chars):', apiKey.substring(0, 10) + '...');
+
   try {
     // Test the API key with a simple request to Gemini (using latest model)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    console.log('Making request to Gemini API...');
+    
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      url,
       {
-        contents: [{ parts: [{ text: 'Say hello' }] }]
+        contents: [{ parts: [{ text: 'Hello' }] }]
       },
       {
         headers: { 'Content-Type': 'application/json' },
-        timeout: 15000
+        timeout: 30000
       }
     );
 
+    console.log('Gemini response status:', response.status);
+    
     if (response.data && response.data.candidates) {
-      res.json({ valid: true, message: 'API key is valid' });
+      console.log('API key validation successful');
+      return res.json({ valid: true, message: 'API key is valid' });
     } else {
-      console.error('Gemini validation response:', response.data);
-      res.json({ valid: false, message: 'Unexpected response from API' });
+      console.log('Unexpected response structure:', JSON.stringify(response.data).substring(0, 200));
+      return res.json({ valid: false, message: 'Unexpected response from API' });
     }
   } catch (error) {
-    console.error('API validation error:', error.response?.data || error.message);
+    console.error('API validation error details:');
+    console.error('- Status:', error.response?.status);
+    console.error('- Data:', JSON.stringify(error.response?.data || {}).substring(0, 500));
+    console.error('- Message:', error.message);
+    
     const errorMsg = error.response?.data?.error?.message || error.message || 'Failed to validate API key';
-    res.json({ valid: false, message: errorMsg });
+    return res.json({ valid: false, message: errorMsg });
   }
 });
 

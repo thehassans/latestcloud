@@ -225,28 +225,23 @@ export default function Home() {
                       <p className="text-dark-400">Real-time infrastructure monitoring</p>
                     </div>
 
-                    {/* Stats row with 4 columns */}
+                    {/* Stats row with 4 columns - uniform alignment */}
                     <div className="grid grid-cols-4 gap-3">
                       {[
-                        { label: 'Active Users', value: '50,000+', color: 'text-primary-400', icon: Users },
-                        { label: 'Uptime', value: '99.99%', color: 'text-green-400', icon: null },
-                        { label: 'Response', value: '<50ms', color: 'text-blue-400', icon: null },
-                        { label: 'Performance', value: '+99.9%', color: 'text-emerald-400', icon: TrendingUp }
+                        { label: 'Active Users', value: '50,000+', color: 'text-primary-400' },
+                        { label: 'Uptime', value: '99.99%', color: 'text-green-400' },
+                        { label: 'Response', value: '<50ms', color: 'text-blue-400' },
+                        { label: 'Performance', value: '+99.9%', color: 'text-emerald-400' }
                       ].map((stat, i) => (
                         <motion.div
                           key={stat.label}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.5 + i * 0.1 }}
-                          className="text-center p-4 rounded-2xl bg-dark-800/50 backdrop-blur border border-dark-700"
+                          className="text-center p-5 rounded-2xl bg-dark-800/50 backdrop-blur border border-dark-700"
                         >
-                          {stat.icon && (
-                            <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-dark-700 to-dark-600 flex items-center justify-center">
-                              <stat.icon className={`w-5 h-5 ${stat.color}`} />
-                            </div>
-                          )}
-                          <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
-                          <p className="text-xs text-dark-500 mt-1">{stat.label}</p>
+                          <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                          <p className="text-xs text-dark-500 mt-2">{stat.label}</p>
                         </motion.div>
                       ))}
                     </div>
