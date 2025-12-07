@@ -27,10 +27,10 @@ const footerLinks = {
   ],
   support: [
     { label: 'Help Center', to: '/support' },
-    { label: 'Knowledge Base', to: '/kb' },
+    { label: 'Knowledge Base', to: '/knowledge-base' },
     { label: 'Submit Ticket', to: '/dashboard/tickets/new' },
     { label: 'System Status', to: '/status' },
-    { label: 'Report Abuse', to: '/abuse' },
+    { label: 'Report Abuse', to: '/report-abuse' },
   ],
   legal: [
     { label: 'Terms of Service', to: '/terms' },

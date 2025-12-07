@@ -33,6 +33,18 @@ const Support = lazy(() => import('./pages/Support'))
 const Terms = lazy(() => import('./pages/legal/Terms'))
 const Privacy = lazy(() => import('./pages/legal/Privacy'))
 const Refund = lazy(() => import('./pages/legal/Refund'))
+const SLA = lazy(() => import('./pages/legal/SLA'))
+const AcceptableUse = lazy(() => import('./pages/legal/AcceptableUse'))
+
+// Company pages
+const Careers = lazy(() => import('./pages/Careers'))
+const Blog = lazy(() => import('./pages/Blog'))
+const Partners = lazy(() => import('./pages/Partners'))
+
+// Support pages
+const KnowledgeBase = lazy(() => import('./pages/KnowledgeBase'))
+const SystemStatus = lazy(() => import('./pages/SystemStatus'))
+const ReportAbuse = lazy(() => import('./pages/ReportAbuse'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
@@ -128,6 +140,14 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/refund" element={<Refund />} />
+          <Route path="/sla" element={<SLA />} />
+          <Route path="/acceptable-use" element={<AcceptableUse />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/partners" element={<Partners />} />
+          <Route path="/knowledge-base" element={<KnowledgeBase />} />
+          <Route path="/status" element={<SystemStatus />} />
+          <Route path="/report-abuse" element={<ReportAbuse />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
