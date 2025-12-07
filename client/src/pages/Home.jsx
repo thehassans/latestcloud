@@ -225,12 +225,13 @@ export default function Home() {
                       <p className="text-dark-400">Real-time infrastructure monitoring</p>
                     </div>
 
-                    {/* Stats row */}
-                    <div className="grid grid-cols-3 gap-4 mb-6">
+                    {/* Stats row with 4 columns */}
+                    <div className="grid grid-cols-4 gap-3">
                       {[
-                        { label: 'Uptime', value: '99.99%', color: 'text-green-400' },
-                        { label: 'Response', value: '<50ms', color: 'text-blue-400' },
-                        { label: 'Servers', value: '500+', color: 'text-purple-400' }
+                        { label: 'Active Users', value: '50,000+', color: 'text-primary-400', icon: Users },
+                        { label: 'Uptime', value: '99.99%', color: 'text-green-400', icon: null },
+                        { label: 'Response', value: '<50ms', color: 'text-blue-400', icon: null },
+                        { label: 'Performance', value: '+99.9%', color: 'text-emerald-400', icon: TrendingUp }
                       ].map((stat, i) => (
                         <motion.div
                           key={stat.label}
@@ -239,69 +240,15 @@ export default function Home() {
                           transition={{ delay: 0.5 + i * 0.1 }}
                           className="text-center p-4 rounded-2xl bg-dark-800/50 backdrop-blur border border-dark-700"
                         >
-                          <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                          {stat.icon && (
+                            <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-dark-700 to-dark-600 flex items-center justify-center">
+                              <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                            </div>
+                          )}
+                          <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
                           <p className="text-xs text-dark-500 mt-1">{stat.label}</p>
                         </motion.div>
                       ))}
-                    </div>
-
-                    {/* Live indicator bar */}
-                    <div className="p-4 rounded-2xl bg-dark-800/50 backdrop-blur border border-dark-700">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                          </span>
-                          <span className="text-sm font-medium text-white">Live Status</span>
-                        </div>
-                        <span className="text-xs text-dark-400">Updated just now</span>
-                      </div>
-                      <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: '100%' }}
-                          transition={{ duration: 2, ease: "easeOut" }}
-                          className="h-full bg-gradient-to-r from-green-500 via-emerald-500 to-green-400 rounded-full"
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Floating cards - stacked on right side */}
-                <div className="absolute -right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
-                  {/* Active Users - Top */}
-                  <motion.div
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                    className="p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-dark-500">Active Users</p>
-                        <p className="font-bold text-sm">50,000+</p>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Performance - Bottom */}
-                  <motion.div
-                    animate={{ y: [0, 8, 0] }}
-                    transition={{ duration: 5, repeat: Infinity }}
-                    className="p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-dark-500">Performance</p>
-                        <p className="font-bold text-green-500 text-sm">+99.9%</p>
-                      </div>
                     </div>
                   </motion.div>
                 </div>
