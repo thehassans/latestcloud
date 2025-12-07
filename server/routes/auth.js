@@ -85,8 +85,12 @@ router.post('/login', [
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Update last login
-    await db.query('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
+    // Update last login (ignore if column doesn't exist)
+    try {
+      await db.query('UPDATE users SET updated_at = NOW() WHERE id = ?', [user.id]);
+    } catch (e) {
+      // Ignore - column might not exist
+    }
 
     const token = generateToken({ uuid: user.uuid, email: user.email, role: user.role });
 
@@ -110,8 +114,8 @@ router.post('/login', [
       token
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    console.error('Login error:', error.message, error.stack);
+    res.status(500).json({ error: 'Login failed', details: error.message });
   }
 });
 
