@@ -94,27 +94,29 @@ router.post('/validate', async (req, res) => {
   }
 
   try {
-    // Test the API key with a simple request to Gemini
+    // Test the API key with a simple request to Gemini (using latest model)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: 'Hello' }] }]
+          contents: [{ parts: [{ text: 'Say hello' }] }]
         })
       }
     );
 
-    if (response.ok) {
+    const data = await response.json();
+    
+    if (response.ok && data.candidates) {
       res.json({ valid: true, message: 'API key is valid' });
     } else {
-      const error = await response.json();
-      res.json({ valid: false, message: error.error?.message || 'Invalid API key' });
+      console.error('Gemini validation response:', data);
+      res.json({ valid: false, message: data.error?.message || 'Invalid API key' });
     }
   } catch (error) {
     console.error('API validation error:', error);
-    res.status(500).json({ valid: false, message: 'Failed to validate API key' });
+    res.status(500).json({ valid: false, message: 'Failed to validate API key: ' + error.message });
   }
 });
 
@@ -150,7 +152,7 @@ Respond naturally as ${agentName} would. Keep it brief and helpful.
 `;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
