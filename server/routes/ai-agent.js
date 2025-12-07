@@ -1,6 +1,46 @@
 const express = require('express');
-const axios = require('axios');
+const https = require('https');
 const router = express.Router();
+
+// Helper function to make HTTPS POST requests
+function httpsPost(url, data) {
+  return new Promise((resolve, reject) => {
+    const urlObj = new URL(url);
+    const postData = JSON.stringify(data);
+    
+    const options = {
+      hostname: urlObj.hostname,
+      path: urlObj.pathname + urlObj.search,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => body += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          resolve({ status: res.statusCode, data: parsed });
+        } catch (e) {
+          resolve({ status: res.statusCode, data: body });
+        }
+      });
+    });
+
+    req.on('error', (e) => reject(e));
+    req.setTimeout(30000, () => {
+      req.destroy();
+      reject(new Error('Request timeout'));
+    });
+    
+    req.write(postData);
+    req.end();
+  });
+}
 
 // Knowledge base for the AI agent
 const knowledgeBase = `
@@ -99,38 +139,29 @@ router.post('/validate', async (req, res) => {
   console.log('Validating API key (first 10 chars):', apiKey.substring(0, 10) + '...');
 
   try {
-    // Test the API key with a simple request to Gemini (using latest model)
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     console.log('Making request to Gemini API...');
     
-    const response = await axios.post(
-      url,
-      {
-        contents: [{ parts: [{ text: 'Hello' }] }]
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 30000
-      }
-    );
+    const response = await httpsPost(url, {
+      contents: [{ parts: [{ text: 'Hello' }] }]
+    });
 
     console.log('Gemini response status:', response.status);
+    console.log('Gemini response data:', JSON.stringify(response.data).substring(0, 300));
     
-    if (response.data && response.data.candidates) {
+    if (response.status === 200 && response.data && response.data.candidates) {
       console.log('API key validation successful');
       return res.json({ valid: true, message: 'API key is valid' });
+    } else if (response.data?.error) {
+      console.log('API error:', response.data.error.message);
+      return res.json({ valid: false, message: response.data.error.message });
     } else {
-      console.log('Unexpected response structure:', JSON.stringify(response.data).substring(0, 200));
+      console.log('Unexpected response');
       return res.json({ valid: false, message: 'Unexpected response from API' });
     }
   } catch (error) {
-    console.error('API validation error details:');
-    console.error('- Status:', error.response?.status);
-    console.error('- Data:', JSON.stringify(error.response?.data || {}).substring(0, 500));
-    console.error('- Message:', error.message);
-    
-    const errorMsg = error.response?.data?.error?.message || error.message || 'Failed to validate API key';
-    return res.json({ valid: false, message: errorMsg });
+    console.error('API validation error:', error.message);
+    return res.json({ valid: false, message: error.message || 'Failed to validate API key' });
   }
 });
 
@@ -165,34 +196,29 @@ Current customer message: ${message}
 Respond naturally as ${agentName} would. Keep it brief and helpful.
 `;
 
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        contents: [
-          ...conversationContext,
-          {
-            role: 'user',
-            parts: [{ text: systemPrompt }]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 256,
-        },
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
-        ]
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    const response = await httpsPost(url, {
+      contents: [
+        ...conversationContext,
+        {
+          role: 'user',
+          parts: [{ text: systemPrompt }]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 256,
       },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 30000
-      }
-    );
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
+      ]
+    });
 
     const aiResponse = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
