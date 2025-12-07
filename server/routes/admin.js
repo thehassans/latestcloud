@@ -157,15 +157,17 @@ router.get('/products', async (req, res) => {
     `);
 
     res.json({
-      products: products.map(p => ({
-        ...p,
-        features: p.features ? JSON.parse(p.features) : [],
-        specifications: p.specifications ? JSON.parse(p.specifications) : {}
-      }))
+      products: products.map(p => {
+        let features = [];
+        let specifications = {};
+        try { features = p.features ? JSON.parse(p.features) : []; } catch(e) { features = []; }
+        try { specifications = p.specifications ? JSON.parse(p.specifications) : {}; } catch(e) { specifications = {}; }
+        return { ...p, features, specifications };
+      })
     });
   } catch (error) {
-    console.error('Get products error:', error);
-    res.status(500).json({ error: 'Failed to load products' });
+    console.error('Get products error:', error.message);
+    res.status(500).json({ error: 'Failed to load products', details: error.message });
   }
 });
 
@@ -179,35 +181,35 @@ router.post('/products', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, category_id, description, features, specifications, price_monthly, price_annual, setup_fee, is_featured, is_active } = req.body;
+    const { name, category_id, description, features, specifications, price_monthly, price_annually, setup_fee, is_featured, is_active } = req.body;
     const uuid = uuidv4();
     const slug = slugify(name, { lower: true, strict: true });
 
     await db.query(`
-      INSERT INTO products (uuid, category_id, name, slug, description, features, specifications, price_monthly, price_annual, setup_fee, is_featured, is_active)
+      INSERT INTO products (uuid, category_id, name, slug, description, features, specifications, price_monthly, price_annually, setup_fee, is_featured, is_active)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [uuid, category_id, name, slug, description, JSON.stringify(features || []), JSON.stringify(specifications || {}), price_monthly, price_annual, setup_fee || 0, is_featured || false, is_active !== false]);
+    `, [uuid, category_id, name, slug, description, JSON.stringify(features || []), JSON.stringify(specifications || {}), price_monthly || 0, price_annually || 0, setup_fee || 0, is_featured || false, is_active !== false]);
 
     res.status(201).json({ message: 'Product created successfully', uuid });
   } catch (error) {
-    console.error('Create product error:', error);
-    res.status(500).json({ error: 'Failed to create product' });
+    console.error('Create product error:', error.message);
+    res.status(500).json({ error: 'Failed to create product', details: error.message });
   }
 });
 
 router.put('/products/:uuid', async (req, res) => {
   try {
-    const { name, category_id, description, features, specifications, price_monthly, price_annual, setup_fee, is_featured, is_active, sort_order } = req.body;
+    const { name, category_id, description, features, specifications, price_monthly, price_annually, setup_fee, is_featured, is_active, sort_order } = req.body;
     
     await db.query(`
-      UPDATE products SET name = ?, category_id = ?, description = ?, features = ?, specifications = ?, price_monthly = ?, price_annual = ?, setup_fee = ?, is_featured = ?, is_active = ?, sort_order = ?
+      UPDATE products SET name = ?, category_id = ?, description = ?, features = ?, specifications = ?, price_monthly = ?, price_annually = ?, setup_fee = ?, is_featured = ?, is_active = ?, sort_order = ?
       WHERE uuid = ?
-    `, [name, category_id, description, JSON.stringify(features || []), JSON.stringify(specifications || {}), price_monthly, price_annual, setup_fee, is_featured, is_active, sort_order || 0, req.params.uuid]);
+    `, [name, category_id, description, JSON.stringify(features || []), JSON.stringify(specifications || {}), price_monthly || 0, price_annually || 0, setup_fee || 0, is_featured, is_active, sort_order || 0, req.params.uuid]);
 
     res.json({ message: 'Product updated successfully' });
   } catch (error) {
-    console.error('Update product error:', error);
-    res.status(500).json({ error: 'Failed to update product' });
+    console.error('Update product error:', error.message);
+    res.status(500).json({ error: 'Failed to update product', details: error.message });
   }
 });
 
