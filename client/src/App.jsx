@@ -11,6 +11,10 @@ import AdminLayout from './layouts/AdminLayout'
 // Loading component
 import LoadingScreen from './components/ui/LoadingScreen'
 
+// AI Agent
+import { AIAgentProvider } from './contexts/AIAgentContext'
+import AIChatWidget from './components/AIChatWidget'
+
 // Public pages (lazy loaded)
 const Home = lazy(() => import('./pages/Home'))
 const Hosting = lazy(() => import('./pages/services/Hosting'))
@@ -57,6 +61,8 @@ const AdminDomains = lazy(() => import('./pages/admin/AdminDomains'))
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
 const AdminPages = lazy(() => import('./pages/admin/AdminPages'))
 const AdminMedia = lazy(() => import('./pages/admin/AdminMedia'))
+const AdminAIAgent = lazy(() => import('./pages/admin/AdminAIAgent'))
+const AdminAgentChats = lazy(() => import('./pages/admin/AdminAgentChats'))
 
 // Protected Route wrapper
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -99,8 +105,10 @@ function App() {
   }, [setSettings])
 
   return (
-    <Suspense fallback={<LoadingScreen />}>
-      <Routes>
+    <AIAgentProvider>
+      <Suspense fallback={<LoadingScreen />}>
+        <AIChatWidget />
+        <Routes>
         {/* Public routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
@@ -164,12 +172,15 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
           <Route path="pages" element={<AdminPages />} />
           <Route path="media" element={<AdminMedia />} />
+          <Route path="ai-agent" element={<AdminAIAgent />} />
+          <Route path="ai-chats" element={<AdminAgentChats />} />
         </Route>
 
         {/* 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
+    </AIAgentProvider>
   )
 }
 

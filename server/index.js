@@ -18,6 +18,7 @@ const adminRoutes = require('./routes/admin');
 const settingsRoutes = require('./routes/settings');
 const uploadRoutes = require('./routes/upload');
 const pageRoutes = require('./routes/pages');
+const aiAgentRoutes = require('./routes/ai-agent');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,6 +65,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/pages', pageRoutes);
+app.use('/api/ai-agent', aiAgentRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
