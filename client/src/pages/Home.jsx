@@ -269,38 +269,42 @@ export default function Home() {
                   </motion.div>
                 </div>
 
-                {/* Floating cards - positioned outside main content */}
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/2 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700 z-20"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-white" />
+                {/* Floating cards - stacked on right side */}
+                <div className="absolute -right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
+                  {/* Active Users - Top */}
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-dark-500">Active Users</p>
+                        <p className="font-bold text-sm">50,000+</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-dark-500">Performance</p>
-                      <p className="font-bold text-green-500 text-sm">+99.9%</p>
-                    </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
 
-                <motion.div
-                  animate={{ y: [0, 10, 0] }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                  className="absolute top-1/2 left-0 -translate-x-1/2 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700 z-20"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-white" />
+                  {/* Performance - Bottom */}
+                  <motion.div
+                    animate={{ y: [0, 8, 0] }}
+                    transition={{ duration: 5, repeat: Infinity }}
+                    className="p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-dark-500">Performance</p>
+                        <p className="font-bold text-green-500 text-sm">+99.9%</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-dark-500">Active Users</p>
-                      <p className="font-bold text-sm">50,000+</p>
-                    </div>
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </div>
               </div>
             </motion.div>
           </div>
