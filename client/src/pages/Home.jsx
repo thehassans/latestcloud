@@ -269,35 +269,35 @@ export default function Home() {
                   </motion.div>
                 </div>
 
-                {/* Floating cards */}
+                {/* Floating cards - positioned outside main content */}
                 <motion.div
-                  animate={{ y: [0, -15, 0] }}
+                  animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 4, repeat: Infinity }}
-                  className="absolute -top-6 -right-6 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700"
+                  className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/2 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700 z-20"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-white" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm text-dark-500">Performance</p>
-                      <p className="font-bold text-green-500">+99.9%</p>
+                      <p className="text-xs text-dark-500">Performance</p>
+                      <p className="font-bold text-green-500 text-sm">+99.9%</p>
                     </div>
                   </div>
                 </motion.div>
 
                 <motion.div
-                  animate={{ y: [0, 15, 0] }}
+                  animate={{ y: [0, 10, 0] }}
                   transition={{ duration: 5, repeat: Infinity }}
-                  className="absolute -bottom-4 -left-6 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700"
+                  className="absolute top-1/2 left-0 -translate-x-1/2 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700 z-20"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-white" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm text-dark-500">Active Users</p>
-                      <p className="font-bold">50,000+</p>
+                      <p className="text-xs text-dark-500">Active Users</p>
+                      <p className="font-bold text-sm">50,000+</p>
                     </div>
                   </div>
                 </motion.div>
