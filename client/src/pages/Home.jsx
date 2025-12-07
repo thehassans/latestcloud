@@ -174,7 +174,7 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Right content - Hero illustration */}
+            {/* Right content - Ultra Premium Status Display */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -182,64 +182,102 @@ export default function Home() {
               className="hidden lg:block"
             >
               <div className="relative">
-                {/* Main server illustration */}
-                <div className={clsx(
-                  "relative z-10 p-8 rounded-3xl shadow-2xl",
-                  isGradient 
-                    ? "bg-gradient-to-br from-dark-800 to-dark-900" 
-                    : "bg-dark-800"
-                )}>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      { color: 'from-green-500 to-emerald-600', label: 'Web Server', cpu: '23%', ram: '4.2GB' },
-                      { color: 'from-blue-500 to-cyan-600', label: 'Database', cpu: '45%', ram: '8.1GB' },
-                      { color: 'from-purple-500 to-pink-600', label: 'Storage', cpu: '12%', ram: '2.8GB' }
-                    ].map((server, i) => (
-                      <motion.div
-                        key={i}
-                        animate={{ y: [0, -8, 0] }}
-                        transition={{ duration: 3, repeat: Infinity, delay: i * 0.3 }}
-                        className="bg-dark-700/80 rounded-2xl p-4 border border-dark-600 backdrop-blur"
-                      >
-                        <div className={`h-2 w-full bg-gradient-to-r ${server.color} rounded-full mb-3`} />
-                        <p className="text-white text-xs font-medium mb-3">{server.label}</p>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-xs">
-                            <span className="text-dark-400">CPU</span>
-                            <span className="text-green-400">{server.cpu}</span>
-                          </div>
-                          <div className="h-1.5 bg-dark-600 rounded-full overflow-hidden">
-                            <div className={`h-full bg-gradient-to-r ${server.color} rounded-full`} style={{ width: server.cpu }} />
-                          </div>
-                          <div className="flex justify-between text-xs">
-                            <span className="text-dark-400">RAM</span>
-                            <span className="text-blue-400">{server.ram}</span>
-                          </div>
-                          <div className="h-1.5 bg-dark-600 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style={{ width: '40%' }} />
+                {/* Premium Glass Card */}
+                <div className="relative">
+                  {/* Glow effect behind */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 via-primary-500/20 to-purple-500/20 blur-3xl rounded-full" />
+                  
+                  {/* Main premium status card */}
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="relative z-10"
+                  >
+                    {/* Status indicator */}
+                    <div className="flex items-center justify-center mb-8">
+                      <div className="relative">
+                        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/40">
+                          <div className="w-28 h-28 rounded-full bg-dark-900 flex items-center justify-center">
+                            <div className="text-center">
+                              <motion.div
+                                animate={{ scale: [1, 1.1, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center"
+                              >
+                                <CheckCircle className="w-8 h-8 text-white" />
+                              </motion.div>
+                            </div>
                           </div>
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                  <div className="mt-6 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-green-400 text-sm font-medium">All Systems Operational</span>
+                        {/* Pulse rings */}
+                        <div className="absolute inset-0 rounded-full border-2 border-green-400/30 animate-ping" />
+                        <div className="absolute -inset-4 rounded-full border border-green-400/20 animate-pulse" />
+                      </div>
                     </div>
-                    <span className="text-dark-400 text-sm">99.99% Uptime</span>
-                  </div>
+
+                    {/* Status text */}
+                    <div className="text-center mb-8">
+                      <h3 className="text-2xl font-bold text-white mb-2">
+                        <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                          All Systems Operational
+                        </span>
+                      </h3>
+                      <p className="text-dark-400">Real-time infrastructure monitoring</p>
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      {[
+                        { label: 'Uptime', value: '99.99%', color: 'text-green-400' },
+                        { label: 'Response', value: '<50ms', color: 'text-blue-400' },
+                        { label: 'Servers', value: '500+', color: 'text-purple-400' }
+                      ].map((stat, i) => (
+                        <motion.div
+                          key={stat.label}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 + i * 0.1 }}
+                          className="text-center p-4 rounded-2xl bg-dark-800/50 backdrop-blur border border-dark-700"
+                        >
+                          <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                          <p className="text-xs text-dark-500 mt-1">{stat.label}</p>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Live indicator bar */}
+                    <div className="p-4 rounded-2xl bg-dark-800/50 backdrop-blur border border-dark-700">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                          </span>
+                          <span className="text-sm font-medium text-white">Live Status</span>
+                        </div>
+                        <span className="text-xs text-dark-400">Updated just now</span>
+                      </div>
+                      <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: '100%' }}
+                          transition={{ duration: 2, ease: "easeOut" }}
+                          className="h-full bg-gradient-to-r from-green-500 via-emerald-500 to-green-400 rounded-full"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
 
                 {/* Floating cards */}
                 <motion.div
                   animate={{ y: [0, -15, 0] }}
                   transition={{ duration: 4, repeat: Infinity }}
-                  className="absolute -top-6 -right-6 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl"
+                  className="absolute -top-6 -right-6 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-green-500" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                      <TrendingUp className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <p className="text-sm text-dark-500">Performance</p>
@@ -251,11 +289,11 @@ export default function Home() {
                 <motion.div
                   animate={{ y: [0, 15, 0] }}
                   transition={{ duration: 5, repeat: Infinity }}
-                  className="absolute -bottom-4 -left-6 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl"
+                  className="absolute -bottom-4 -left-6 p-4 bg-white dark:bg-dark-800 rounded-2xl shadow-xl border border-dark-100 dark:border-dark-700"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-primary-500" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <p className="text-sm text-dark-500">Active Users</p>
