@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 
 // Knowledge base for the AI agent
 const knowledgeBase = `
@@ -95,28 +96,31 @@ router.post('/validate', async (req, res) => {
 
   try {
     // Test the API key with a simple request to Gemini (using latest model)
-    const response = await fetch(
+    console.log('Validating API key with Gemini...');
+    
+    const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
-        method: 'POST',
+        contents: [{ parts: [{ text: 'Say hello' }] }]
+      },
+      {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: 'Say hello' }] }]
-        })
+        timeout: 30000
       }
     );
 
-    const data = await response.json();
+    console.log('Gemini response status:', response.status);
     
-    if (response.ok && data.candidates) {
+    if (response.data && response.data.candidates) {
       res.json({ valid: true, message: 'API key is valid' });
     } else {
-      console.error('Gemini validation response:', data);
-      res.json({ valid: false, message: data.error?.message || 'Invalid API key' });
+      console.error('Unexpected Gemini response:', response.data);
+      res.json({ valid: false, message: 'Unexpected response from Gemini API' });
     }
   } catch (error) {
-    console.error('API validation error:', error);
-    res.status(500).json({ valid: false, message: 'Failed to validate API key: ' + error.message });
+    console.error('API validation error:', error.response?.data || error.message);
+    const errorMessage = error.response?.data?.error?.message || error.message || 'Failed to validate API key';
+    res.json({ valid: false, message: errorMessage });
   }
 });
 
@@ -151,43 +155,36 @@ Current customer message: ${message}
 Respond naturally as ${agentName} would. Keep it brief and helpful.
 `;
 
-    const response = await fetch(
+    const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
-        method: 'POST',
+        contents: [
+          ...conversationContext,
+          {
+            role: 'user',
+            parts: [{ text: systemPrompt }]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 256,
+        },
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
+        ]
+      },
+      {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            ...conversationContext,
-            {
-              role: 'user',
-              parts: [{ text: systemPrompt }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 256,
-          },
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
-          ]
-        })
+        timeout: 30000
       }
     );
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('Gemini API error:', error);
-      return res.status(500).json({ error: 'Failed to get AI response' });
-    }
-
-    const data = await response.json();
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const aiResponse = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!aiResponse) {
       return res.status(500).json({ error: 'No response from AI' });
