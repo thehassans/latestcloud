@@ -1,6 +1,5 @@
 const express = require('express');
 const multer = require('multer');
-const sharp = require('sharp');
 const path = require('path');
 const fs = require('fs').promises;
 const { v4: uuidv4 } = require('uuid');
@@ -8,6 +7,15 @@ const db = require('../database/connection');
 const { authenticate, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Try to load sharp (optional - for WebP conversion)
+let sharp = null;
+try {
+  sharp = require('sharp');
+  console.log('Sharp loaded - WebP conversion enabled');
+} catch (e) {
+  console.log('Sharp not available - images will be saved without conversion');
+}
 
 // Configure multer for memory storage
 const upload = multer({
@@ -34,7 +42,7 @@ async function ensureUploadDir(dir) {
   }
 }
 
-// Upload single image (converts to WebP automatically)
+// Upload single image (converts to WebP if sharp is available)
 router.post('/image', authenticate, requireRole('admin', 'support'), upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
@@ -45,23 +53,31 @@ router.post('/image', authenticate, requireRole('admin', 'support'), upload.sing
     await ensureUploadDir(uploadDir);
 
     const uuid = uuidv4();
-    const filename = `${uuid}.webp`;
-    const filepath = path.join(uploadDir, filename);
-    const relativePath = `/uploads/${new Date().toISOString().slice(0, 7)}/${filename}`;
+    let filename, mimeType, filepath, relativePath;
 
-    // Convert to WebP and optimize
-    await sharp(req.file.buffer)
-      .webp({ quality: 85 })
-      .toFile(filepath);
+    if (sharp) {
+      // Convert to WebP
+      filename = `${uuid}.webp`;
+      mimeType = 'image/webp';
+      filepath = path.join(uploadDir, filename);
+      relativePath = `/uploads/${new Date().toISOString().slice(0, 7)}/${filename}`;
+      await sharp(req.file.buffer).webp({ quality: 85 }).toFile(filepath);
+    } else {
+      // Save original file
+      const ext = path.extname(req.file.originalname) || '.jpg';
+      filename = `${uuid}${ext}`;
+      mimeType = req.file.mimetype;
+      filepath = path.join(uploadDir, filename);
+      relativePath = `/uploads/${new Date().toISOString().slice(0, 7)}/${filename}`;
+      await fs.writeFile(filepath, req.file.buffer);
+    }
 
-    // Get file info
     const stats = await fs.stat(filepath);
 
-    // Save to database
     await db.query(`
       INSERT INTO media (uuid, filename, original_filename, mime_type, file_size, path, uploaded_by)
-      VALUES (?, ?, ?, 'image/webp', ?, ?, ?)
-    `, [uuid, filename, req.file.originalname, stats.size, relativePath, req.user.id]);
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `, [uuid, filename, req.file.originalname, mimeType, stats.size, relativePath, req.user.id]);
 
     res.json({
       message: 'File uploaded successfully',
@@ -69,7 +85,7 @@ router.post('/image', authenticate, requireRole('admin', 'support'), upload.sing
         uuid,
         filename,
         original_filename: req.file.originalname,
-        mime_type: 'image/webp',
+        mime_type: mimeType,
         file_size: stats.size,
         url: relativePath
       }
@@ -94,27 +110,35 @@ router.post('/images', authenticate, requireRole('admin', 'support'), upload.arr
 
     for (const file of req.files) {
       const uuid = uuidv4();
-      const filename = `${uuid}.webp`;
-      const filepath = path.join(uploadDir, filename);
-      const relativePath = `/uploads/${new Date().toISOString().slice(0, 7)}/${filename}`;
+      let filename, mimeType, filepath, relativePath;
 
-      // Convert to WebP and optimize
-      await sharp(file.buffer)
-        .webp({ quality: 85 })
-        .toFile(filepath);
+      if (sharp) {
+        filename = `${uuid}.webp`;
+        mimeType = 'image/webp';
+        filepath = path.join(uploadDir, filename);
+        relativePath = `/uploads/${new Date().toISOString().slice(0, 7)}/${filename}`;
+        await sharp(file.buffer).webp({ quality: 85 }).toFile(filepath);
+      } else {
+        const ext = path.extname(file.originalname) || '.jpg';
+        filename = `${uuid}${ext}`;
+        mimeType = file.mimetype;
+        filepath = path.join(uploadDir, filename);
+        relativePath = `/uploads/${new Date().toISOString().slice(0, 7)}/${filename}`;
+        await fs.writeFile(filepath, file.buffer);
+      }
 
       const stats = await fs.stat(filepath);
 
       await db.query(`
         INSERT INTO media (uuid, filename, original_filename, mime_type, file_size, path, uploaded_by)
-        VALUES (?, ?, ?, 'image/webp', ?, ?, ?)
-      `, [uuid, filename, file.originalname, stats.size, relativePath, req.user.id]);
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, [uuid, filename, file.originalname, mimeType, stats.size, relativePath, req.user.id]);
 
       uploadedFiles.push({
         uuid,
         filename,
         original_filename: file.originalname,
-        mime_type: 'image/webp',
+        mime_type: mimeType,
         file_size: stats.size,
         url: relativePath
       });
@@ -130,11 +154,15 @@ router.post('/images', authenticate, requireRole('admin', 'support'), upload.arr
   }
 });
 
-// Upload with resize options
+// Upload with resize options (requires sharp)
 router.post('/image/resize', authenticate, requireRole('admin', 'support'), upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    if (!sharp) {
+      return res.status(501).json({ error: 'Image resize not available - sharp not installed' });
     }
 
     const { width, height, fit = 'cover' } = req.body;
@@ -146,7 +174,6 @@ router.post('/image/resize', authenticate, requireRole('admin', 'support'), uplo
     const filepath = path.join(uploadDir, filename);
     const relativePath = `/uploads/${new Date().toISOString().slice(0, 7)}/${filename}`;
 
-    // Process image with resize
     let sharpInstance = sharp(req.file.buffer);
     
     if (width || height) {
