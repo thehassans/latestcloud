@@ -1,6 +1,6 @@
 const express = require('express');
-const router = express.Router();
 const axios = require('axios');
+const router = express.Router();
 
 // Knowledge base for the AI agent
 const knowledgeBase = `
@@ -96,8 +96,6 @@ router.post('/validate', async (req, res) => {
 
   try {
     // Test the API key with a simple request to Gemini (using latest model)
-    console.log('Validating API key with Gemini...');
-    
     const response = await axios.post(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
@@ -105,22 +103,20 @@ router.post('/validate', async (req, res) => {
       },
       {
         headers: { 'Content-Type': 'application/json' },
-        timeout: 30000
+        timeout: 15000
       }
     );
 
-    console.log('Gemini response status:', response.status);
-    
     if (response.data && response.data.candidates) {
       res.json({ valid: true, message: 'API key is valid' });
     } else {
-      console.error('Unexpected Gemini response:', response.data);
-      res.json({ valid: false, message: 'Unexpected response from Gemini API' });
+      console.error('Gemini validation response:', response.data);
+      res.json({ valid: false, message: 'Unexpected response from API' });
     }
   } catch (error) {
     console.error('API validation error:', error.response?.data || error.message);
-    const errorMessage = error.response?.data?.error?.message || error.message || 'Failed to validate API key';
-    res.json({ valid: false, message: errorMessage });
+    const errorMsg = error.response?.data?.error?.message || error.message || 'Failed to validate API key';
+    res.json({ valid: false, message: errorMsg });
   }
 });
 

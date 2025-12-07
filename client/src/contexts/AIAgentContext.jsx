@@ -120,8 +120,6 @@ export function AIAgentProvider({ children }) {
       addLog('info', 'Validating API key...')
       const response = await api.post('/ai-agent/validate', { apiKey: newApiKey })
       
-      console.log('Validation response:', response.data)
-      
       if (response.data.valid) {
         setApiKey(newApiKey)
         setIsApiValid(true)
@@ -131,15 +129,12 @@ export function AIAgentProvider({ children }) {
         addLog('success', 'API key validated successfully!')
         return { success: true, message: 'API key is valid' }
       } else {
-        const errorMsg = response.data.message || 'Invalid API key'
-        addLog('error', errorMsg)
-        return { success: false, message: errorMsg }
+        addLog('error', 'Invalid API key')
+        return { success: false, message: 'Invalid API key' }
       }
     } catch (error) {
-      console.error('Validation error:', error)
-      const errorMsg = error.response?.data?.message || error.message || 'Validation failed'
-      addLog('error', `Validation failed: ${errorMsg}`)
-      return { success: false, message: errorMsg }
+      addLog('error', `Validation failed: ${error.message}`)
+      return { success: false, message: error.message }
     }
   }, [addLog])
 
