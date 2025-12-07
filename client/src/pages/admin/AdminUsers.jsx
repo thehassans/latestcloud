@@ -36,14 +36,14 @@ export default function AdminUsers() {
               </tr>
             </thead>
             <tbody className="divide-y divide-dark-100 dark:divide-dark-700">
-              {data?.users?.map(user => (
+              {data?.users?.length > 0 ? data.users.map(user => (
                 <tr key={user.uuid} className="hover:bg-dark-50 dark:hover:bg-dark-800/50">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center font-bold">
-                        {user.first_name?.[0]}{user.last_name?.[0]}
+                      <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center font-bold text-primary-600">
+                        {user.first_name?.[0] || 'U'}{user.last_name?.[0] || ''}
                       </div>
-                      <span className="font-medium">{user.first_name} {user.last_name}</span>
+                      <span className="font-medium">{user.first_name || 'Unknown'} {user.last_name || ''}</span>
                     </div>
                   </td>
                   <td className="p-4 text-dark-500">{user.email}</td>
@@ -53,7 +53,11 @@ export default function AdminUsers() {
                   </td>
                   <td className="p-4 text-dark-500">{new Date(user.created_at).toLocaleDateString()}</td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan="5" className="p-8 text-center text-dark-500">No users found</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -184,26 +184,40 @@ export default function Home() {
               <div className="relative">
                 {/* Main server illustration */}
                 <div className={clsx(
-                  "relative z-10 p-8 rounded-3xl",
+                  "relative z-10 p-8 rounded-3xl shadow-2xl",
                   isGradient 
                     ? "bg-gradient-to-br from-dark-800 to-dark-900" 
                     : "bg-dark-800"
                 )}>
                   <div className="grid grid-cols-3 gap-4">
-                    {[1, 2, 3].map((i) => (
+                    {[
+                      { color: 'from-green-500 to-emerald-600', label: 'Web Server', cpu: '23%', ram: '4.2GB' },
+                      { color: 'from-blue-500 to-cyan-600', label: 'Database', cpu: '45%', ram: '8.1GB' },
+                      { color: 'from-purple-500 to-pink-600', label: 'Storage', cpu: '12%', ram: '2.8GB' }
+                    ].map((server, i) => (
                       <motion.div
                         key={i}
-                        animate={{ y: [0, -10, 0] }}
+                        animate={{ y: [0, -8, 0] }}
                         transition={{ duration: 3, repeat: Infinity, delay: i * 0.3 }}
-                        className="aspect-[3/4] bg-gradient-to-br from-dark-700 to-dark-800 rounded-2xl p-4 border border-dark-600"
+                        className="bg-dark-700/80 rounded-2xl p-4 border border-dark-600 backdrop-blur"
                       >
-                        <div className="h-2 w-8 bg-green-500 rounded-full mb-2 animate-pulse" />
-                        <div className="h-2 w-6 bg-blue-500 rounded-full mb-2" />
-                        <div className="h-2 w-10 bg-primary-500 rounded-full" />
-                        <div className="mt-4 space-y-2">
-                          {[1, 2, 3, 4].map((j) => (
-                            <div key={j} className="h-1 bg-dark-600 rounded-full" />
-                          ))}
+                        <div className={`h-2 w-full bg-gradient-to-r ${server.color} rounded-full mb-3`} />
+                        <p className="text-white text-xs font-medium mb-3">{server.label}</p>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-dark-400">CPU</span>
+                            <span className="text-green-400">{server.cpu}</span>
+                          </div>
+                          <div className="h-1.5 bg-dark-600 rounded-full overflow-hidden">
+                            <div className={`h-full bg-gradient-to-r ${server.color} rounded-full`} style={{ width: server.cpu }} />
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-dark-400">RAM</span>
+                            <span className="text-blue-400">{server.ram}</span>
+                          </div>
+                          <div className="h-1.5 bg-dark-600 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style={{ width: '40%' }} />
+                          </div>
                         </div>
                       </motion.div>
                     ))}
@@ -211,7 +225,7 @@ export default function Home() {
                   <div className="mt-6 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-green-400 text-sm">All Systems Operational</span>
+                      <span className="text-green-400 text-sm font-medium">All Systems Operational</span>
                     </div>
                     <span className="text-dark-400 text-sm">99.99% Uptime</span>
                   </div>

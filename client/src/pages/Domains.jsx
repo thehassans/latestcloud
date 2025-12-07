@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
@@ -26,14 +26,22 @@ export default function Domains() {
   const { data: searchResults, isLoading: searching, refetch } = useQuery({
     queryKey: ['domain-search', searchTerm],
     queryFn: () => domainsAPI.search(searchTerm).then(res => res.data),
-    enabled: false
+    enabled: searched && searchTerm.length > 0
   })
+
+  // Auto-search on URL param
+  useEffect(() => {
+    const urlSearch = searchParams.get('search')
+    if (urlSearch) {
+      setSearchTerm(urlSearch)
+      setSearched(true)
+    }
+  }, [searchParams])
 
   const handleSearch = (e) => {
     e.preventDefault()
     if (searchTerm.trim()) {
       setSearched(true)
-      refetch()
     }
   }
 
@@ -100,38 +108,49 @@ export default function Domains() {
                   <motion.div key={result.domain} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
                     className={clsx("card p-4 flex items-center justify-between", 
-                      result.available ? "border-green-200 dark:border-green-800" : "border-red-200 dark:border-red-800 opacity-60")}>
+                      result.available 
+                        ? "border-2 border-green-500 bg-green-50 dark:bg-green-900/20" 
+                        : "border-2 border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10")}>
                     <div className="flex items-center gap-4">
                       {result.available ? 
-                        <CheckCircle className="w-6 h-6 text-green-500" /> : 
-                        <XCircle className="w-6 h-6 text-red-500" />}
+                        <CheckCircle className="w-8 h-8 text-green-500" /> : 
+                        <XCircle className="w-8 h-8 text-red-500" />}
                       <div>
                         <p className="font-bold text-lg">{result.domain}</p>
-                        <p className="text-sm text-dark-500">{result.available ? 'Available' : 'Not Available'}</p>
+                        <p className={clsx("text-sm font-medium", result.available ? "text-green-600" : "text-red-500")}>
+                          {result.available ? '✓ Available - Register Now!' : '✗ Domain is Taken'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        {result.promo_price ? (
-                          <>
-                            <p className="font-bold text-green-500">{format(result.promo_price)}/yr</p>
-                            <p className="text-sm text-dark-400 line-through">{format(result.price_register)}/yr</p>
-                          </>
-                        ) : (
-                          <p className="font-bold">{format(result.price_register)}/yr</p>
-                        )}
-                      </div>
                       {result.available && (
-                        <button onClick={() => handleAddToCart(result)} className="btn-primary">
-                          <ShoppingCart className="w-4 h-4 mr-2" /> Add
-                        </button>
+                        <>
+                          <div className="text-right">
+                            {result.promo_price ? (
+                              <>
+                                <p className="font-bold text-xl text-green-600">{format(result.promo_price)}/yr</p>
+                                <p className="text-sm text-dark-400 line-through">{format(result.price_register)}/yr</p>
+                              </>
+                            ) : (
+                              <p className="font-bold text-xl">{format(result.price_register)}/yr</p>
+                            )}
+                          </div>
+                          <button onClick={() => handleAddToCart(result)} className="btn-primary">
+                            <ShoppingCart className="w-4 h-4 mr-2" /> Add to Cart
+                          </button>
+                        </>
+                      )}
+                      {!result.available && (
+                        <div className="text-right">
+                          <p className="text-dark-400 text-sm">Try a different extension</p>
+                        </div>
                       )}
                     </div>
                   </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-dark-500">No results found</div>
+              <div className="text-center py-12 text-dark-500">Enter a domain name to search</div>
             )}
           </div>
         </section>

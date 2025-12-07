@@ -71,7 +71,7 @@ router.get('/users', async (req, res) => {
     const { search, status, role, page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
     
-    let query = 'SELECT id, uuid, email, first_name, last_name, phone, company, role, status, created_at, last_login FROM users WHERE 1=1';
+    let query = 'SELECT id, uuid, email, first_name, last_name, phone, company, role, status, created_at FROM users WHERE 1=1';
     const params = [];
 
     if (search) {
