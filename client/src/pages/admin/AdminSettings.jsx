@@ -45,58 +45,69 @@ export default function AdminSettings() {
   const handleFileUpload = async (file, type) => {
     if (!file) return
     
-    // For favicon, resize to 32x32
-    if (type === 'favicon') {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        canvas.width = 32
-        canvas.height = 32
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, 32, 32)
-        const resized = canvas.toDataURL('image/png')
-        setFormData(prev => ({ ...prev, [type]: resized }))
-      }
-      img.src = URL.createObjectURL(file)
-      return
-    }
-    
-    // For logo, resize to max 200px height while maintaining aspect ratio
-    if (type === 'logo') {
-      const img = new Image()
-      img.onload = () => {
-        const maxHeight = 100
-        const maxWidth = 300
-        let width = img.width
-        let height = img.height
+    try {
+      // First convert to base64
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64 = reader.result
         
-        if (height > maxHeight) {
-          width = (width * maxHeight) / height
-          height = maxHeight
+        // Create image to resize
+        const img = new window.Image()
+        img.onload = () => {
+          try {
+            let width = img.width
+            let height = img.height
+            
+            // Set max dimensions based on type
+            const maxHeight = type === 'favicon' ? 32 : 100
+            const maxWidth = type === 'favicon' ? 32 : 300
+            
+            // Calculate new dimensions
+            if (type === 'favicon') {
+              width = 32
+              height = 32
+            } else {
+              if (height > maxHeight) {
+                width = (width * maxHeight) / height
+                height = maxHeight
+              }
+              if (width > maxWidth) {
+                height = (height * maxWidth) / width
+                width = maxWidth
+              }
+            }
+            
+            // Resize using canvas
+            const canvas = document.createElement('canvas')
+            canvas.width = width
+            canvas.height = height
+            const ctx = canvas.getContext('2d')
+            ctx.drawImage(img, 0, 0, width, height)
+            const resized = canvas.toDataURL('image/png')
+            setFormData(prev => ({ ...prev, [type]: resized }))
+            toast.success(`${type === 'logo' ? 'Logo' : 'Favicon'} uploaded successfully!`)
+          } catch (err) {
+            console.error('Canvas error:', err)
+            // Fallback to original base64
+            setFormData(prev => ({ ...prev, [type]: base64 }))
+            toast.success(`${type === 'logo' ? 'Logo' : 'Favicon'} uploaded!`)
+          }
         }
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width
-          width = maxWidth
+        img.onerror = () => {
+          // If image fails to load, use original base64
+          setFormData(prev => ({ ...prev, [type]: base64 }))
+          toast.success(`${type === 'logo' ? 'Logo' : 'Favicon'} uploaded!`)
         }
-        
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(img, 0, 0, width, height)
-        const resized = canvas.toDataURL('image/png')
-        setFormData(prev => ({ ...prev, [type]: resized }))
+        img.src = base64
       }
-      img.src = URL.createObjectURL(file)
-      return
+      reader.onerror = () => {
+        toast.error('Failed to read file')
+      }
+      reader.readAsDataURL(file)
+    } catch (err) {
+      console.error('Upload error:', err)
+      toast.error('Failed to upload file')
     }
-    
-    // Fallback: Convert to base64 for storage
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setFormData(prev => ({ ...prev, [type]: reader.result }))
-    }
-    reader.readAsDataURL(file)
   }
 
   const handleSave = async () => {
