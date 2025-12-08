@@ -1,15 +1,11 @@
-import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { Mail, CheckCircle, Shield, Clock, Smartphone, Send } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
-import api from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const planColors = ['from-blue-500 to-cyan-500', 'from-primary-500 to-purple-500', 'from-purple-500 to-pink-500']
-
-const defaultPlans = [
+const emailPlans = [
   {
     name: 'Starter Email',
     price: 1.99,
@@ -42,13 +38,6 @@ export default function Email() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
-  const [plans, setPlans] = useState(defaultPlans)
-
-  useEffect(() => {
-    api.get('/api/pricing/email')
-      .then(res => setPlans(res.data))
-      .catch(() => {})
-  }, [])
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -86,7 +75,7 @@ export default function Email() {
       <section className="py-20 bg-white dark:bg-dark-900">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
-            {plans.map((plan, i) => (
+            {emailPlans.map((plan, i) => (
               <motion.div
                 key={plan.name}
                 initial={{ opacity: 0, y: 20 }}
@@ -104,7 +93,7 @@ export default function Email() {
                     MOST POPULAR
                   </div>
                 )}
-                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${planColors[i % planColors.length]} flex items-center justify-center mb-4`}>
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-4`}>
                   <Mail className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-dark-900 dark:text-white">{plan.name}</h3>

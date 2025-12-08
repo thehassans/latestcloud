@@ -1,28 +1,47 @@
-import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { CheckCircle, HardDrive, Shield, Cpu, Gauge, Globe, Zap } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
-import api from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const planColors = ['from-blue-500 to-cyan-500', 'from-primary-500 to-purple-500', 'from-purple-500 to-pink-500', 'from-orange-500 to-red-500']
+const vpsPlans = [
+  {
+    name: 'VPS Basic',
+    price: 9.99,
+    specs: { cpu: '1 vCPU', ram: '2 GB RAM', storage: '40 GB NVMe', bandwidth: '2 TB Transfer' },
+    features: ['Full Root Access', 'KVM Virtualization', 'Weekly Backups', '24/7 Support'],
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    name: 'VPS Standard',
+    price: 19.99,
+    specs: { cpu: '2 vCPU', ram: '4 GB RAM', storage: '80 GB NVMe', bandwidth: '4 TB Transfer' },
+    features: ['Full Root Access', 'KVM Virtualization', 'Daily Backups', 'DDoS Protection', '24/7 Support'],
+    popular: true,
+    color: 'from-primary-500 to-purple-500'
+  },
+  {
+    name: 'VPS Advanced',
+    price: 39.99,
+    specs: { cpu: '4 vCPU', ram: '8 GB RAM', storage: '160 GB NVMe', bandwidth: '8 TB Transfer' },
+    features: ['Full Root Access', 'KVM Virtualization', 'Daily Backups', 'DDoS Protection', 'Priority Support', 'Free Migrations'],
+    color: 'from-purple-500 to-pink-500'
+  },
+  {
+    name: 'VPS Pro',
+    price: 79.99,
+    specs: { cpu: '8 vCPU', ram: '16 GB RAM', storage: '320 GB NVMe', bandwidth: '16 TB Transfer' },
+    features: ['Full Root Access', 'KVM Virtualization', 'Hourly Backups', 'Advanced DDoS', 'Dedicated Support', 'Free Migrations', 'Custom rDNS'],
+    color: 'from-orange-500 to-red-500'
+  }
+]
 
 export default function VPS() {
   const { format } = useCurrencyStore()
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
-  const [plans, setPlans] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    api.get('/api/pricing/vps')
-      .then(res => setPlans(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -69,13 +88,10 @@ export default function VPS() {
             <p className="mt-4 text-dark-500">Scale your resources as you grow. All plans include full root access.</p>
           </div>
 
-          {loading ? (
-            <div className="text-center py-12">Loading plans...</div>
-          ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {plans.map((plan, i) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {vpsPlans.map((plan, i) => (
               <motion.div
-                key={plan.id || plan.name}
+                key={plan.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * i }}
@@ -138,7 +154,6 @@ export default function VPS() {
               </motion.div>
             ))}
           </div>
-          )}
         </div>
       </section>
 
