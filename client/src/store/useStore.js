@@ -159,3 +159,23 @@ export const useSettingsStore = create(
     }
   )
 )
+
+// Site Settings store (logo, favicon, site name)
+export const useSiteSettingsStore = create(
+  persist(
+    (set) => ({
+      siteName: 'Magnetic Clouds',
+      siteTagline: 'Premium Cloud Hosting',
+      logo: null,
+      favicon: null,
+      contactEmail: 'support@magneticclouds.com',
+      contactPhone: '',
+      loaded: false,
+      setSiteSettings: (data) => set({ ...data, loaded: true }),
+      updateSiteSetting: (key, value) => set({ [key]: value })
+    }),
+    {
+      name: 'magnetic-site-settings'
+    }
+  )
+)

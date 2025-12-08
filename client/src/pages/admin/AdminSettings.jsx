@@ -1,26 +1,233 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Save, Palette, Globe, CreditCard, Mail } from 'lucide-react'
-import { useThemeStore } from '../../store/useStore'
+import { Save, Palette, Globe, CreditCard, Image, Upload, X } from 'lucide-react'
+import { useThemeStore, useSiteSettingsStore } from '../../store/useStore'
+import api from '../../lib/api'
 import toast from 'react-hot-toast'
 
 export default function AdminSettings() {
   const { themeStyle, setThemeStyle } = useThemeStore()
+  const { siteName, siteTagline, logo, favicon, contactEmail, setSiteSettings, updateSiteSetting } = useSiteSettingsStore()
   const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    siteName: siteName || 'Magnetic Clouds',
+    siteTagline: siteTagline || 'Premium Cloud Hosting',
+    contactEmail: contactEmail || 'support@magneticclouds.com',
+    logo: logo || null,
+    favicon: favicon || null
+  })
+  const logoInputRef = useRef(null)
+  const faviconInputRef = useRef(null)
+
+  // Load settings from server on mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const res = await api.get('/settings/public')
+        if (res.data.settings) {
+          const s = res.data.settings
+          setFormData(prev => ({
+            ...prev,
+            siteName: s.site_name || prev.siteName,
+            siteTagline: s.site_tagline || prev.siteTagline,
+            contactEmail: s.contact_email || prev.contactEmail,
+            logo: s.site_logo || prev.logo,
+            favicon: s.site_favicon || prev.favicon
+          }))
+        }
+      } catch (err) {
+        console.error('Failed to load settings:', err)
+      }
+    }
+    loadSettings()
+  }, [])
+
+  const handleFileUpload = async (file, type) => {
+    if (!file) return
+    
+    // Convert to base64 for storage
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setFormData(prev => ({ ...prev, [type]: reader.result }))
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSave = async () => {
     setLoading(true)
-    await new Promise(r => setTimeout(r, 500))
-    toast.success('Settings saved!')
+    try {
+      // Save to server
+      await api.put('/settings', {
+        settings: {
+          site_name: formData.siteName,
+          site_tagline: formData.siteTagline,
+          contact_email: formData.contactEmail,
+          site_logo: formData.logo,
+          site_favicon: formData.favicon
+        }
+      })
+      
+      // Update local store
+      setSiteSettings({
+        siteName: formData.siteName,
+        siteTagline: formData.siteTagline,
+        contactEmail: formData.contactEmail,
+        logo: formData.logo,
+        favicon: formData.favicon
+      })
+
+      // Update favicon in DOM
+      if (formData.favicon) {
+        const link = document.querySelector("link[rel*='icon']") || document.createElement('link')
+        link.type = 'image/x-icon'
+        link.rel = 'shortcut icon'
+        link.href = formData.favicon
+        document.head.appendChild(link)
+      }
+
+      // Update document title
+      document.title = formData.siteName
+
+      toast.success('Settings saved successfully!')
+    } catch (err) {
+      console.error('Save error:', err)
+      toast.error('Failed to save settings')
+    }
     setLoading(false)
   }
 
   return (
     <>
-      <Helmet><title>Settings - Admin - Magnetic Clouds</title></Helmet>
-      <h1 className="text-2xl font-bold mb-8">Settings</h1>
+      <Helmet><title>Settings - Admin - {formData.siteName}</title></Helmet>
+      <h1 className="text-2xl font-bold mb-8">Site Settings</h1>
       
       <div className="space-y-8 max-w-3xl">
+        {/* Branding Section */}
+        <div className="card p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Image className="w-6 h-6 text-primary-500" />
+            <h2 className="text-lg font-bold">Branding</h2>
+          </div>
+          <div className="space-y-6">
+            {/* Logo Upload */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Site Logo</label>
+              <div className="flex items-center gap-4">
+                <div className="w-32 h-32 border-2 border-dashed border-dark-300 dark:border-dark-600 rounded-xl flex items-center justify-center overflow-hidden bg-dark-50 dark:bg-dark-800">
+                  {formData.logo ? (
+                    <img src={formData.logo} alt="Logo" className="w-full h-full object-contain p-2" />
+                  ) : (
+                    <Upload className="w-8 h-8 text-dark-400" />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e.target.files[0], 'logo')}
+                  />
+                  <button
+                    onClick={() => logoInputRef.current?.click()}
+                    className="btn-outline text-sm"
+                  >
+                    <Upload className="w-4 h-4 mr-2" /> Upload Logo
+                  </button>
+                  {formData.logo && (
+                    <button
+                      onClick={() => setFormData(prev => ({ ...prev, logo: null }))}
+                      className="btn text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <X className="w-4 h-4 mr-2" /> Remove
+                    </button>
+                  )}
+                  <p className="text-xs text-dark-500">Recommended: 200x60px, PNG/SVG</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Favicon Upload */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Favicon</label>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 border-2 border-dashed border-dark-300 dark:border-dark-600 rounded-xl flex items-center justify-center overflow-hidden bg-dark-50 dark:bg-dark-800">
+                  {formData.favicon ? (
+                    <img src={formData.favicon} alt="Favicon" className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <Upload className="w-5 h-5 text-dark-400" />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={faviconInputRef}
+                    type="file"
+                    accept="image/*,.ico"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e.target.files[0], 'favicon')}
+                  />
+                  <button
+                    onClick={() => faviconInputRef.current?.click()}
+                    className="btn-outline text-sm"
+                  >
+                    <Upload className="w-4 h-4 mr-2" /> Upload Favicon
+                  </button>
+                  {formData.favicon && (
+                    <button
+                      onClick={() => setFormData(prev => ({ ...prev, favicon: null }))}
+                      className="btn text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <X className="w-4 h-4 mr-2" /> Remove
+                    </button>
+                  )}
+                  <p className="text-xs text-dark-500">Recommended: 32x32px, ICO/PNG</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* General Section */}
+        <div className="card p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Globe className="w-6 h-6 text-primary-500" />
+            <h2 className="text-lg font-bold">General</h2>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Site Name</label>
+              <input 
+                type="text" 
+                value={formData.siteName}
+                onChange={(e) => setFormData(prev => ({ ...prev, siteName: e.target.value }))}
+                className="input" 
+                placeholder="Your Site Name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Site Tagline</label>
+              <input 
+                type="text" 
+                value={formData.siteTagline}
+                onChange={(e) => setFormData(prev => ({ ...prev, siteTagline: e.target.value }))}
+                className="input" 
+                placeholder="Your site tagline"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Contact Email</label>
+              <input 
+                type="email" 
+                value={formData.contactEmail}
+                onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                className="input" 
+                placeholder="support@example.com"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Appearance Section */}
         <div className="card p-6">
           <div className="flex items-center gap-3 mb-6">
             <Palette className="w-6 h-6 text-primary-500" />
@@ -45,27 +252,7 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Globe className="w-6 h-6 text-primary-500" />
-            <h2 className="text-lg font-bold">General</h2>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Site Name</label>
-              <input type="text" defaultValue="Magnetic Clouds" className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Site Tagline</label>
-              <input type="text" defaultValue="Premium Web Hosting from Bangladesh" className="input" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Contact Email</label>
-              <input type="email" defaultValue="support@magneticclouds.com" className="input" />
-            </div>
-          </div>
-        </div>
-
+        {/* Billing Section */}
         <div className="card p-6">
           <div className="flex items-center gap-3 mb-6">
             <CreditCard className="w-6 h-6 text-primary-500" />
@@ -89,7 +276,7 @@ export default function AdminSettings() {
         </div>
 
         <button onClick={handleSave} disabled={loading} className="btn-primary">
-          <Save className="w-4 h-4 mr-2" /> {loading ? 'Saving...' : 'Save Settings'}
+          <Save className="w-4 h-4 mr-2" /> {loading ? 'Saving...' : 'Save All Settings'}
         </button>
       </div>
     </>

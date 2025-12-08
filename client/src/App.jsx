@@ -1,6 +1,6 @@
 import { useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useThemeStore, useAuthStore, useSettingsStore } from './store/useStore'
+import { useThemeStore, useAuthStore, useSettingsStore, useSiteSettingsStore } from './store/useStore'
 import { settingsAPI } from './lib/api'
 
 // Layouts
@@ -94,6 +94,7 @@ function ProtectedRoute({ children, adminOnly = false }) {
 function App() {
   const { theme, themeStyle } = useThemeStore()
   const { setSettings } = useSettingsStore()
+  const { setSiteSettings, favicon, siteName } = useSiteSettingsStore()
 
   // Apply theme to document
   useEffect(() => {
@@ -109,12 +110,46 @@ function App() {
     document.documentElement.setAttribute('data-theme-style', themeStyle)
   }, [themeStyle])
 
-  // Fetch public settings
+  // Fetch public settings and site settings
   useEffect(() => {
     settingsAPI.getPublic()
-      .then(res => setSettings(res.data.settings))
+      .then(res => {
+        const s = res.data.settings
+        setSettings(s)
+        
+        // Update site settings store
+        if (s) {
+          setSiteSettings({
+            siteName: s.site_name || 'Magnetic Clouds',
+            siteTagline: s.site_tagline || 'Premium Cloud Hosting',
+            logo: s.site_logo || null,
+            favicon: s.site_favicon || null,
+            contactEmail: s.contact_email || ''
+          })
+        }
+      })
       .catch(console.error)
-  }, [setSettings])
+  }, [setSettings, setSiteSettings])
+
+  // Apply favicon when it changes
+  useEffect(() => {
+    if (favicon) {
+      let link = document.querySelector("link[rel*='icon']")
+      if (!link) {
+        link = document.createElement('link')
+        link.rel = 'shortcut icon'
+        document.head.appendChild(link)
+      }
+      link.href = favicon
+    }
+  }, [favicon])
+
+  // Apply site title when it changes
+  useEffect(() => {
+    if (siteName && !document.title.includes(' - ')) {
+      document.title = siteName
+    }
+  }, [siteName])
 
   return (
     <AIAgentProvider>

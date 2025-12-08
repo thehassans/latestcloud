@@ -67,13 +67,27 @@ router.put('/', authenticate, requireRole('admin'), async (req, res) => {
   try {
     const { settings } = req.body;
 
+    // Define which settings should be public
+    const publicSettings = ['site_name', 'site_tagline', 'site_logo', 'site_favicon', 'contact_email', 'contact_phone'];
+
     for (const [key, value] of Object.entries(settings)) {
-      const settingValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      const settingValue = typeof value === 'object' ? JSON.stringify(value) : String(value || '');
+      const isPublic = publicSettings.includes(key);
       
-      await db.query(`
-        INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE setting_value = ?
-      `, [key, settingValue, settingValue]);
+      // Check if setting exists
+      const existing = await db.query('SELECT id FROM settings WHERE setting_key = ?', [key]);
+      
+      if (existing && existing.length > 0) {
+        await db.query(
+          'UPDATE settings SET setting_value = ?, is_public = ? WHERE setting_key = ?',
+          [settingValue, isPublic, key]
+        );
+      } else {
+        await db.query(
+          'INSERT INTO settings (setting_key, setting_value, is_public) VALUES (?, ?, ?)',
+          [key, settingValue, isPublic]
+        );
+      }
     }
 
     res.json({ message: 'Settings updated successfully' });

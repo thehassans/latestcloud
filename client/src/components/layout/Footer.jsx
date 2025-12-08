@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import { useSiteSettingsStore } from '../../store/useStore'
 
 const footerLinks = {
   services: [
@@ -52,6 +53,7 @@ const socialLinks = [
 export default function Footer() {
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
+  const { siteName, logo, contactEmail } = useSiteSettingsStore()
 
   const handleSubscribe = (e) => {
     e.preventDefault()
@@ -103,13 +105,19 @@ export default function Footer() {
           {/* Brand column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-xl">
-                MC
-              </div>
-              <div>
-                <span className="font-display font-bold text-2xl">Magnetic</span>
-                <span className="font-display font-bold text-2xl text-primary-400 ml-1">Clouds</span>
-              </div>
+              {logo ? (
+                <img src={logo} alt={siteName} className="h-12 w-auto object-contain" />
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-xl">
+                    MC
+                  </div>
+                  <div>
+                    <span className="font-display font-bold text-2xl">{siteName?.split(' ')[0] || 'Magnetic'}</span>
+                    <span className="font-display font-bold text-2xl text-primary-400 ml-1">{siteName?.split(' ')[1] || 'Clouds'}</span>
+                  </div>
+                </>
+              )}
             </Link>
             <p className="mt-4 text-dark-400 max-w-sm">
               Premium web hosting and cloud solutions from Bangladesh. 
@@ -122,9 +130,9 @@ export default function Footer() {
                 <Phone className="w-5 h-5" />
                 <span>+880 1XXX-XXXXXX</span>
               </a>
-              <a href="mailto:support@magneticclouds.com" className="flex items-center gap-3 text-dark-400 hover:text-white transition-colors">
+              <a href={`mailto:${contactEmail || 'support@magneticclouds.com'}`} className="flex items-center gap-3 text-dark-400 hover:text-white transition-colors">
                 <Mail className="w-5 h-5" />
-                <span>support@magneticclouds.com</span>
+                <span>{contactEmail || 'support@magneticclouds.com'}</span>
               </a>
               <div className="flex items-start gap-3 text-dark-400">
                 <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
