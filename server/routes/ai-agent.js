@@ -363,22 +363,24 @@ router.post('/settings', authenticate, requireRole('admin'), async (req, res) =>
   try {
     const { enabled, apiKey, settings } = req.body;
     
-    // Save enabled state
+    // Save enabled state - use simple INSERT/UPDATE
     if (enabled !== undefined) {
-      await db.query(`
-        INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public)
-        VALUES ('ai_agent_enabled', ?, 'boolean', 'ai_agent', TRUE)
-        ON DUPLICATE KEY UPDATE setting_value = ?
-      `, [String(enabled), String(enabled)]);
+      const existsEnabled = await db.query("SELECT 1 FROM settings WHERE setting_key = 'ai_agent_enabled'");
+      if (existsEnabled && existsEnabled.length > 0) {
+        await db.query("UPDATE settings SET setting_value = ? WHERE setting_key = 'ai_agent_enabled'", [String(enabled)]);
+      } else {
+        await db.query("INSERT INTO settings (setting_key, setting_value) VALUES ('ai_agent_enabled', ?)", [String(enabled)]);
+      }
     }
     
     // Save API key
     if (apiKey !== undefined) {
-      await db.query(`
-        INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public)
-        VALUES ('ai_agent_api_key', ?, 'string', 'ai_agent', FALSE)
-        ON DUPLICATE KEY UPDATE setting_value = ?
-      `, [apiKey, apiKey]);
+      const existsKey = await db.query("SELECT 1 FROM settings WHERE setting_key = 'ai_agent_api_key'");
+      if (existsKey && existsKey.length > 0) {
+        await db.query("UPDATE settings SET setting_value = ? WHERE setting_key = 'ai_agent_api_key'", [apiKey]);
+      } else {
+        await db.query("INSERT INTO settings (setting_key, setting_value) VALUES ('ai_agent_api_key', ?)", [apiKey]);
+      }
     }
     
     // Save timing settings
@@ -393,19 +395,21 @@ router.post('/settings', authenticate, requireRole('admin'), async (req, res) =>
       
       for (const [key, value] of Object.entries(timingSettings)) {
         if (value !== undefined) {
-          await db.query(`
-            INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public)
-            VALUES (?, ?, 'number', 'ai_agent', FALSE)
-            ON DUPLICATE KEY UPDATE setting_value = ?
-          `, [key, String(value), String(value)]);
+          const exists = await db.query("SELECT 1 FROM settings WHERE setting_key = ?", [key]);
+          if (exists && exists.length > 0) {
+            await db.query("UPDATE settings SET setting_value = ? WHERE setting_key = ?", [String(value), key]);
+          } else {
+            await db.query("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)", [key, String(value)]);
+          }
         }
       }
     }
     
+    console.log('AI agent settings saved successfully');
     res.json({ success: true, message: 'AI agent settings saved' });
   } catch (error) {
     console.error('Save AI settings error:', error);
-    res.status(500).json({ error: 'Failed to save settings' });
+    res.status(500).json({ error: 'Failed to save settings: ' + error.message });
   }
 });
 
