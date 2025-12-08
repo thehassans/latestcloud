@@ -197,7 +197,7 @@ export default function Home() {
                     <div className="flex items-center justify-center mb-8">
                       <div className="relative">
                         <div className="w-32 h-32 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/40">
-                          <div className="w-28 h-28 rounded-full bg-dark-900 flex items-center justify-center">
+                          <div className="w-28 h-28 rounded-full bg-white dark:bg-dark-900 flex items-center justify-center">
                             <div className="text-center">
                               <motion.div
                                 animate={{ scale: [1, 1.1, 1] }}
@@ -217,12 +217,12 @@ export default function Home() {
 
                     {/* Status text */}
                     <div className="text-center mb-8">
-                      <h3 className="text-2xl font-bold text-white mb-2">
-                        <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                      <h3 className="text-2xl font-bold mb-2">
+                        <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
                           All Systems Operational
                         </span>
                       </h3>
-                      <p className="text-dark-400">Real-time infrastructure monitoring</p>
+                      <p className="text-dark-600 dark:text-dark-400">Real-time infrastructure monitoring</p>
                     </div>
 
                     {/* Stats row with 4 columns - uniform alignment */}
@@ -238,7 +238,7 @@ export default function Home() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.5 + i * 0.1 }}
-                          className="text-center p-5 rounded-2xl bg-dark-800/50 backdrop-blur border border-dark-700"
+                          className="text-center p-5 rounded-2xl bg-white/80 dark:bg-dark-800/50 backdrop-blur border border-gray-200 dark:border-dark-700 shadow-lg"
                         >
                           <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
                           <p className="text-xs text-dark-500 mt-2">{stat.label}</p>

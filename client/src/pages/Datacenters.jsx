@@ -9,12 +9,14 @@ import clsx from 'clsx'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
-// Fix leaflet marker icon
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+// Custom marker icon
+const customIcon = new L.Icon({
+  iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 })
 
 export default function Datacenters() {
@@ -50,20 +52,36 @@ export default function Datacenters() {
         </div>
       </section>
 
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="card overflow-hidden" style={{ height: '500px' }}>
+      <section className="py-8">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-dark-700" style={{ height: '350px' }}>
             {!isLoading && datacenters && (
-              <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+              <MapContainer 
+                center={[25, 20]} 
+                zoom={2} 
+                style={{ height: '100%', width: '100%' }} 
+                scrollWheelZoom={false}
+                zoomControl={false}
+                attributionControl={false}
+                dragging={true}
+                doubleClickZoom={false}
+              >
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                 />
                 {datacenters.map((dc) => (
-                  <Marker key={dc.id} position={[dc.latitude, dc.longitude]}>
-                    <Popup>
-                      <div className="font-semibold">{dc.name}</div>
-                      <div className="text-sm text-dark-500">{dc.location}</div>
+                  <Marker key={dc.id} position={[dc.latitude, dc.longitude]} icon={customIcon}>
+                    <Popup className="custom-popup">
+                      <div className="p-2">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Server className="w-4 h-4 text-primary-500" />
+                          <span className="font-bold text-dark-900">{dc.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-dark-600">
+                          <MapPin className="w-3 h-3" />
+                          {dc.location}
+                        </div>
+                      </div>
                     </Popup>
                   </Marker>
                 ))}
