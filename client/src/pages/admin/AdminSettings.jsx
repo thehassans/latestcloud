@@ -45,7 +45,53 @@ export default function AdminSettings() {
   const handleFileUpload = async (file, type) => {
     if (!file) return
     
-    // Convert to base64 for storage
+    // For favicon, resize to 32x32
+    if (type === 'favicon') {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = 32
+        canvas.height = 32
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, 32, 32)
+        const resized = canvas.toDataURL('image/png')
+        setFormData(prev => ({ ...prev, [type]: resized }))
+      }
+      img.src = URL.createObjectURL(file)
+      return
+    }
+    
+    // For logo, resize to max 200px height while maintaining aspect ratio
+    if (type === 'logo') {
+      const img = new Image()
+      img.onload = () => {
+        const maxHeight = 100
+        const maxWidth = 300
+        let width = img.width
+        let height = img.height
+        
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height
+          height = maxHeight
+        }
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+        
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+        const resized = canvas.toDataURL('image/png')
+        setFormData(prev => ({ ...prev, [type]: resized }))
+      }
+      img.src = URL.createObjectURL(file)
+      return
+    }
+    
+    // Fallback: Convert to base64 for storage
     const reader = new FileReader()
     reader.onloadend = () => {
       setFormData(prev => ({ ...prev, [type]: reader.result }))

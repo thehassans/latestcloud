@@ -10,7 +10,7 @@ import {
   ArrowRight, ChevronRight, Star, Users, Award, TrendingUp
 } from 'lucide-react'
 import { productsAPI, domainsAPI, settingsAPI } from '../lib/api'
-import { useCurrencyStore, useThemeStore } from '../store/useStore'
+import { useCurrencyStore, useThemeStore, useSiteSettingsStore } from '../store/useStore'
 import clsx from 'clsx'
 
 const features = [
@@ -45,6 +45,7 @@ export default function Home() {
   const navigate = useNavigate()
   const { format } = useCurrencyStore()
   const { themeStyle } = useThemeStore()
+  const { logo, siteName } = useSiteSettingsStore()
   const [domainSearch, setDomainSearch] = useState('')
 
   const { data: datacenters } = useQuery({
@@ -193,22 +194,24 @@ export default function Home() {
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                     className="relative z-10"
                   >
-                    {/* Status indicator */}
+                    {/* Status indicator with Logo */}
                     <div className="flex items-center justify-center mb-8">
                       <div className="relative">
-                        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-400 to-purple-600 flex items-center justify-center shadow-2xl shadow-primary-500/40">
-                          <div className="w-28 h-28 rounded-full bg-white dark:bg-dark-900 flex items-center justify-center">
-                            <div className="text-center">
-                              <motion.div
-                                animate={{ scale: [1, 1.1, 1] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                                className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-primary-400 to-purple-600 flex items-center justify-center"
-                              >
-                                <CheckCircle className="w-8 h-8 text-white" />
-                              </motion.div>
-                            </div>
+                        <motion.div
+                          animate={{ scale: [1, 1.05, 1] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          className="w-36 h-36 rounded-full bg-gradient-to-br from-primary-400 to-purple-600 p-1 shadow-2xl shadow-primary-500/40"
+                        >
+                          <div className="w-full h-full rounded-full bg-white dark:bg-dark-900 flex items-center justify-center overflow-hidden">
+                            {logo && logo.startsWith('data:image') ? (
+                              <img src={logo} alt={siteName} className="w-24 h-24 object-contain" />
+                            ) : (
+                              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
+                                <CheckCircle className="w-10 h-10 text-white" />
+                              </div>
+                            )}
                           </div>
-                        </div>
+                        </motion.div>
                         {/* Pulse rings */}
                         <div className="absolute inset-0 rounded-full border-2 border-primary-400/30 animate-ping" />
                         <div className="absolute -inset-4 rounded-full border border-primary-400/20 animate-pulse" />

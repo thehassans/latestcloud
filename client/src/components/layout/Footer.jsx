@@ -105,16 +105,16 @@ export default function Footer() {
           {/* Brand column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/" className="flex items-center gap-3">
-              {logo ? (
-                <img src={logo} alt={siteName} className="h-12 w-auto object-contain" />
+              {logo && logo.startsWith('data:image') ? (
+                <img src={logo} alt={siteName} className="h-10 w-auto object-contain max-w-[180px]" />
               ) : (
                 <>
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-xl">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-lg">
                     MC
                   </div>
                   <div>
-                    <span className="font-display font-bold text-2xl">{siteName?.split(' ')[0] || 'Magnetic'}</span>
-                    <span className="font-display font-bold text-2xl text-primary-400 ml-1">{siteName?.split(' ')[1] || 'Clouds'}</span>
+                    <span className="font-display font-bold text-xl">{siteName?.split(' ')[0] || 'Magnetic'}</span>
+                    <span className="font-display font-bold text-xl text-primary-400 ml-1">{siteName?.split(' ')[1] || 'Clouds'}</span>
                   </div>
                 </>
               )}
