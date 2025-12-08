@@ -78,23 +78,21 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            {logo && logo.startsWith('data:image') ? (
-              <img src={logo} alt={siteName} className="h-10 w-auto object-contain max-w-[200px]" />
-            ) : (
-              <>
-                <motion.div 
-                  whileHover={{ rotate: 180 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary-500/30"
-                >
-                  MC
-                </motion.div>
-                <div className="hidden sm:block">
-                  <span className="font-display font-bold text-xl">{siteName?.split(' ')[0] || 'Magnetic'}</span>
-                  <span className="font-display font-bold text-xl text-gradient ml-1">{siteName?.split(' ')[1] || 'Clouds'}</span>
-                </div>
-              </>
-            )}
+            <motion.div 
+              whileHover={{ rotate: 180 }}
+              transition={{ duration: 0.5 }}
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary-500/30 overflow-hidden"
+            >
+              {logo && logo.startsWith('data:image') ? (
+                <img src={logo} alt="" className="w-full h-full object-cover" />
+              ) : (
+                'MC'
+              )}
+            </motion.div>
+            <div className="hidden sm:block">
+              <span className="font-display font-bold text-xl">{siteName?.split(' ')[0] || 'Magnetic'}</span>
+              <span className="font-display font-bold text-xl text-gradient ml-1">{siteName?.split(' ')[1] || 'Clouds'}</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}

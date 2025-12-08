@@ -105,19 +105,17 @@ export default function Footer() {
           {/* Brand column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/" className="flex items-center gap-3">
-              {logo && logo.startsWith('data:image') ? (
-                <img src={logo} alt={siteName} className="h-10 w-auto object-contain max-w-[180px]" />
-              ) : (
-                <>
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-lg">
-                    MC
-                  </div>
-                  <div>
-                    <span className="font-display font-bold text-xl">{siteName?.split(' ')[0] || 'Magnetic'}</span>
-                    <span className="font-display font-bold text-xl text-primary-400 ml-1">{siteName?.split(' ')[1] || 'Clouds'}</span>
-                  </div>
-                </>
-              )}
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center font-bold text-lg overflow-hidden">
+                {logo && logo.startsWith('data:image') ? (
+                  <img src={logo} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  'MC'
+                )}
+              </div>
+              <div>
+                <span className="font-display font-bold text-xl">{siteName?.split(' ')[0] || 'Magnetic'}</span>
+                <span className="font-display font-bold text-xl text-primary-400 ml-1">{siteName?.split(' ')[1] || 'Clouds'}</span>
+              </div>
             </Link>
             <p className="mt-4 text-dark-400 max-w-sm">
               Premium web hosting and cloud solutions from Bangladesh. 

@@ -204,11 +204,15 @@ export default function Home() {
                         >
                           <div className="w-full h-full rounded-full bg-white dark:bg-dark-900 flex items-center justify-center overflow-hidden">
                             {logo && logo.startsWith('data:image') ? (
-                              <img src={logo} alt={siteName} className="w-24 h-24 object-contain" />
+                              <img src={logo} alt="" className="w-24 h-24 object-contain" />
                             ) : (
-                              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
+                              <motion.div
+                                animate={{ scale: [1, 1.1, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center"
+                              >
                                 <CheckCircle className="w-10 h-10 text-white" />
-                              </div>
+                              </motion.div>
                             )}
                           </div>
                         </motion.div>
