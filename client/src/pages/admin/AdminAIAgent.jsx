@@ -69,9 +69,9 @@ export default function AdminAIAgent() {
     const result = await trainAgent(newApiKey)
     setIsValidating(false)
     if (result.success) {
-      toast.success('API key validated successfully!')
+      toast.success(result.message || 'API key validated and saved!')
     } else {
-      toast.error(result.message)
+      toast.error(result.message || 'Validation failed')
     }
   }
 

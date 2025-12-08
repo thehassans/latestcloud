@@ -118,13 +118,16 @@ export function AIAgentProvider({ children }) {
         setIsApiValid(true)
         // Save to server database
         try {
-          await api.post('/ai-agent/settings', { apiKey: newApiKey, enabled: true })
+          const saveResponse = await api.post('/ai-agent/settings', { apiKey: newApiKey, enabled: true })
+          console.log('Save response:', saveResponse.data)
           setIsEnabled(true)
-        } catch (e) {
-          console.error('Failed to save API key to server:', e)
+          addLog('success', 'API key validated and saved to database!')
+          return { success: true, message: 'API key validated and saved!' }
+        } catch (saveError) {
+          console.error('Failed to save API key to server:', saveError)
+          addLog('error', `API key valid but failed to save: ${saveError.response?.data?.error || saveError.message}`)
+          return { success: false, message: `Valid but save failed: ${saveError.response?.data?.error || saveError.message}` }
         }
-        addLog('success', 'API key validated and saved!')
-        return { success: true, message: 'API key is valid' }
       } else {
         addLog('error', 'Invalid API key')
         return { success: false, message: 'Invalid API key' }
@@ -231,10 +234,11 @@ export function AIAgentProvider({ children }) {
     setIsEnabled(enabled)
     try {
       await api.post('/ai-agent/settings', { enabled })
+      addLog('success', `AI Agent ${enabled ? 'enabled' : 'disabled'} and saved`)
     } catch (e) {
       console.error('Failed to save enabled state to server:', e)
+      addLog('error', `Failed to save: ${e.response?.data?.error || e.message}`)
     }
-    addLog('info', `AI Agent ${enabled ? 'enabled' : 'disabled'}`)
   }, [addLog])
 
   // Clear timers
