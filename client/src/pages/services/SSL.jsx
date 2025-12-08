@@ -1,51 +1,33 @@
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import { Shield, CheckCircle, Lock, Globe, Zap } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const sslPlans = [
-  {
-    name: 'Domain Validation',
-    description: 'Basic encryption for personal sites',
-    price: 9.99,
-    features: ['Single Domain', '256-bit Encryption', 'Browser Trust', '10 Min Issuance', '$10K Warranty'],
-    icon: Lock,
-    color: 'from-green-500 to-emerald-500'
-  },
-  {
-    name: 'Organization Validation',
-    description: 'Business identity verification',
-    price: 49.99,
-    features: ['Single Domain', 'Company Verification', 'Site Seal', '1-3 Day Issuance', '$250K Warranty'],
-    icon: Shield,
-    popular: true,
-    color: 'from-blue-500 to-cyan-500'
-  },
-  {
-    name: 'Extended Validation',
-    description: 'Maximum trust & green bar',
-    price: 149.99,
-    features: ['Single Domain', 'Green Address Bar', 'Full Verification', '3-5 Day Issuance', '$1M Warranty'],
-    icon: Globe,
-    color: 'from-purple-500 to-pink-500'
-  },
-  {
-    name: 'Wildcard SSL',
-    description: 'Secure unlimited subdomains',
-    price: 99.99,
-    features: ['Unlimited Subdomains', '256-bit Encryption', 'Browser Trust', '10 Min Issuance', '$500K Warranty'],
-    icon: Zap,
-    color: 'from-orange-500 to-red-500'
-  }
+const defaultPlans = [
+  { name: 'Domain Validation', description: 'Basic encryption for personal sites', price: 9.99, features: ['Single Domain', '256-bit Encryption', 'Browser Trust', '10 Min Issuance', '$10K Warranty'], color: 'from-green-500 to-emerald-500' },
+  { name: 'Organization Validation', description: 'Business identity verification', price: 49.99, popular: true, features: ['Single Domain', 'Company Verification', 'Site Seal', '1-3 Day Issuance', '$250K Warranty'], color: 'from-blue-500 to-cyan-500' },
+  { name: 'Extended Validation', description: 'Maximum trust & green bar', price: 149.99, features: ['Single Domain', 'Green Address Bar', 'Full Verification', '3-5 Day Issuance', '$1M Warranty'], color: 'from-purple-500 to-pink-500' },
+  { name: 'Wildcard SSL', description: 'Secure unlimited subdomains', price: 99.99, features: ['Unlimited Subdomains', '256-bit Encryption', 'Browser Trust', '10 Min Issuance', '$500K Warranty'], color: 'from-orange-500 to-red-500' }
 ]
+
+const iconMap = { Lock, Shield, Globe, Zap }
 
 export default function SSL() {
   const { format } = useCurrencyStore()
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+
+  const { data: pricingData } = useQuery({
+    queryKey: ['pricing'],
+    queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
+  })
+
+  const sslPlans = pricingData?.ssl || defaultPlans
 
   const handleAddToCart = (plan) => {
     addItem({

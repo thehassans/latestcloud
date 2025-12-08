@@ -1,33 +1,16 @@
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import { Database, CheckCircle, Cpu, HardDrive, Shield, Zap } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const dedicatedPlans = [
-  {
-    name: 'Starter Dedicated',
-    price: 99.99,
-    specs: { cpu: 'Intel Xeon E-2236', ram: '32 GB DDR4', storage: '1 TB NVMe SSD', bandwidth: '10 TB Transfer' },
-    features: ['Full Root Access', 'IPMI Access', '1 Gbps Port', 'DDoS Protection', '24/7 Support'],
-    color: 'from-blue-500 to-cyan-500'
-  },
-  {
-    name: 'Professional Dedicated',
-    price: 199.99,
-    specs: { cpu: 'Intel Xeon E-2288G', ram: '64 GB DDR4', storage: '2 TB NVMe SSD', bandwidth: '20 TB Transfer' },
-    features: ['Full Root Access', 'IPMI Access', '10 Gbps Port', 'Advanced DDoS', 'Priority Support', 'Free Setup'],
-    popular: true,
-    color: 'from-primary-500 to-purple-500'
-  },
-  {
-    name: 'Enterprise Dedicated',
-    price: 399.99,
-    specs: { cpu: 'Dual Intel Xeon Gold', ram: '128 GB DDR4', storage: '4 TB NVMe RAID', bandwidth: 'Unlimited' },
-    features: ['Full Root Access', 'IPMI Access', '10 Gbps Port', 'Premium DDoS', 'Dedicated Support', 'Free Setup', 'Hardware Customization'],
-    color: 'from-orange-500 to-red-500'
-  }
+const defaultPlans = [
+  { name: 'Starter Dedicated', price: 99.99, cpu: 'Intel Xeon E-2236', ram: '32 GB DDR4', storage: '1 TB NVMe SSD', bandwidth: '10 TB Transfer', color: 'from-blue-500 to-cyan-500' },
+  { name: 'Professional Dedicated', price: 199.99, popular: true, cpu: 'Intel Xeon E-2288G', ram: '64 GB DDR4', storage: '2 TB NVMe SSD', bandwidth: '20 TB Transfer', color: 'from-primary-500 to-purple-500' },
+  { name: 'Enterprise Dedicated', price: 399.99, cpu: 'Dual Intel Xeon Gold', ram: '128 GB DDR4', storage: '4 TB NVMe RAID', bandwidth: 'Unlimited', color: 'from-orange-500 to-red-500' }
 ]
 
 export default function Dedicated() {
@@ -35,6 +18,16 @@ export default function Dedicated() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+
+  const { data: pricingData } = useQuery({
+    queryKey: ['pricing'],
+    queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
+  })
+
+  const dedicatedPlans = (pricingData?.dedicated || defaultPlans).map(p => ({
+    ...p,
+    specs: { cpu: p.cpu, ram: p.ram, storage: p.storage, bandwidth: p.bandwidth }
+  }))
 
   const handleAddToCart = (plan) => {
     addItem({

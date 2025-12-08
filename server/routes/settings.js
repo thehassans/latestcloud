@@ -185,6 +185,89 @@ router.get('/translations/:locale', async (req, res) => {
   }
 });
 
+// Get pricing data (public)
+router.get('/pricing', async (req, res) => {
+  try {
+    const settings = await db.query(
+      "SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'pricing_%'"
+    );
+    
+    const pricing = {};
+    for (const s of settings) {
+      const key = s.setting_key.replace('pricing_', '');
+      try {
+        pricing[key] = JSON.parse(s.setting_value);
+      } catch {
+        pricing[key] = s.setting_value;
+      }
+    }
+
+    // Default pricing if not set
+    if (!pricing.hosting) {
+      pricing.hosting = [
+        { name: 'Starter Hosting', price: 2.99, features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'cPanel Access'], color: 'from-blue-500 to-cyan-500' },
+        { name: 'Professional Hosting', price: 5.99, popular: true, features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'cPanel Access', 'Free Domain'], color: 'from-primary-500 to-purple-500' },
+        { name: 'Business Hosting', price: 9.99, features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'cPanel Access', 'Free Domain', 'Staging Environment'], color: 'from-purple-500 to-pink-500' }
+      ];
+    }
+    if (!pricing.ssl) {
+      pricing.ssl = [
+        { name: 'Domain Validation', description: 'Basic encryption for personal sites', price: 9.99, features: ['Single Domain', '256-bit Encryption', 'Browser Trust', '10 Min Issuance', '$10K Warranty'], color: 'from-green-500 to-emerald-500' },
+        { name: 'Organization Validation', description: 'Business identity verification', price: 49.99, popular: true, features: ['Single Domain', 'Company Verification', 'Site Seal', '1-3 Day Issuance', '$250K Warranty'], color: 'from-blue-500 to-cyan-500' },
+        { name: 'Extended Validation', description: 'Maximum trust & green bar', price: 149.99, features: ['Single Domain', 'Green Address Bar', 'Full Verification', '3-5 Day Issuance', '$1M Warranty'], color: 'from-purple-500 to-pink-500' },
+        { name: 'Wildcard SSL', description: 'Secure unlimited subdomains', price: 99.99, features: ['Unlimited Subdomains', '256-bit Encryption', 'Browser Trust', '10 Min Issuance', '$500K Warranty'], color: 'from-orange-500 to-red-500' }
+      ];
+    }
+    if (!pricing.vps) {
+      pricing.vps = [
+        { name: 'VPS Starter', price: 5.99, cpu: '1 vCPU', ram: '1 GB', storage: '25 GB SSD', bandwidth: '1 TB', color: 'from-blue-500 to-cyan-500' },
+        { name: 'VPS Professional', price: 12.99, popular: true, cpu: '2 vCPU', ram: '4 GB', storage: '80 GB SSD', bandwidth: '3 TB', color: 'from-primary-500 to-purple-500' },
+        { name: 'VPS Business', price: 24.99, cpu: '4 vCPU', ram: '8 GB', storage: '160 GB SSD', bandwidth: '5 TB', color: 'from-purple-500 to-pink-500' }
+      ];
+    }
+    if (!pricing.dedicated) {
+      pricing.dedicated = [
+        { name: 'Entry Server', price: 79.99, cpu: 'Intel Xeon E3', ram: '16 GB DDR4', storage: '500 GB SSD', bandwidth: '10 TB', color: 'from-blue-500 to-cyan-500' },
+        { name: 'Business Server', price: 149.99, popular: true, cpu: 'Intel Xeon E5', ram: '32 GB DDR4', storage: '1 TB SSD', bandwidth: '20 TB', color: 'from-primary-500 to-purple-500' },
+        { name: 'Enterprise Server', price: 299.99, cpu: 'Dual Xeon Gold', ram: '64 GB DDR4', storage: '2 TB NVMe', bandwidth: 'Unlimited', color: 'from-purple-500 to-pink-500' }
+      ];
+    }
+
+    res.json({ pricing });
+  } catch (error) {
+    console.error('Get pricing error:', error);
+    res.status(500).json({ error: 'Failed to load pricing' });
+  }
+});
+
+// Update pricing (admin only)
+router.put('/pricing', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { category, plans } = req.body;
+    const key = `pricing_${category}`;
+    const value = JSON.stringify(plans);
+
+    const existing = await db.query('SELECT id FROM settings WHERE setting_key = ?', [key]);
+    
+    if (existing && existing.length > 0) {
+      await db.query(
+        'UPDATE settings SET setting_value = ?, setting_type = ?, is_public = TRUE WHERE setting_key = ?',
+        [value, 'json', key]
+      );
+    } else {
+      await db.query(
+        'INSERT INTO settings (setting_key, setting_value, setting_type, is_public, category) VALUES (?, ?, ?, TRUE, ?)',
+        [key, value, 'json', 'pricing']
+      );
+    }
+
+    res.json({ message: 'Pricing updated successfully' });
+  } catch (error) {
+    console.error('Update pricing error:', error);
+    res.status(500).json({ error: 'Failed to update pricing' });
+  }
+});
+
 // Currency conversion rates (mock - in production, use real API)
 router.get('/currencies', async (req, res) => {
   try {

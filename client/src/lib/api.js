@@ -94,7 +94,9 @@ export const settingsAPI = {
   getDatacenters: () => api.get('/settings/datacenters'),
   getAnnouncements: (location) => api.get('/settings/announcements', { params: { location } }),
   getTranslations: (locale) => api.get(`/settings/translations/${locale}`),
-  getCurrencies: () => api.get('/settings/currencies')
+  getCurrencies: () => api.get('/settings/currencies'),
+  getPricing: () => api.get('/settings/pricing'),
+  updatePricing: (category, plans) => api.put('/settings/pricing', { category, plans })
 }
 
 // Pages API

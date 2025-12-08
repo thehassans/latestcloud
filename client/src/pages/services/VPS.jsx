@@ -1,40 +1,17 @@
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import { CheckCircle, HardDrive, Shield, Cpu, Gauge, Globe, Zap } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const vpsPlans = [
-  {
-    name: 'VPS Basic',
-    price: 9.99,
-    specs: { cpu: '1 vCPU', ram: '2 GB RAM', storage: '40 GB NVMe', bandwidth: '2 TB Transfer' },
-    features: ['Full Root Access', 'KVM Virtualization', 'Weekly Backups', '24/7 Support'],
-    color: 'from-blue-500 to-cyan-500'
-  },
-  {
-    name: 'VPS Standard',
-    price: 19.99,
-    specs: { cpu: '2 vCPU', ram: '4 GB RAM', storage: '80 GB NVMe', bandwidth: '4 TB Transfer' },
-    features: ['Full Root Access', 'KVM Virtualization', 'Daily Backups', 'DDoS Protection', '24/7 Support'],
-    popular: true,
-    color: 'from-primary-500 to-purple-500'
-  },
-  {
-    name: 'VPS Advanced',
-    price: 39.99,
-    specs: { cpu: '4 vCPU', ram: '8 GB RAM', storage: '160 GB NVMe', bandwidth: '8 TB Transfer' },
-    features: ['Full Root Access', 'KVM Virtualization', 'Daily Backups', 'DDoS Protection', 'Priority Support', 'Free Migrations'],
-    color: 'from-purple-500 to-pink-500'
-  },
-  {
-    name: 'VPS Pro',
-    price: 79.99,
-    specs: { cpu: '8 vCPU', ram: '16 GB RAM', storage: '320 GB NVMe', bandwidth: '16 TB Transfer' },
-    features: ['Full Root Access', 'KVM Virtualization', 'Hourly Backups', 'Advanced DDoS', 'Dedicated Support', 'Free Migrations', 'Custom rDNS'],
-    color: 'from-orange-500 to-red-500'
-  }
+const defaultPlans = [
+  { name: 'VPS Basic', price: 9.99, cpu: '1 vCPU', ram: '2 GB RAM', storage: '40 GB NVMe', bandwidth: '2 TB Transfer', color: 'from-blue-500 to-cyan-500' },
+  { name: 'VPS Standard', price: 19.99, popular: true, cpu: '2 vCPU', ram: '4 GB RAM', storage: '80 GB NVMe', bandwidth: '4 TB Transfer', color: 'from-primary-500 to-purple-500' },
+  { name: 'VPS Advanced', price: 39.99, cpu: '4 vCPU', ram: '8 GB RAM', storage: '160 GB NVMe', bandwidth: '8 TB Transfer', color: 'from-purple-500 to-pink-500' },
+  { name: 'VPS Pro', price: 79.99, cpu: '8 vCPU', ram: '16 GB RAM', storage: '320 GB NVMe', bandwidth: '16 TB Transfer', color: 'from-orange-500 to-red-500' }
 ]
 
 export default function VPS() {
@@ -42,6 +19,16 @@ export default function VPS() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+
+  const { data: pricingData } = useQuery({
+    queryKey: ['pricing'],
+    queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
+  })
+
+  const vpsPlans = (pricingData?.vps || defaultPlans).map(p => ({
+    ...p,
+    specs: { cpu: p.cpu, ram: p.ram, storage: p.storage, bandwidth: p.bandwidth }
+  }))
 
   const handleAddToCart = (plan) => {
     addItem({

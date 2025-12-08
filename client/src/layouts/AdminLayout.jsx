@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   LayoutDashboard, Users, Package, ShoppingCart, Ticket, 
   Globe, Settings, FileText, Image, LogOut, Menu, X,
-  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare
+  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare, DollarSign
 } from 'lucide-react'
 import { useAuthStore, useThemeStore } from '../store/useStore'
 import clsx from 'clsx'
@@ -13,6 +13,7 @@ const sidebarLinks = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/products', icon: Package, label: 'Products' },
+  { to: '/admin/pricing', icon: DollarSign, label: 'Pricing' },
   { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
   { to: '/admin/tickets', icon: Ticket, label: 'Tickets' },
   { to: '/admin/domains', icon: Globe, label: 'Domain TLDs' },

@@ -1,31 +1,17 @@
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import { CheckCircle, ArrowRight, Server, Shield, Clock, Zap } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const hostingPlans = [
-  {
-    name: 'Starter Hosting',
-    price: 2.99,
-    features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'cPanel Access'],
-    color: 'from-blue-500 to-cyan-500'
-  },
-  {
-    name: 'Professional Hosting',
-    price: 5.99,
-    popular: true,
-    features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'cPanel Access', 'Free Domain'],
-    color: 'from-primary-500 to-purple-500'
-  },
-  {
-    name: 'Business Hosting',
-    price: 9.99,
-    features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'cPanel Access', 'Free Domain', 'Staging Environment'],
-    color: 'from-purple-500 to-pink-500'
-  }
+const defaultPlans = [
+  { name: 'Starter Hosting', price: 2.99, features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'cPanel Access'], color: 'from-blue-500 to-cyan-500' },
+  { name: 'Professional Hosting', price: 5.99, popular: true, features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'cPanel Access', 'Free Domain'], color: 'from-primary-500 to-purple-500' },
+  { name: 'Business Hosting', price: 9.99, features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'cPanel Access', 'Free Domain', 'Staging Environment'], color: 'from-purple-500 to-pink-500' }
 ]
 
 const features = [
@@ -40,6 +26,13 @@ export default function Hosting() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+
+  const { data: pricingData } = useQuery({
+    queryKey: ['pricing'],
+    queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
+  })
+
+  const hostingPlans = pricingData?.hosting || defaultPlans
 
   const handleAddToCart = (plan) => {
     addItem({
