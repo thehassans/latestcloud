@@ -39,10 +39,24 @@ export default function AdminPricing() {
   const loadPricing = async () => {
     try {
       const res = await settingsAPI.getPricing()
-      setPricing(res.data.pricing)
+      const data = res.data?.pricing || {}
+      // Ensure all categories have data
+      setPricing({
+        hosting: data.hosting || defaultPlans.hosting,
+        ssl: data.ssl || defaultPlans.ssl,
+        vps: data.vps || defaultPlans.vps,
+        dedicated: data.dedicated || defaultPlans.dedicated,
+      })
     } catch (err) {
       console.error('Failed to load pricing:', err)
       toast.error('Failed to load pricing')
+      // Set defaults on error
+      setPricing({
+        hosting: defaultPlans.hosting,
+        ssl: defaultPlans.ssl,
+        vps: defaultPlans.vps,
+        dedicated: defaultPlans.dedicated,
+      })
     } finally {
       setLoading(false)
     }
