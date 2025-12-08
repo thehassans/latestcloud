@@ -160,8 +160,8 @@ export default function AdminSettings() {
               <label className="block text-sm font-medium mb-2">Site Logo</label>
               <div className="flex items-center gap-4">
                 <div className="w-32 h-32 border-2 border-dashed border-dark-300 dark:border-dark-600 rounded-xl flex items-center justify-center overflow-hidden bg-dark-50 dark:bg-dark-800">
-                  {formData.logo ? (
-                    <img src={formData.logo} alt="Logo" className="w-full h-full object-contain p-2" />
+                  {formData.logo && formData.logo.startsWith('data:image') ? (
+                    <img src={formData.logo} alt="" className="w-full h-full object-contain p-2" />
                   ) : (
                     <Upload className="w-8 h-8 text-dark-400" />
                   )}
@@ -180,7 +180,7 @@ export default function AdminSettings() {
                   >
                     <Upload className="w-4 h-4 mr-2" /> Upload Logo
                   </button>
-                  {formData.logo && (
+                  {formData.logo && formData.logo.startsWith('data:image') && (
                     <button
                       onClick={() => setFormData(prev => ({ ...prev, logo: null }))}
                       className="btn text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -198,8 +198,8 @@ export default function AdminSettings() {
               <label className="block text-sm font-medium mb-2">Favicon</label>
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 border-2 border-dashed border-dark-300 dark:border-dark-600 rounded-xl flex items-center justify-center overflow-hidden bg-dark-50 dark:bg-dark-800">
-                  {formData.favicon ? (
-                    <img src={formData.favicon} alt="Favicon" className="w-full h-full object-contain p-1" />
+                  {formData.favicon && formData.favicon.startsWith('data:image') ? (
+                    <img src={formData.favicon} alt="" className="w-full h-full object-contain p-1" />
                   ) : (
                     <Upload className="w-5 h-5 text-dark-400" />
                   )}
@@ -218,7 +218,7 @@ export default function AdminSettings() {
                   >
                     <Upload className="w-4 h-4 mr-2" /> Upload Favicon
                   </button>
-                  {formData.favicon && (
+                  {formData.favicon && formData.favicon.startsWith('data:image') && (
                     <button
                       onClick={() => setFormData(prev => ({ ...prev, favicon: null }))}
                       className="btn text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
