@@ -200,18 +200,18 @@ export default function Home() {
                         <motion.div
                           animate={{ scale: [1, 1.05, 1] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="w-36 h-36 rounded-full bg-gradient-to-br from-primary-400 to-purple-600 p-1 shadow-2xl shadow-primary-500/40"
+                          className="w-40 h-40 rounded-full bg-gradient-to-br from-primary-400 to-purple-600 p-1 shadow-2xl shadow-primary-500/40"
                         >
-                          <div className="w-full h-full rounded-full bg-white dark:bg-dark-900 flex items-center justify-center overflow-hidden">
+                          <div className="w-full h-full rounded-full bg-white dark:bg-dark-900 flex items-center justify-center overflow-hidden p-2">
                             {logo && logo.startsWith('data:image') ? (
-                              <img src={logo} alt="" className="w-24 h-24 object-contain" />
+                              <img src={logo} alt="" className="w-32 h-32 object-contain" />
                             ) : (
                               <motion.div
                                 animate={{ scale: [1, 1.1, 1] }}
                                 transition={{ duration: 2, repeat: Infinity }}
-                                className="w-20 h-20 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center"
+                                className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center"
                               >
-                                <CheckCircle className="w-10 h-10 text-white" />
+                                <CheckCircle className="w-12 h-12 text-white" />
                               </motion.div>
                             )}
                           </div>
