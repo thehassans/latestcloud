@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { 
   Bot, Key, Eye, EyeOff, Save, RefreshCw, Check, X, 
   Settings, Clock, MessageSquare, Trash2, ExternalLink,
-  Power, Zap
+  Power, Zap, Loader2
 } from 'lucide-react'
 import { useAIAgent } from '../../contexts/AIAgentContext'
+import api from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -15,6 +16,7 @@ export default function AdminAIAgent() {
     isEnabled,
     toggleEnabled,
     apiKey,
+    setApiKey,
     trainAgent,
     settings,
     updateChatSettings,
@@ -23,15 +25,40 @@ export default function AdminAIAgent() {
     savedChats,
     currentAgent,
     agentProfiles,
-    isApiValid
+    isApiValid,
+    setIsApiValid
   } = useAIAgent()
 
   const [showApiKey, setShowApiKey] = useState(false)
-  const [newApiKey, setNewApiKey] = useState(apiKey)
+  const [newApiKey, setNewApiKey] = useState('')
   const [isValidating, setIsValidating] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
   const [testResult, setTestResult] = useState(null)
   const [localSettings, setLocalSettings] = useState(settings)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch saved settings from server on mount
+  useEffect(() => {
+    const fetchAdminSettings = async () => {
+      try {
+        const response = await api.get('/ai-agent/settings/admin')
+        if (response.data) {
+          setNewApiKey(response.data.apiKey || '')
+          if (response.data.apiKey) {
+            setApiKey(response.data.apiKey)
+            setIsApiValid(true)
+          }
+          if (response.data.settings) {
+            setLocalSettings(response.data.settings)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch AI agent settings:', error)
+      }
+      setIsLoading(false)
+    }
+    fetchAdminSettings()
+  }, [])
 
   const handleValidate = async () => {
     if (!newApiKey.trim()) {
