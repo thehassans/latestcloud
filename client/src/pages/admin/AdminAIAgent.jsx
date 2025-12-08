@@ -29,6 +29,8 @@ export default function AdminAIAgent() {
   const [showApiKey, setShowApiKey] = useState(false)
   const [newApiKey, setNewApiKey] = useState(apiKey)
   const [isValidating, setIsValidating] = useState(false)
+  const [isTesting, setIsTesting] = useState(false)
+  const [testResult, setTestResult] = useState(null)
   const [localSettings, setLocalSettings] = useState(settings)
 
   const handleValidate = async () => {
@@ -44,6 +46,33 @@ export default function AdminAIAgent() {
     } else {
       toast.error(result.message)
     }
+  }
+
+  const handleTestConnection = async () => {
+    if (!newApiKey.trim()) {
+      toast.error('Please enter an API key')
+      return
+    }
+    setIsTesting(true)
+    setTestResult(null)
+    try {
+      const response = await fetch('/api/ai-agent/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: newApiKey })
+      })
+      const data = await response.json()
+      setTestResult(data)
+      if (data.success) {
+        toast.success(`Connected! Model: ${data.model}`)
+      } else {
+        toast.error(data.message || 'Connection failed')
+      }
+    } catch (error) {
+      setTestResult({ success: false, message: error.message })
+      toast.error('Failed to test connection')
+    }
+    setIsTesting(false)
   }
 
   const handleSaveSettings = () => {
@@ -187,6 +216,18 @@ export default function AdminAIAgent() {
 
             <div className="flex gap-3">
               <button
+                onClick={handleTestConnection}
+                disabled={isTesting}
+                className="btn-outline flex items-center gap-2"
+              >
+                {isTesting ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Zap className="w-4 h-4" />
+                )}
+                Test Connection
+              </button>
+              <button
                 onClick={handleValidate}
                 disabled={isValidating}
                 className="btn-primary flex items-center gap-2"
@@ -199,6 +240,15 @@ export default function AdminAIAgent() {
                 Validate & Save
               </button>
             </div>
+
+            {testResult && (
+              <div className={`mt-4 p-4 rounded-lg text-sm ${testResult.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'}`}>
+                <p className="font-medium mb-1">{testResult.success ? 'Connection Successful!' : 'Connection Failed'}</p>
+                {testResult.model && <p>Model: {testResult.model}</p>}
+                {testResult.message && <p>{testResult.message}</p>}
+                {testResult.response && <p className="text-xs mt-2 opacity-75">Response: {testResult.response}</p>}
+              </div>
+            )}
           </div>
         </div>
 

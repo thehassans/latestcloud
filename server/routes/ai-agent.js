@@ -139,7 +139,7 @@ router.post('/validate', async (req, res) => {
   console.log('Validating API key (first 10 chars):', apiKey.substring(0, 10) + '...');
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     console.log('Making request to Gemini API...');
     
     const response = await httpsPost(url, {
@@ -163,6 +163,62 @@ router.post('/validate', async (req, res) => {
     console.error('API validation error:', error.message);
     return res.json({ valid: false, message: error.message || 'Failed to validate API key' });
   }
+});
+
+// Test connection endpoint - tries multiple models
+router.post('/test', async (req, res) => {
+  console.log('AI Agent test connection request received');
+  const { apiKey } = req.body;
+
+  if (!apiKey) {
+    return res.status(400).json({ success: false, message: 'API key is required' });
+  }
+
+  // Models to try in order of preference
+  const modelsToTry = [
+    'gemini-2.0-flash-exp',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-pro',
+    'gemini-pro'
+  ];
+
+  for (const model of modelsToTry) {
+    console.log(`Testing model: ${model}`);
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      
+      const response = await httpsPost(url, {
+        contents: [{ parts: [{ text: 'Say "OK" only.' }] }]
+      });
+
+      console.log(`Model ${model} response status:`, response.status);
+      
+      if (response.status === 200 && response.data && response.data.candidates) {
+        const responseText = response.data.candidates[0]?.content?.parts?.[0]?.text || '';
+        console.log(`Model ${model} SUCCESS! Response: ${responseText}`);
+        return res.json({ 
+          success: true, 
+          model: model,
+          message: `Successfully connected using ${model}`,
+          response: responseText.substring(0, 100)
+        });
+      } else if (response.data?.error) {
+        console.log(`Model ${model} error:`, response.data.error.message);
+        // Continue to next model
+      }
+    } catch (error) {
+      console.log(`Model ${model} failed:`, error.message);
+      // Continue to next model
+    }
+  }
+
+  // If all models failed
+  return res.json({ 
+    success: false, 
+    message: 'All models failed. Please check your API key is valid and has proper permissions.',
+    modelsAttempted: modelsToTry
+  });
 });
 
 // Chat endpoint
@@ -196,7 +252,7 @@ Current customer message: ${message}
 Respond naturally as ${agentName} would. Keep it brief and helpful.
 `;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     const response = await httpsPost(url, {
       contents: [
