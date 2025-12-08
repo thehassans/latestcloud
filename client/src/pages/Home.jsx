@@ -185,7 +185,7 @@ export default function Home() {
                 {/* Premium Glass Card */}
                 <div className="relative">
                   {/* Glow effect behind */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 via-primary-500/20 to-purple-500/20 blur-3xl rounded-full" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 via-purple-500/20 to-indigo-500/20 blur-3xl rounded-full" />
                   
                   {/* Main premium status card */}
                   <motion.div
@@ -196,13 +196,13 @@ export default function Home() {
                     {/* Status indicator */}
                     <div className="flex items-center justify-center mb-8">
                       <div className="relative">
-                        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/40">
+                        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-400 to-purple-600 flex items-center justify-center shadow-2xl shadow-primary-500/40">
                           <div className="w-28 h-28 rounded-full bg-white dark:bg-dark-900 flex items-center justify-center">
                             <div className="text-center">
                               <motion.div
                                 animate={{ scale: [1, 1.1, 1] }}
                                 transition={{ duration: 2, repeat: Infinity }}
-                                className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center"
+                                className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-primary-400 to-purple-600 flex items-center justify-center"
                               >
                                 <CheckCircle className="w-8 h-8 text-white" />
                               </motion.div>
@@ -210,15 +210,15 @@ export default function Home() {
                           </div>
                         </div>
                         {/* Pulse rings */}
-                        <div className="absolute inset-0 rounded-full border-2 border-green-400/30 animate-ping" />
-                        <div className="absolute -inset-4 rounded-full border border-green-400/20 animate-pulse" />
+                        <div className="absolute inset-0 rounded-full border-2 border-primary-400/30 animate-ping" />
+                        <div className="absolute -inset-4 rounded-full border border-primary-400/20 animate-pulse" />
                       </div>
                     </div>
 
                     {/* Status text */}
                     <div className="text-center mb-8">
                       <h3 className="text-2xl font-bold mb-2">
-                        <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent">
                           All Systems Operational
                         </span>
                       </h3>
