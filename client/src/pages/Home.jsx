@@ -194,31 +194,79 @@ export default function Home() {
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                     className="relative z-10"
                   >
-                    {/* Status indicator with Logo */}
+                    {/* Status indicator with Logo - Magnet attracting clouds */}
                     <div className="flex items-center justify-center mb-8">
                       <div className="relative">
+                        {/* Floating clouds being attracted to the magnet */}
+                        {[
+                          { x: -80, y: -60, delay: 0, size: 'w-8 h-8' },
+                          { x: 90, y: -40, delay: 0.5, size: 'w-6 h-6' },
+                          { x: -100, y: 30, delay: 1, size: 'w-7 h-7' },
+                          { x: 85, y: 50, delay: 1.5, size: 'w-5 h-5' },
+                          { x: -60, y: 80, delay: 2, size: 'w-6 h-6' },
+                          { x: 70, y: -70, delay: 2.5, size: 'w-5 h-5' },
+                        ].map((cloud, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute"
+                            style={{ left: '50%', top: '50%' }}
+                            animate={{
+                              x: [cloud.x, cloud.x * 0.3, cloud.x],
+                              y: [cloud.y, cloud.y * 0.3, cloud.y],
+                              opacity: [0.4, 0.9, 0.4],
+                              scale: [1, 1.2, 1]
+                            }}
+                            transition={{
+                              duration: 3,
+                              delay: cloud.delay,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          >
+                            <Cloud className={`${cloud.size} text-primary-400/60`} />
+                          </motion.div>
+                        ))}
+                        
+                        {/* Magnetic field lines */}
+                        <motion.div
+                          className="absolute inset-0 -m-12"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        >
+                          {[0, 60, 120, 180, 240, 300].map((angle) => (
+                            <motion.div
+                              key={angle}
+                              className="absolute left-1/2 top-1/2 w-1 h-16 -ml-0.5 origin-bottom"
+                              style={{ transform: `rotate(${angle}deg) translateY(-100%)` }}
+                              animate={{ opacity: [0.1, 0.4, 0.1] }}
+                              transition={{ duration: 2, repeat: Infinity, delay: angle / 360 }}
+                            >
+                              <div className="w-full h-full bg-gradient-to-t from-primary-500/40 to-transparent rounded-full" />
+                            </motion.div>
+                          ))}
+                        </motion.div>
+
+                        {/* Main logo circle */}
                         <motion.div
                           animate={{ scale: [1, 1.05, 1] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="w-40 h-40 rounded-full bg-gradient-to-br from-primary-400 to-purple-600 p-1 shadow-2xl shadow-primary-500/40"
+                          className="relative z-10 w-44 h-44 rounded-full bg-gradient-to-br from-primary-400 via-purple-500 to-indigo-600 p-1.5 shadow-2xl shadow-primary-500/50"
                         >
-                          <div className="w-full h-full rounded-full bg-white dark:bg-dark-900 flex items-center justify-center overflow-hidden p-2">
+                          <div className="w-full h-full rounded-full bg-white dark:bg-dark-900 flex items-center justify-center overflow-hidden">
                             {logo && logo.startsWith('data:image') ? (
-                              <img src={logo} alt="" className="w-32 h-32 object-contain" />
+                              <img src={logo} alt="" className="w-36 h-36 object-contain p-2" />
                             ) : (
-                              <motion.div
-                                animate={{ scale: [1, 1.1, 1] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                                className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center"
-                              >
-                                <CheckCircle className="w-12 h-12 text-white" />
-                              </motion.div>
+                              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
+                                <Cloud className="w-14 h-14 text-white" />
+                              </div>
                             )}
                           </div>
                         </motion.div>
+                        
                         {/* Pulse rings */}
                         <div className="absolute inset-0 rounded-full border-2 border-primary-400/30 animate-ping" />
-                        <div className="absolute -inset-4 rounded-full border border-primary-400/20 animate-pulse" />
+                        <div className="absolute -inset-4 rounded-full border border-purple-400/20 animate-pulse" />
+                        <div className="absolute -inset-8 rounded-full border border-indigo-400/10 animate-pulse" style={{ animationDelay: '0.5s' }} />
                       </div>
                     </div>
 
