@@ -1,32 +1,14 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { CheckCircle, ArrowRight, Server, Shield, Clock, Zap } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import api from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const hostingPlans = [
-  {
-    name: 'Starter Hosting',
-    price: 2.99,
-    features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'cPanel Access'],
-    color: 'from-blue-500 to-cyan-500'
-  },
-  {
-    name: 'Professional Hosting',
-    price: 5.99,
-    popular: true,
-    features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'cPanel Access', 'Free Domain'],
-    color: 'from-primary-500 to-purple-500'
-  },
-  {
-    name: 'Business Hosting',
-    price: 9.99,
-    features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'cPanel Access', 'Free Domain', 'Staging Environment'],
-    color: 'from-purple-500 to-pink-500'
-  }
-]
+const planColors = ['from-blue-500 to-cyan-500', 'from-primary-500 to-purple-500', 'from-purple-500 to-pink-500']
 
 const features = [
   { icon: Zap, title: 'SSD Storage', desc: 'Lightning-fast NVMe SSD drives' },
@@ -40,6 +22,15 @@ export default function Hosting() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const [plans, setPlans] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api.get('/api/pricing/hosting')
+      .then(res => setPlans(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -131,10 +122,13 @@ export default function Hosting() {
             <p className="mt-4 text-dark-500">All plans include free SSL, backups, and 24/7 support.</p>
           </div>
 
+          {loading ? (
+            <div className="text-center py-12">Loading plans...</div>
+          ) : (
           <div className="grid md:grid-cols-3 gap-8">
-            {hostingPlans.map((plan, i) => (
+            {plans.map((plan, i) => (
               <motion.div
-                key={plan.name}
+                key={plan.id || plan.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * i }}
@@ -150,7 +144,7 @@ export default function Hosting() {
                     MOST POPULAR
                   </div>
                 )}
-                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-4`}>
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${planColors[i % planColors.length]} flex items-center justify-center mb-4`}>
                   <Server className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-dark-900 dark:text-white">{plan.name}</h3>
@@ -179,6 +173,7 @@ export default function Hosting() {
               </motion.div>
             ))}
           </div>
+          )}
         </div>
       </section>
 

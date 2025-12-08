@@ -1,11 +1,15 @@
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { Archive, CheckCircle, Shield, Clock, RotateCcw, HardDrive } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import api from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const backupPlans = [
+const planColors = ['from-purple-500 to-indigo-500', 'from-primary-500 to-purple-500', 'from-orange-500 to-red-500']
+
+const defaultPlans = [
   {
     name: 'Basic Backup',
     price: 2.99,
@@ -38,6 +42,13 @@ export default function Backup() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const [plans, setPlans] = useState(defaultPlans)
+
+  useEffect(() => {
+    api.get('/api/pricing/backup')
+      .then(res => setPlans(res.data))
+      .catch(() => {})
+  }, [])
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -75,7 +86,7 @@ export default function Backup() {
       <section className="py-20 bg-white dark:bg-dark-900">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
-            {backupPlans.map((plan, i) => (
+            {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
                 initial={{ opacity: 0, y: 20 }}
@@ -93,7 +104,7 @@ export default function Backup() {
                     MOST POPULAR
                   </div>
                 )}
-                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-4`}>
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${planColors[i % planColors.length]} flex items-center justify-center mb-4`}>
                   <Archive className="w-7 h-7 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-dark-900 dark:text-white">{plan.name}</h3>

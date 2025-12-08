@@ -1,11 +1,13 @@
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { Database, CheckCircle, Cpu, HardDrive, Shield, Zap } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import api from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const dedicatedPlans = [
+const defaultPlans = [
   {
     name: 'Starter Dedicated',
     price: 99.99,
@@ -35,6 +37,13 @@ export default function Dedicated() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const [plans, setPlans] = useState(defaultPlans)
+
+  useEffect(() => {
+    api.get('/api/pricing/dedicated')
+      .then(res => setPlans(res.data))
+      .catch(() => {})
+  }, [])
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -72,7 +81,7 @@ export default function Dedicated() {
       <section className="py-20 bg-white dark:bg-dark-900">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
-            {dedicatedPlans.map((plan, i) => (
+            {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
                 initial={{ opacity: 0, y: 20 }}

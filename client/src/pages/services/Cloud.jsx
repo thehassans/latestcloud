@@ -1,11 +1,13 @@
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { Cloud as CloudIcon, CheckCircle, Cpu, HardDrive, Gauge, Globe } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import api from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const cloudPlans = [
+const defaultPlans = [
   {
     name: 'Cloud Starter',
     price: 19.99,
@@ -42,6 +44,13 @@ export default function Cloud() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const [plans, setPlans] = useState(defaultPlans)
+
+  useEffect(() => {
+    api.get('/api/pricing/cloud')
+      .then(res => setPlans(res.data))
+      .catch(() => {})
+  }, [])
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -84,7 +93,7 @@ export default function Cloud() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {cloudPlans.map((plan, i) => (
+            {plans.map((plan, i) => (
               <motion.div
                 key={plan.name}
                 initial={{ opacity: 0, y: 20 }}

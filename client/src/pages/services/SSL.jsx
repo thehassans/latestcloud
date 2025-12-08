@@ -1,11 +1,13 @@
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { Shield, CheckCircle, Lock, Globe, Zap } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import api from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const sslPlans = [
+const defaultPlans = [
   {
     name: 'Domain Validation',
     description: 'Basic encryption for personal sites',
@@ -46,6 +48,13 @@ export default function SSL() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const [plans, setPlans] = useState(defaultPlans)
+
+  useEffect(() => {
+    api.get('/api/pricing/ssl')
+      .then(res => setPlans(res.data))
+      .catch(() => {})
+  }, [])
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -80,7 +89,7 @@ export default function SSL() {
       <section className="py-20 bg-white dark:bg-dark-900">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {sslPlans.map((plan, i) => (
+            {plans.map((plan, i) => (
               <motion.div 
                 key={plan.name} 
                 initial={{ opacity: 0, y: 20 }} 
