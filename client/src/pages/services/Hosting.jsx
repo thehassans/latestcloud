@@ -1,12 +1,32 @@
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
-import { useQuery } from '@tanstack/react-query'
 import { CheckCircle, ArrowRight, Server, Shield, Clock, Zap } from 'lucide-react'
-import { productsAPI } from '../../lib/api'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
+
+const hostingPlans = [
+  {
+    name: 'Starter Hosting',
+    price: 2.99,
+    features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'cPanel Access'],
+    color: 'from-blue-500 to-cyan-500'
+  },
+  {
+    name: 'Professional Hosting',
+    price: 5.99,
+    popular: true,
+    features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'cPanel Access', 'Free Domain'],
+    color: 'from-primary-500 to-purple-500'
+  },
+  {
+    name: 'Business Hosting',
+    price: 9.99,
+    features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'cPanel Access', 'Free Domain', 'Staging Environment'],
+    color: 'from-purple-500 to-pink-500'
+  }
+]
 
 const features = [
   { icon: Zap, title: 'SSD Storage', desc: 'Lightning-fast NVMe SSD drives' },
@@ -21,23 +41,16 @@ export default function Hosting() {
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['products', 'web-hosting'],
-    queryFn: () => productsAPI.getByCategory('web-hosting').then(res => res.data)
-  })
-
-  const handleAddToCart = (product, billingCycle) => {
-    const price = billingCycle === 'monthly' ? product.price_monthly : product.price_annual / 12
+  const handleAddToCart = (plan) => {
     addItem({
-      id: product.uuid,
+      id: `hosting-${plan.name.toLowerCase().replace(/\s/g, '-')}`,
       type: 'product',
-      product_uuid: product.uuid,
-      name: product.name,
-      price: billingCycle === 'monthly' ? product.price_monthly : product.price_annual,
-      billingCycle,
+      name: plan.name,
+      price: plan.price,
+      billingCycle: 'monthly',
       product_type: 'hosting'
     })
-    toast.success(`${product.name} added to cart!`)
+    toast.success(`${plan.name} added to cart!`)
   }
 
   return (
@@ -111,81 +124,61 @@ export default function Hosting() {
       </section>
 
       {/* Pricing */}
-      <section className="section">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-white dark:bg-dark-900">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="section-heading">Choose Your Plan</h2>
-            <p className="section-subheading mx-auto">
-              All plans include free SSL, daily backups, and 24/7 support.
-            </p>
+            <h2 className="text-3xl font-bold text-dark-900 dark:text-white">Choose Your Plan</h2>
+            <p className="mt-4 text-dark-500">All plans include free SSL, backups, and 24/7 support.</p>
           </div>
 
-          {isLoading ? (
-            <div className="grid md:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="card p-8 animate-pulse">
-                  <div className="h-6 bg-dark-200 dark:bg-dark-700 rounded w-1/2 mb-4" />
-                  <div className="h-10 bg-dark-200 dark:bg-dark-700 rounded w-1/3 mb-6" />
-                  <div className="space-y-3">
-                    {[1, 2, 3, 4].map((j) => (
-                      <div key={j} className="h-4 bg-dark-200 dark:bg-dark-700 rounded" />
-                    ))}
+          <div className="grid md:grid-cols-3 gap-8">
+            {hostingPlans.map((plan, i) => (
+              <motion.div
+                key={plan.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * i }}
+                className={clsx(
+                  "relative p-8 rounded-2xl border-2 transition-all hover:shadow-xl",
+                  plan.popular
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/10"
+                    : "border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800"
+                )}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary-500 text-white text-xs font-bold rounded-full">
+                    MOST POPULAR
                   </div>
+                )}
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-4`}>
+                  <Server className="w-7 h-7 text-white" />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-8">
-              {data?.products?.map((product, i) => (
-                <motion.div
-                  key={product.uuid}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 * i }}
+                <h3 className="text-xl font-bold text-dark-900 dark:text-white">{plan.name}</h3>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold text-dark-900 dark:text-white">{format(plan.price)}</span>
+                  <span className="text-dark-500">/mo</span>
+                </div>
+                <ul className="mt-6 space-y-3">
+                  {plan.features.map((f, j) => (
+                    <li key={j} className="flex items-center gap-2 text-sm text-dark-600 dark:text-dark-300">
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />{f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => handleAddToCart(plan)}
                   className={clsx(
-                    "card p-8 relative",
-                    product.is_featured && "pricing-popular"
+                    "w-full mt-6 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
+                    plan.popular
+                      ? "bg-primary-500 text-white hover:bg-primary-600"
+                      : "bg-dark-100 dark:bg-dark-700 text-dark-900 dark:text-white hover:bg-dark-200 dark:hover:bg-dark-600"
                   )}
                 >
-                  <h3 className="text-xl font-bold">{product.name}</h3>
-                  <p className="text-dark-500 text-sm mt-1">{product.description}</p>
-                  
-                  <div className="mt-6">
-                    <span className="text-4xl font-bold">{format(product.price_monthly)}</span>
-                    <span className="text-dark-500">/month</span>
-                  </div>
-                  
-                  {product.price_annual && (
-                    <p className="text-sm text-dark-500 mt-1">
-                      or {format(product.price_annual)}/year (save {Math.round((1 - product.price_annual / (product.price_monthly * 12)) * 100)}%)
-                    </p>
-                  )}
-
-                  <ul className="mt-6 space-y-3">
-                    {product.features?.map((feature, j) => (
-                      <li key={j} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-8 space-y-3">
-                    <button
-                      onClick={() => handleAddToCart(product, 'monthly')}
-                      className={clsx(
-                        "w-full btn",
-                        product.is_featured ? "btn-primary" : "btn-outline"
-                      )}
-                    >
-                      Get Started
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+                  Get Started <ArrowRight className="w-4 h-4" />
+                </button>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
