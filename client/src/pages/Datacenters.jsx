@@ -54,7 +54,7 @@ export default function Datacenters() {
 
       <section className="py-8">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-dark-700" style={{ height: '350px' }}>
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-dark-700 relative z-0" style={{ height: '350px' }}>
             {!isLoading && datacenters && (
               <MapContainer 
                 center={[25, 20]} 
