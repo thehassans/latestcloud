@@ -139,7 +139,7 @@ router.post('/validate', async (req, res) => {
   console.log('Validating API key (first 10 chars):', apiKey.substring(0, 10) + '...');
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
     console.log('Making request to Gemini API...');
     
     const response = await httpsPost(url, {
@@ -252,7 +252,7 @@ Current customer message: ${message}
 Respond naturally as ${agentName} would. Keep it brief and helpful.
 `;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
     
     const response = await httpsPost(url, {
       contents: [
