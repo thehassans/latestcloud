@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   LayoutDashboard, Users, Package, ShoppingCart, Ticket, 
   Globe, Settings, FileText, Image, LogOut, Menu, X,
-  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare
+  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare, LayoutGrid
 } from 'lucide-react'
 import { useAuthStore, useThemeStore } from '../store/useStore'
 import clsx from 'clsx'
@@ -18,6 +18,7 @@ const sidebarLinks = [
   { to: '/admin/domains', icon: Globe, label: 'Domain TLDs' },
   { to: '/admin/pages', icon: FileText, label: 'Pages' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
+  { to: '/admin/service-cards', icon: LayoutGrid, label: 'Service Cards' },
   { to: '/admin/ai-agent', icon: Bot, label: 'AI Agent' },
   { to: '/admin/ai-chats', icon: MessageSquare, label: 'Chat History' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },

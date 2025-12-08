@@ -10,6 +10,7 @@ import {
   ArrowRight, ChevronRight, Star, Users, Award, TrendingUp
 } from 'lucide-react'
 import { productsAPI, domainsAPI, settingsAPI } from '../lib/api'
+import api from '../lib/api'
 import { useCurrencyStore, useThemeStore } from '../store/useStore'
 import clsx from 'clsx'
 
@@ -22,16 +23,21 @@ const features = [
   { icon: MapPin, title: 'Global Network', desc: '10+ locations', color: 'from-indigo-500 to-violet-500' },
 ]
 
-const services = [
-  { icon: Server, title: 'Web Hosting', desc: 'Fast & reliable shared hosting', to: '/hosting', price: 2.99 },
-  { icon: Database, title: 'VPS Servers', desc: 'Full root access & control', to: '/vps', price: 9.99 },
-  { icon: Cloud, title: 'Cloud Servers', desc: 'Scalable cloud infrastructure', to: '/cloud', price: 24.99 },
-  { icon: Server, title: 'Dedicated Servers', desc: 'Maximum performance', to: '/dedicated', price: 99.99 },
-  { icon: Globe, title: 'Domains', desc: 'Register your perfect domain', to: '/domains', price: 2.99 },
-  { icon: Shield, title: 'SSL Certificates', desc: 'Secure your website', to: '/ssl', price: 9.99 },
-  { icon: Mail, title: 'Professional Email', desc: 'Business email solutions', to: '/email', price: 1.99 },
-  { icon: Archive, title: 'Website Backup', desc: 'Automated backups', to: '/backup', price: 2.99 },
+// Fallback services if API fails
+const defaultServices = [
+  { icon: 'Server', title: 'Web Hosting', description: 'Fast & reliable shared hosting', link: '/services/hosting', price: 2.99 },
+  { icon: 'Cloud', title: 'VPS Servers', description: 'Full root access & control', link: '/services/vps', price: 9.99 },
+  { icon: 'Cloud', title: 'Cloud Servers', description: 'Scalable cloud infrastructure', link: '/services/cloud', price: 24.99 },
+  { icon: 'Database', title: 'Dedicated Servers', description: 'Maximum performance', link: '/services/dedicated', price: 99.99 },
+  { icon: 'Globe', title: 'Domains', description: 'Register your perfect domain', link: '/domains', price: 2.99 },
+  { icon: 'Shield', title: 'SSL Certificates', description: 'Secure your website', link: '/services/ssl', price: 9.99 },
+  { icon: 'Mail', title: 'Professional Email', description: 'Business email solutions', link: '/services/email', price: 1.99 },
+  { icon: 'Archive', title: 'Website Backup', description: 'Automated backups', link: '/services/backup', price: 2.99 },
 ]
+
+// Map icon names to components
+const iconMap = { Server, Cloud, Database, Globe, Shield, Mail, Archive, Zap }
+const getIcon = (name) => iconMap[name] || Server
 
 const stats = [
   { value: '50K+', label: 'Happy Customers' },
@@ -51,6 +57,14 @@ export default function Home() {
     queryKey: ['datacenters'],
     queryFn: () => settingsAPI.getDatacenters().then(res => res.data.datacenters)
   })
+
+  // Fetch service cards from API
+  const { data: serviceCards } = useQuery({
+    queryKey: ['service-cards'],
+    queryFn: () => api.get('/service-cards').then(res => res.data)
+  })
+
+  const services = serviceCards?.length > 0 ? serviceCards : defaultServices
 
   const handleDomainSearch = (e) => {
     e.preventDefault()
@@ -341,37 +355,46 @@ export default function Home() {
           </div>
 
           <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service, i) => (
-              <motion.div
-                key={service.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <Link
-                  to={service.to}
-                  className="block card-hover p-6 group"
+            {services.map((service, i) => {
+              const IconComponent = getIcon(service.icon)
+              return (
+                <motion.div
+                  key={service.id || service.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
                 >
-                  <div className={clsx(
-                    "w-14 h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110",
-                    isGradient 
-                      ? "bg-gradient-to-br from-primary-500 to-secondary-500 text-white" 
-                      : "bg-primary-100 dark:bg-primary-900/30 text-primary-500"
-                  )}>
-                    <service.icon className="w-7 h-7" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold group-hover:text-primary-500 transition-colors">
-                    {service.title}
-                  </h3>
-                  <p className="mt-1 text-dark-500 text-sm">{service.desc}</p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm text-dark-400">Starting at</span>
-                    <span className="font-bold text-primary-500">{format(service.price)}/mo</span>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  <Link
+                    to={service.link}
+                    className="block card-hover p-6 group"
+                  >
+                    {service.image_url ? (
+                      <div className="w-14 h-14 rounded-2xl overflow-hidden transition-all group-hover:scale-110">
+                        <img src={service.image_url} alt={service.title} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className={clsx(
+                        "w-14 h-14 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110",
+                        isGradient 
+                          ? "bg-gradient-to-br from-primary-500 to-secondary-500 text-white" 
+                          : "bg-primary-100 dark:bg-primary-900/30 text-primary-500"
+                      )}>
+                        <IconComponent className="w-7 h-7" />
+                      </div>
+                    )}
+                    <h3 className="mt-4 text-lg font-semibold group-hover:text-primary-500 transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="mt-1 text-dark-500 text-sm">{service.description}</p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-sm text-dark-400">Starting at</span>
+                      <span className="font-bold text-primary-500">{format(service.price)}/mo</span>
+                    </div>
+                  </Link>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
