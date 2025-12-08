@@ -38,10 +38,13 @@ export default function Datacenters() {
   const { themeStyle } = useThemeStore()
   const isGradient = themeStyle === 'gradient'
 
-  const { data: datacenters, isLoading } = useQuery({
+  const { data: datacenters } = useQuery({
     queryKey: ['datacenters'],
     queryFn: () => settingsAPI.getDatacenters().then(res => res.data.datacenters)
   })
+
+  // Use API data if available and not empty, otherwise use static data
+  const locations = (datacenters && datacenters.length > 0) ? datacenters : staticDatacenters
 
   return (
     <>
@@ -83,7 +86,7 @@ export default function Datacenters() {
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {(datacenters || staticDatacenters).map((dc) => (
+              {locations.map((dc) => (
                 <Marker key={dc.id} position={[dc.latitude, dc.longitude]} icon={customIcon}>
                   <Popup>
                     <div className="p-1">
@@ -102,7 +105,7 @@ export default function Datacenters() {
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="section-heading text-center mb-12">Our Locations</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(datacenters || staticDatacenters).map((dc, i) => (
+            {locations.map((dc, i) => (
               <motion.div key={dc.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }} className="card p-6">
                 <div className="flex items-start gap-4">
