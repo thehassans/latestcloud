@@ -61,16 +61,9 @@ const defaultSettings = {
 }
 
 export function AIAgentProvider({ children }) {
-  const [isEnabled, setIsEnabled] = useState(() => {
-    try {
-      return localStorage.getItem('ai_agent_enabled') === 'true'
-    } catch { return true }
-  })
-  const [apiKey, setApiKey] = useState(() => {
-    try {
-      return localStorage.getItem('ai_agent_api_key') || ''
-    } catch { return '' }
-  })
+  const [isEnabled, setIsEnabled] = useState(false)
+  const [apiKey, setApiKey] = useState('')
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [currentAgent, setCurrentAgent] = useState(null)
   const [isTyping, setIsTyping] = useState(false)
   const [chatHistory, setChatHistory] = useState([])
@@ -114,7 +107,7 @@ export function AIAgentProvider({ children }) {
     }, ...prev].slice(0, 50))
   }, [])
 
-  // Train/validate API key
+  // Train/validate API key and save to server
   const trainAgent = useCallback(async (newApiKey) => {
     try {
       addLog('info', 'Validating API key...')
@@ -123,10 +116,14 @@ export function AIAgentProvider({ children }) {
       if (response.data.valid) {
         setApiKey(newApiKey)
         setIsApiValid(true)
+        // Save to server database
         try {
-          localStorage.setItem('ai_agent_api_key', newApiKey)
-        } catch {}
-        addLog('success', 'API key validated successfully!')
+          await api.post('/ai-agent/settings', { apiKey: newApiKey, enabled: true })
+          setIsEnabled(true)
+        } catch (e) {
+          console.error('Failed to save API key to server:', e)
+        }
+        addLog('success', 'API key validated and saved!')
         return { success: true, message: 'API key is valid' }
       } else {
         addLog('error', 'Invalid API key')
@@ -217,24 +214,26 @@ export function AIAgentProvider({ children }) {
     addLog('info', 'All chats cleared')
   }, [addLog])
 
-  // Update settings
-  const updateChatSettings = useCallback((newSettings) => {
-    setSettings(prev => {
-      const updated = { ...prev, ...newSettings }
-      try {
-        localStorage.setItem('ai_agent_settings', JSON.stringify(updated))
-      } catch {}
-      return updated
-    })
+  // Update settings and save to server
+  const updateChatSettings = useCallback(async (newSettings) => {
+    const updated = { ...settings, ...newSettings }
+    setSettings(updated)
+    try {
+      await api.post('/ai-agent/settings', { settings: updated })
+    } catch (e) {
+      console.error('Failed to save settings to server:', e)
+    }
     addLog('success', 'Settings updated')
-  }, [addLog])
+  }, [settings, addLog])
 
-  // Toggle enabled state
-  const toggleEnabled = useCallback((enabled) => {
+  // Toggle enabled state and save to server
+  const toggleEnabled = useCallback(async (enabled) => {
     setIsEnabled(enabled)
     try {
-      localStorage.setItem('ai_agent_enabled', String(enabled))
-    } catch {}
+      await api.post('/ai-agent/settings', { enabled })
+    } catch (e) {
+      console.error('Failed to save enabled state to server:', e)
+    }
     addLog('info', `AI Agent ${enabled ? 'enabled' : 'disabled'}`)
   }, [addLog])
 
@@ -256,8 +255,26 @@ export function AIAgentProvider({ children }) {
     return () => clearTimers()
   }, [clearTimers])
 
+  // Fetch AI agent settings from server on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await api.get('/ai-agent/settings')
+        if (response.data) {
+          setIsEnabled(response.data.enabled && response.data.hasApiKey)
+          setSettingsLoaded(true)
+        }
+      } catch (error) {
+        console.error('Failed to fetch AI agent settings:', error)
+        setSettingsLoaded(true)
+      }
+    }
+    fetchSettings()
+  }, [])
+
   const value = {
     isEnabled,
+    settingsLoaded,
     toggleEnabled,
     apiKey,
     setApiKey,

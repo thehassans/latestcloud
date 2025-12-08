@@ -7,6 +7,7 @@ import clsx from 'clsx'
 export default function AIChatWidget() {
   const {
     isEnabled,
+    settingsLoaded,
     currentAgent,
     setCurrentAgent,
     isTyping,
@@ -282,7 +283,8 @@ export default function AIChatWidget() {
     }
   }, [isOpen, isMinimized])
 
-  if (!isEnabled) return null
+  // Don't render until settings are loaded from server, and only if enabled
+  if (!settingsLoaded || !isEnabled) return null
 
   return (
     <>

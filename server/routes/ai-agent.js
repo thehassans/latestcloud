@@ -1,5 +1,7 @@
 const express = require('express');
 const https = require('https');
+const db = require('../database/connection');
+const { authenticate, requireRole } = require('../middleware/auth');
 const router = express.Router();
 
 // Helper function to make HTTPS POST requests
@@ -296,6 +298,114 @@ Respond naturally as ${agentName} would. Keep it brief and helpful.
   } catch (error) {
     console.error('Chat error:', error);
     res.status(500).json({ error: 'Failed to process chat message' });
+  }
+});
+
+// Get AI agent settings (public - for chatbot visibility)
+router.get('/settings', async (req, res) => {
+  try {
+    const settings = await db.query(
+      "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('ai_agent_enabled', 'ai_agent_api_key')"
+    );
+    
+    const result = {
+      enabled: false,
+      hasApiKey: false
+    };
+    
+    for (const s of settings) {
+      if (s.setting_key === 'ai_agent_enabled') {
+        result.enabled = s.setting_value === 'true';
+      }
+      if (s.setting_key === 'ai_agent_api_key') {
+        result.hasApiKey = !!s.setting_value;
+      }
+    }
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Get AI settings error:', error);
+    res.json({ enabled: false, hasApiKey: false });
+  }
+});
+
+// Get AI agent settings (admin - includes API key)
+router.get('/settings/admin', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const settings = await db.query(
+      "SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'ai_agent_%'"
+    );
+    
+    const result = {};
+    for (const s of settings) {
+      result[s.setting_key] = s.setting_value;
+    }
+    
+    res.json({
+      enabled: result.ai_agent_enabled === 'true',
+      apiKey: result.ai_agent_api_key || '',
+      settings: {
+        queueAssignTime: parseInt(result.ai_agent_queue_time) || 12000,
+        typingStartDelay: parseInt(result.ai_agent_typing_delay) || 8000,
+        replyTimePerWord: parseInt(result.ai_agent_reply_time) || 2500,
+        followUpTimeout: parseInt(result.ai_agent_followup_timeout) || 60000,
+        endChatTimeout: parseInt(result.ai_agent_end_timeout) || 30000
+      }
+    });
+  } catch (error) {
+    console.error('Get AI admin settings error:', error);
+    res.status(500).json({ error: 'Failed to load settings' });
+  }
+});
+
+// Save AI agent settings (admin only)
+router.post('/settings', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { enabled, apiKey, settings } = req.body;
+    
+    // Save enabled state
+    if (enabled !== undefined) {
+      await db.query(`
+        INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public)
+        VALUES ('ai_agent_enabled', ?, 'boolean', 'ai_agent', TRUE)
+        ON DUPLICATE KEY UPDATE setting_value = ?
+      `, [String(enabled), String(enabled)]);
+    }
+    
+    // Save API key
+    if (apiKey !== undefined) {
+      await db.query(`
+        INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public)
+        VALUES ('ai_agent_api_key', ?, 'string', 'ai_agent', FALSE)
+        ON DUPLICATE KEY UPDATE setting_value = ?
+      `, [apiKey, apiKey]);
+    }
+    
+    // Save timing settings
+    if (settings) {
+      const timingSettings = {
+        ai_agent_queue_time: settings.queueAssignTime,
+        ai_agent_typing_delay: settings.typingStartDelay,
+        ai_agent_reply_time: settings.replyTimePerWord,
+        ai_agent_followup_timeout: settings.followUpTimeout,
+        ai_agent_end_timeout: settings.endChatTimeout
+      };
+      
+      for (const [key, value] of Object.entries(timingSettings)) {
+        if (value !== undefined) {
+          await db.query(`
+            INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public)
+            VALUES (?, ?, 'number', 'ai_agent', FALSE)
+            ON DUPLICATE KEY UPDATE setting_value = ?
+          `, [key, String(value), String(value)]);
+        }
+      }
+    }
+    
+    res.json({ success: true, message: 'AI agent settings saved' });
+  } catch (error) {
+    console.error('Save AI settings error:', error);
+    res.status(500).json({ error: 'Failed to save settings' });
   }
 });
 
