@@ -254,10 +254,10 @@ export default function Home() {
                         >
                           <div className="w-full h-full rounded-full bg-white dark:bg-dark-900 flex items-center justify-center overflow-hidden">
                             {logo && logo.startsWith('data:image') ? (
-                              <img src={logo} alt="" className="w-36 h-36 object-contain p-2" />
+                              <img src={logo} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-28 h-28 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
-                                <Cloud className="w-14 h-14 text-white" />
+                              <div className="w-full h-full rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
+                                <Cloud className="w-16 h-16 text-white" />
                               </div>
                             )}
                           </div>

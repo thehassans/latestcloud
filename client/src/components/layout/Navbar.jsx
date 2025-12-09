@@ -82,15 +82,15 @@ export default function Navbar() {
               <motion.div 
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
-                className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center"
+                className="h-12 overflow-hidden flex items-center justify-center"
               >
-                <img src={logo} alt="" className="w-full h-full object-contain" />
+                <img src={logo} alt="" className="h-full w-auto object-contain" />
               </motion.div>
             ) : (
               <motion.div 
                 whileHover={{ rotate: 180 }}
                 transition={{ duration: 0.5 }}
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary-500/30"
+                className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30"
               >
                 MC
               </motion.div>
