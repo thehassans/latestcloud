@@ -26,10 +26,11 @@ const features = [
 
 export default function Hosting() {
   const { format } = useCurrencyStore()
-  const { themeStyle } = useThemeStore()
+  const { themeStyle, theme } = useThemeStore()
   const { addItem } = useCartStore()
   const { setIsOpen: openChat } = useAIAgent()
   const isGradient = themeStyle === 'gradient'
+  const isDark = theme === 'dark'
 
   const { data: pricingData } = useQuery({
     queryKey: ['pricing'],
@@ -62,12 +63,24 @@ export default function Hosting() {
       </Helmet>
 
       {/* Hero with integrated pricing */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-dark-950 via-dark-900 to-dark-950">
+      <section className={clsx(
+        "relative overflow-hidden",
+        isDark ? "bg-gradient-to-b from-dark-950 via-dark-900 to-dark-950" : "bg-gradient-to-b from-primary-50 via-white to-purple-50"
+      )}>
         {/* Animated background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-500/20 via-transparent to-transparent" />
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          {isDark ? (
+            <>
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-500/20 via-transparent to-transparent" />
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-200/40 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-200/40 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </>
+          )}
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
@@ -76,19 +89,27 @@ export default function Hosting() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500/20 to-purple-500/20 border border-primary-500/30 text-primary-400 rounded-full text-sm font-medium mb-6 backdrop-blur-sm"
+              className={clsx(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6 backdrop-blur-sm",
+                isDark 
+                  ? "bg-gradient-to-r from-primary-500/20 to-purple-500/20 border border-primary-500/30 text-primary-400" 
+                  : "bg-primary-100 border border-primary-200 text-primary-600"
+              )}
             >
-              <Star className="w-4 h-4 fill-primary-400" />
+              <Star className={clsx("w-4 h-4", isDark ? "fill-primary-400" : "fill-primary-500")} />
               #1 Rated Web Hosting Provider
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white"
+              className={clsx(
+                "text-4xl md:text-5xl lg:text-6xl font-bold font-display",
+                isDark ? "text-white" : "text-dark-900"
+              )}
             >
               Lightning-Fast{' '}
-              <span className="bg-gradient-to-r from-primary-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                 Web Hosting
               </span>
             </motion.h1>
@@ -96,7 +117,7 @@ export default function Hosting() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-6 text-lg text-dark-300"
+              className={clsx("mt-6 text-lg", isDark ? "text-dark-300" : "text-dark-600")}
             >
               Power your website with blazing-fast NVMe SSD storage, free SSL certificates, 
               and 24/7 expert support. 45-day money-back guarantee.
@@ -116,8 +137,8 @@ export default function Hosting() {
                 { value: '4.9/5', label: 'Rating' },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
-                  <p className="text-2xl font-bold text-white">{stat.value}</p>
-                  <p className="text-sm text-dark-400">{stat.label}</p>
+                  <p className={clsx("text-2xl font-bold", isDark ? "text-white" : "text-dark-900")}>{stat.value}</p>
+                  <p className={clsx("text-sm", isDark ? "text-dark-400" : "text-dark-500")}>{stat.label}</p>
                 </div>
               ))}
             </motion.div>
@@ -135,7 +156,9 @@ export default function Hosting() {
                   "relative p-8 rounded-3xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] group",
                   plan.popular
                     ? "bg-gradient-to-b from-primary-500/20 to-purple-500/10 border-2 border-primary-500/50 shadow-2xl shadow-primary-500/20"
-                    : "bg-white/5 border border-white/10 hover:border-white/20"
+                    : isDark 
+                      ? "bg-white/5 border border-white/10 hover:border-white/20"
+                      : "bg-white/80 border border-primary-100 hover:border-primary-300 shadow-lg"
                 )}
               >
                 {plan.popular && (
@@ -148,19 +171,19 @@ export default function Hosting() {
                   <Server className="w-8 h-8 text-white" />
                 </div>
                 
-                <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                <h3 className={clsx("text-xl font-bold", isDark ? "text-white" : "text-dark-900")}>{plan.name}</h3>
                 
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-5xl font-bold text-white">{format(plan.price)}</span>
-                  <span className="text-dark-400">/month</span>
+                  <span className={clsx("text-5xl font-bold", isDark ? "text-white" : "text-dark-900")}>{format(plan.price)}</span>
+                  <span className={isDark ? "text-dark-400" : "text-dark-500"}>/month</span>
                 </div>
                 
-                <p className="mt-2 text-sm text-dark-400">Billed monthly, cancel anytime</p>
+                <p className={clsx("mt-2 text-sm", isDark ? "text-dark-400" : "text-dark-500")}>Billed monthly, cancel anytime</p>
                 
                 <ul className="mt-8 space-y-4">
                   {plan.features.map((f, j) => (
-                    <li key={j} className="flex items-center gap-3 text-sm text-dark-200">
-                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                    <li key={j} className={clsx("flex items-center gap-3 text-sm", isDark ? "text-dark-200" : "text-dark-600")}>
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                       {f}
                     </li>
                   ))}
@@ -172,7 +195,7 @@ export default function Hosting() {
                     "w-full mt-8 py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 group-hover:gap-3",
                     plan.popular
                       ? "bg-gradient-to-r from-primary-500 to-purple-500 text-white hover:shadow-lg hover:shadow-primary-500/30"
-                      : "bg-white/10 text-white hover:bg-white/20"
+                      : isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-primary-100 text-primary-700 hover:bg-primary-200"
                   )}
                 >
                   Get Started <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -186,18 +209,18 @@ export default function Hosting() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="mt-12 flex flex-wrap justify-center items-center gap-6 text-dark-400 text-sm"
+            className={clsx("mt-12 flex flex-wrap justify-center items-center gap-6 text-sm", isDark ? "text-dark-400" : "text-dark-600")}
           >
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-400" />
+              <Shield className="w-5 h-5 text-green-500" />
               45-Day Money Back
             </div>
             <div className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-blue-400" />
+              <Lock className="w-5 h-5 text-blue-500" />
               Free SSL Included
             </div>
             <div className="flex items-center gap-2">
-              <Headphones className="w-5 h-5 text-purple-400" />
+              <Headphones className="w-5 h-5 text-purple-500" />
               24/7 Expert Support
             </div>
           </motion.div>

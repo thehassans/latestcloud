@@ -23,9 +23,10 @@ export default function Domains() {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '')
   const [searched, setSearched] = useState(!!searchParams.get('search'))
   const { format } = useCurrencyStore()
-  const { themeStyle } = useThemeStore()
+  const { themeStyle, theme } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const isDark = theme === 'dark'
 
   const { data: tlds } = useQuery({
     queryKey: ['tlds'],
@@ -77,13 +78,25 @@ export default function Domains() {
       </Helmet>
 
       {/* Ultra Premium Hero */}
-      <section className="relative min-h-[70vh] bg-dark-950 overflow-hidden flex items-center">
+      <section className={clsx(
+        "relative min-h-[70vh] overflow-hidden flex items-center",
+        isDark ? "bg-dark-950" : "bg-gradient-to-b from-emerald-50 via-white to-teal-50"
+      )}>
         {/* Animated background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/50 via-dark-950 to-teal-950/50" />
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-emerald-500/10 via-transparent to-teal-500/10 rounded-full blur-2xl" />
+          {isDark ? (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/50 via-dark-950 to-teal-950/50" />
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-emerald-500/10 via-transparent to-teal-500/10 rounded-full blur-2xl" />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-200/40 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </>
+          )}
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
@@ -92,7 +105,10 @@ export default function Domains() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium mb-6"
+              className={clsx(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6",
+                isDark ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" : "bg-emerald-100 border border-emerald-200 text-emerald-600"
+              )}
             >
               <Globe className="w-4 h-4" />
               Domain Registration
@@ -101,10 +117,13 @@ export default function Domains() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white mb-6"
+              className={clsx(
+                "text-4xl md:text-5xl lg:text-6xl font-bold font-display mb-6",
+                isDark ? "text-white" : "text-dark-900"
+              )}
             >
               Find Your Perfect{' '}
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
                 Domain
               </span>
             </motion.h1>
@@ -112,7 +131,7 @@ export default function Domains() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-dark-300 max-w-2xl mx-auto"
+              className={clsx("text-lg max-w-2xl mx-auto", isDark ? "text-dark-300" : "text-dark-600")}
             >
               Search from 500+ domain extensions and secure your online identity today.
             </motion.p>
@@ -128,7 +147,10 @@ export default function Domains() {
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur opacity-20" />
-              <div className="relative bg-dark-800/80 backdrop-blur-sm border border-dark-700 rounded-2xl p-2 flex gap-2">
+              <div className={clsx(
+                "relative backdrop-blur-sm rounded-2xl p-2 flex gap-2",
+                isDark ? "bg-dark-800/80 border border-dark-700" : "bg-white/80 border border-emerald-100 shadow-lg"
+              )}>
                 <div className="flex-1 relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                   <input
@@ -136,7 +158,10 @@ export default function Domains() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search for your perfect domain name..."
-                    className="w-full bg-transparent pl-12 pr-4 py-4 text-white placeholder-dark-400 focus:outline-none text-lg"
+                    className={clsx(
+                      "w-full bg-transparent pl-12 pr-4 py-4 focus:outline-none text-lg",
+                      isDark ? "text-white placeholder-dark-400" : "text-dark-900 placeholder-dark-400"
+                    )}
                   />
                 </div>
                 <button
@@ -158,7 +183,15 @@ export default function Domains() {
             className="mt-8 flex flex-wrap justify-center gap-3"
           >
             {['.com', '.net', '.io', '.ai', '.co', '.dev'].map((ext) => (
-              <span key={ext} className="px-4 py-2 bg-dark-800/50 border border-dark-700 rounded-lg text-dark-300 text-sm hover:border-emerald-500/50 hover:text-emerald-400 transition-all cursor-pointer">
+              <span 
+                key={ext} 
+                className={clsx(
+                  "px-4 py-2 rounded-lg text-sm transition-all cursor-pointer",
+                  isDark 
+                    ? "bg-dark-800/50 border border-dark-700 text-dark-300 hover:border-emerald-500/50 hover:text-emerald-400"
+                    : "bg-white/80 border border-emerald-100 text-dark-600 hover:border-emerald-300 hover:text-emerald-600 shadow-sm"
+                )}
+              >
                 {ext}
               </span>
             ))}
@@ -178,8 +211,8 @@ export default function Domains() {
               { value: '24/7', label: 'Support' }
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{stat.value}</div>
-                <div className="text-dark-400 text-sm">{stat.label}</div>
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">{stat.value}</div>
+                <div className={clsx("text-sm", isDark ? "text-dark-400" : "text-dark-500")}>{stat.label}</div>
               </div>
             ))}
           </motion.div>
