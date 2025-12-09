@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle, ArrowRight, Server, Shield, Clock, Zap, Cpu, Globe, Headphones, Star, MessageCircle, Rocket, Database, Lock, RefreshCw } from 'lucide-react'
+import { CheckCircle, ArrowRight, Server, Shield, Clock, Zap, Globe, Headphones, Star, MessageCircle, Lock } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
 import { settingsAPI } from '../../lib/api'
 import { useAIAgent } from '../../contexts/AIAgentContext'
@@ -22,15 +22,6 @@ const features = [
   { icon: Server, title: 'Plesk Control Panel', desc: 'Professional server management', color: 'from-purple-500 to-pink-500' },
   { icon: Globe, title: 'Global CDN', desc: 'Content delivery in 200+ locations', color: 'from-indigo-500 to-violet-500' },
   { icon: Headphones, title: '24/7 Expert Support', desc: 'Average response time under 5 min', color: 'from-rose-500 to-red-500' },
-]
-
-const techStack = [
-  { icon: Cpu, name: 'PHP 8.3' },
-  { icon: Database, name: 'MySQL 8' },
-  { icon: Globe, name: 'Node.js' },
-  { icon: Lock, name: 'Let\'s Encrypt' },
-  { icon: RefreshCw, name: 'Git Deploy' },
-  { icon: Rocket, name: 'LiteSpeed' },
 ]
 
 export default function Hosting() {
@@ -249,30 +240,6 @@ export default function Hosting() {
                 </div>
                 <h3 className="text-xl font-bold text-dark-900 dark:text-white">{feature.title}</h3>
                 <p className="mt-3 text-dark-500">{feature.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Tech Stack */}
-      <section className="py-16 bg-dark-50 dark:bg-dark-950 border-y border-dark-100 dark:border-dark-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h3 className="text-lg font-semibold text-dark-500">Powered by Latest Technologies</h3>
-          </div>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            {techStack.map((tech, i) => (
-              <motion.div
-                key={tech.name}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.05 * i }}
-                className="flex items-center gap-3 text-dark-600 dark:text-dark-300 hover:text-primary-500 transition-colors"
-              >
-                <tech.icon className="w-6 h-6" />
-                <span className="font-medium">{tech.name}</span>
               </motion.div>
             ))}
           </div>

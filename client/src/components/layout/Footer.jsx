@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { 
   Facebook, Twitter, Linkedin, Instagram, Youtube,
-  Mail, Phone, MapPin, Heart, ArrowRight, Send
+  Mail, Phone, MapPin, ArrowRight, Send
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
@@ -228,32 +228,44 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Trust badges */}
+        {/* Trust badges - Premium Design */}
         <div className="mt-12 pt-8 border-t border-dark-700">
-          <div className="flex flex-wrap items-center justify-center gap-8">
-            <div className="flex items-center gap-2 text-dark-400">
-              <div className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center">
-                <span className="text-green-500 font-bold text-sm">SSL</span>
+          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
+            <div className="group flex items-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 hover:border-green-500/40 transition-all">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform">
+                <span className="text-white font-bold text-sm">SSL</span>
               </div>
-              <span className="text-sm">256-bit Encryption</span>
+              <div>
+                <span className="text-white font-semibold block">256-bit</span>
+                <span className="text-dark-400 text-sm">Encryption</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-dark-400">
-              <div className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center">
-                <span className="text-primary-400 font-bold text-sm">99.9%</span>
+            <div className="group flex items-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-br from-primary-500/10 to-purple-500/5 border border-primary-500/20 hover:border-primary-500/40 transition-all">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform">
+                <span className="text-white font-bold text-sm">99.9%</span>
               </div>
-              <span className="text-sm">Uptime Guarantee</span>
+              <div>
+                <span className="text-white font-semibold block">Uptime</span>
+                <span className="text-dark-400 text-sm">Guarantee</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-dark-400">
-              <div className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center">
-                <span className="text-yellow-500 font-bold text-sm">24/7</span>
+            <div className="group flex items-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-br from-yellow-500/10 to-orange-500/5 border border-yellow-500/20 hover:border-yellow-500/40 transition-all">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center shadow-lg shadow-yellow-500/20 group-hover:scale-110 transition-transform">
+                <span className="text-white font-bold text-sm">24/7</span>
               </div>
-              <span className="text-sm">Expert Support</span>
+              <div>
+                <span className="text-white font-semibold block">Expert</span>
+                <span className="text-dark-400 text-sm">Support</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-dark-400">
-              <div className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center">
-                <span className="text-blue-400 font-bold text-sm">45</span>
+            <div className="group flex items-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/5 border border-blue-500/20 hover:border-blue-500/40 transition-all">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
+                <span className="text-white font-bold text-sm">45</span>
               </div>
-              <span className="text-sm">Day Money Back</span>
+              <div>
+                <span className="text-white font-semibold block">Day</span>
+                <span className="text-dark-400 text-sm">Money Back</span>
+              </div>
             </div>
           </div>
         </div>
@@ -262,14 +274,9 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-dark-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-dark-400 text-sm text-center md:text-left">
-              © {new Date().getFullYear()} Magnetic Clouds. All rights reserved.
-            </p>
-            <p className="text-dark-400 text-sm flex items-center gap-1">
-              Made with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> in Bangladesh
-            </p>
-          </div>
+          <p className="text-dark-400 text-sm text-center">
+            © {new Date().getFullYear()} Magnetic Clouds. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
