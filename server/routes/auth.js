@@ -26,36 +26,51 @@ passport.deserializeUser(async (id, done) => {
 
 // Helper function to find or create OAuth user
 async function findOrCreateOAuthUser(profile, provider) {
-  const email = profile.emails?.[0]?.value;
-  if (!email) {
-    throw new Error('Email not provided by OAuth provider');
+  try {
+    const email = profile.emails?.[0]?.value;
+    if (!email) {
+      throw new Error('Email not provided by OAuth provider');
+    }
+
+    console.log(`OAuth ${provider} login attempt for: ${email}`);
+
+    // Check if user exists by email
+    let users = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    
+    if (users.length) {
+      // Update OAuth provider info - try to update provider_id column, ignore if doesn't exist
+      try {
+        await db.query(
+          `UPDATE users SET avatar = COALESCE(avatar, ?) WHERE id = ?`,
+          [profile.photos?.[0]?.value || null, users[0].id]
+        );
+      } catch (updateErr) {
+        console.log('Avatar update skipped:', updateErr.message);
+      }
+      console.log(`Existing user found: ${users[0].uuid}`);
+      return users[0];
+    }
+
+    // Create new user
+    const uuid = uuidv4();
+    const firstName = profile.name?.givenName || profile.displayName?.split(' ')[0] || 'User';
+    const lastName = profile.name?.familyName || profile.displayName?.split(' ').slice(1).join(' ') || '';
+    const avatar = profile.photos?.[0]?.value || null;
+
+    console.log(`Creating new user: ${email}, ${firstName} ${lastName}`);
+
+    await db.query(`
+      INSERT INTO users (uuid, email, first_name, last_name, avatar, role, status, password)
+      VALUES (?, ?, ?, ?, ?, 'user', 'active', '')
+    `, [uuid, email, firstName, lastName, avatar]);
+
+    const newUsers = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    console.log(`New user created: ${newUsers[0]?.uuid}`);
+    return newUsers[0];
+  } catch (error) {
+    console.error(`OAuth ${provider} findOrCreateOAuthUser error:`, error);
+    throw error;
   }
-
-  // Check if user exists by email
-  let users = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-  
-  if (users.length) {
-    // Update OAuth provider info
-    await db.query(
-      `UPDATE users SET ${provider}_id = ?, avatar = COALESCE(avatar, ?) WHERE id = ?`,
-      [profile.id, profile.photos?.[0]?.value || null, users[0].id]
-    );
-    return users[0];
-  }
-
-  // Create new user
-  const uuid = uuidv4();
-  const firstName = profile.name?.givenName || profile.displayName?.split(' ')[0] || 'User';
-  const lastName = profile.name?.familyName || profile.displayName?.split(' ').slice(1).join(' ') || '';
-  const avatar = profile.photos?.[0]?.value || null;
-
-  await db.query(`
-    INSERT INTO users (uuid, email, first_name, last_name, avatar, ${provider}_id, role, status, password)
-    VALUES (?, ?, ?, ?, ?, ?, 'user', 'active', '')
-  `, [uuid, email, firstName, lastName, avatar, profile.id]);
-
-  const newUsers = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-  return newUsers[0];
 }
 
 // Get the base URL for OAuth callbacks
@@ -103,28 +118,58 @@ router.get('/google', passport.authenticate('google', {
   scope: ['profile', 'email']
 }));
 
-router.get('/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: '/login?error=oauth_failed' }),
-  (req, res) => {
-    const token = generateToken({ uuid: req.user.uuid, email: req.user.email, role: req.user.role });
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-    res.redirect(`${clientUrl}/oauth-callback?token=${token}`);
-  }
-);
+router.get('/google/callback', (req, res, next) => {
+  passport.authenticate('google', { session: false }, (err, user, info) => {
+    const clientUrl = getBaseUrl();
+    
+    if (err) {
+      console.error('Google OAuth error:', err);
+      return res.redirect(`${clientUrl}/login?error=${encodeURIComponent(err.message || 'oauth_failed')}`);
+    }
+    
+    if (!user) {
+      console.error('Google OAuth: No user returned', info);
+      return res.redirect(`${clientUrl}/login?error=oauth_failed`);
+    }
+    
+    try {
+      const token = generateToken({ uuid: user.uuid, email: user.email, role: user.role });
+      res.redirect(`${clientUrl}/oauth-callback?token=${token}`);
+    } catch (tokenErr) {
+      console.error('Token generation error:', tokenErr);
+      res.redirect(`${clientUrl}/login?error=token_failed`);
+    }
+  })(req, res, next);
+});
 
 // GitHub OAuth routes
 router.get('/github', passport.authenticate('github', {
   scope: ['user:email']
 }));
 
-router.get('/github/callback',
-  passport.authenticate('github', { session: false, failureRedirect: '/login?error=oauth_failed' }),
-  (req, res) => {
-    const token = generateToken({ uuid: req.user.uuid, email: req.user.email, role: req.user.role });
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-    res.redirect(`${clientUrl}/oauth-callback?token=${token}`);
-  }
-);
+router.get('/github/callback', (req, res, next) => {
+  passport.authenticate('github', { session: false }, (err, user, info) => {
+    const clientUrl = getBaseUrl();
+    
+    if (err) {
+      console.error('GitHub OAuth error:', err);
+      return res.redirect(`${clientUrl}/login?error=${encodeURIComponent(err.message || 'oauth_failed')}`);
+    }
+    
+    if (!user) {
+      console.error('GitHub OAuth: No user returned', info);
+      return res.redirect(`${clientUrl}/login?error=oauth_failed`);
+    }
+    
+    try {
+      const token = generateToken({ uuid: user.uuid, email: user.email, role: user.role });
+      res.redirect(`${clientUrl}/oauth-callback?token=${token}`);
+    } catch (tokenErr) {
+      console.error('Token generation error:', tokenErr);
+      res.redirect(`${clientUrl}/login?error=token_failed`);
+    }
+  })(req, res, next);
+});
 
 // Register
 router.post('/register', [
