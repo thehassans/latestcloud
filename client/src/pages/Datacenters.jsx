@@ -1,8 +1,9 @@
+import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { MapPin, Server, Shield, Zap } from 'lucide-react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapPin, Server, Shield, Zap, Navigation } from 'lucide-react'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import { settingsAPI } from '../lib/api'
 import { useThemeStore } from '../store/useStore'
 import clsx from 'clsx'
@@ -20,6 +21,37 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41]
 })
 
+// Active/selected marker icon
+const activeIcon = new L.Icon({
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 41"><path fill="#8b5cf6" d="M12 0C5.4 0 0 5.4 0 12c0 9 12 29 12 29s12-20 12-29c0-6.6-5.4-12-12-12z"/><circle fill="white" cx="12" cy="12" r="5"/></svg>`),
+  iconSize: [24, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [0, -34]
+})
+
+// Map controller component
+function MapController({ selectedLocation, locations }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    if (selectedLocation) {
+      const loc = locations.find(l => l.id === selectedLocation)
+      if (loc) {
+        map.flyTo([loc.latitude, loc.longitude], 5, {
+          duration: 1.5
+        })
+      }
+    } else {
+      // Reset to world view
+      map.flyTo([20, 0], 2, {
+        duration: 1.5
+      })
+    }
+  }, [selectedLocation, locations, map])
+  
+  return null
+}
+
 // Static datacenter locations as fallback
 const staticDatacenters = [
   { id: 1, name: 'New York', location: 'USA', latitude: 40.7128, longitude: -74.0060, description: 'East Coast USA datacenter' },
@@ -35,8 +67,10 @@ const staticDatacenters = [
 ]
 
 export default function Datacenters() {
-  const { themeStyle } = useThemeStore()
+  const { themeStyle, theme } = useThemeStore()
   const isGradient = themeStyle === 'gradient'
+  const isDark = theme === 'dark'
+  const [selectedLocation, setSelectedLocation] = useState(null)
 
   const { data: datacenters } = useQuery({
     queryKey: ['datacenters'],
@@ -45,6 +79,10 @@ export default function Datacenters() {
 
   // Use API data if available and not empty, otherwise use static data
   const locations = (datacenters && datacenters.length > 0) ? datacenters : staticDatacenters
+  
+  // Tile layer URLs for light and dark themes
+  const lightTileUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+  const darkTileUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
 
   return (
     <>
@@ -72,45 +110,88 @@ export default function Datacenters() {
 
       <section className="py-8">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-200 dark:border-dark-700 relative z-0" style={{ height: '400px' }}>
+          <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-primary-500/20 dark:border-primary-500/30 relative z-0" style={{ height: '400px' }}>
             <MapContainer 
               center={[20, 0]} 
               zoom={2} 
               style={{ height: '100%', width: '100%' }} 
               scrollWheelZoom={false}
-              zoomControl={true}
+              zoomControl={false}
               attributionControl={false}
-              dragging={true}
+              dragging={false}
               doubleClickZoom={false}
+              touchZoom={false}
+              keyboard={false}
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+              <TileLayer url={isDark ? darkTileUrl : lightTileUrl} />
+              <MapController selectedLocation={selectedLocation} locations={locations} />
               {locations.map((dc) => (
-                <Marker key={dc.id} position={[dc.latitude, dc.longitude]} icon={customIcon}>
+                <Marker 
+                  key={dc.id} 
+                  position={[dc.latitude, dc.longitude]} 
+                  icon={selectedLocation === dc.id ? activeIcon : customIcon}
+                  eventHandlers={{
+                    click: () => setSelectedLocation(dc.id)
+                  }}
+                >
                   <Popup>
-                    <div className="p-1">
-                      <div className="font-bold text-gray-900">{dc.name}</div>
+                    <div className="p-2 min-w-[150px]">
+                      <div className="font-bold text-gray-900 text-base">{dc.name}</div>
                       <div className="text-sm text-gray-600">{dc.location}</div>
+                      <div className="text-xs text-gray-500 mt-1">{dc.description}</div>
                     </div>
                   </Popup>
                 </Marker>
               ))}
             </MapContainer>
           </div>
+          {selectedLocation && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 text-center"
+            >
+              <button
+                onClick={() => setSelectedLocation(null)}
+                className="text-sm text-primary-500 hover:text-primary-600 flex items-center gap-2 mx-auto"
+              >
+                <Navigation className="w-4 h-4" />
+                Reset Map View
+              </button>
+            </motion.div>
+          )}
         </div>
       </section>
 
       <section className="section">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="section-heading text-center mb-12">Our Locations</h2>
+          <p className="text-center text-dark-500 -mt-8 mb-8">Click on a location to view it on the map</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {locations.map((dc, i) => (
-              <motion.div key={dc.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }} className="card p-6">
+              <motion.button
+                key={dc.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                onClick={() => {
+                  setSelectedLocation(dc.id)
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+                className={clsx(
+                  "card p-6 text-left transition-all duration-300 hover:scale-[1.02]",
+                  selectedLocation === dc.id
+                    ? "ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                    : "hover:shadow-lg"
+                )}
+              >
                 <div className="flex items-start gap-4">
-                  <div className={clsx("w-12 h-12 rounded-xl flex items-center justify-center text-white",
-                    isGradient ? "bg-gradient-to-br from-primary-500 to-secondary-500" : "bg-primary-500")}>
+                  <div className={clsx(
+                    "w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all",
+                    selectedLocation === dc.id
+                      ? "bg-gradient-to-br from-primary-500 to-purple-500 scale-110"
+                      : isGradient ? "bg-gradient-to-br from-primary-500 to-secondary-500" : "bg-primary-500"
+                  )}>
                     <Server className="w-6 h-6" />
                   </div>
                   <div>
@@ -119,7 +200,13 @@ export default function Datacenters() {
                     <p className="text-sm text-dark-400 mt-2">{dc.description}</p>
                   </div>
                 </div>
-              </motion.div>
+                {selectedLocation === dc.id && (
+                  <div className="mt-3 flex items-center gap-1 text-primary-500 text-sm font-medium">
+                    <MapPin className="w-4 h-4" />
+                    Currently viewing
+                  </div>
+                )}
+              </motion.button>
             ))}
           </div>
         </div>
