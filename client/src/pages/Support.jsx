@@ -3,12 +3,13 @@ import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { MessageSquare, FileText, Phone, Mail, HelpCircle, Book, Ticket, Search } from 'lucide-react'
 import { useThemeStore, useAuthStore } from '../store/useStore'
+import { useAIAgent } from '../contexts/AIAgentContext'
 import clsx from 'clsx'
 
 const supportOptions = [
   { icon: Ticket, title: 'Submit a Ticket', desc: 'Get help from our support team', to: '/dashboard/tickets/new', color: 'from-primary-500 to-secondary-500' },
-  { icon: Book, title: 'Knowledge Base', desc: 'Browse our help articles', to: '/kb', color: 'from-green-500 to-emerald-500' },
-  { icon: MessageSquare, title: 'Live Chat', desc: 'Chat with us in real-time', to: '#', color: 'from-blue-500 to-cyan-500' },
+  { icon: Book, title: 'Knowledge Base', desc: 'Browse our help articles', to: '/knowledge-base', color: 'from-green-500 to-emerald-500' },
+  { icon: MessageSquare, title: 'Live Chat', desc: 'Chat with us in real-time', action: 'chat', color: 'from-blue-500 to-cyan-500' },
   { icon: Phone, title: 'Phone Support', desc: '+880 1XXX-XXXXXX', to: 'tel:+8801XXXXXXXXX', color: 'from-yellow-500 to-orange-500' },
 ]
 
@@ -24,7 +25,15 @@ const popularArticles = [
 export default function Support() {
   const { themeStyle } = useThemeStore()
   const { isAuthenticated } = useAuthStore()
+  const { setIsOpen: openChat } = useAIAgent()
   const isGradient = themeStyle === 'gradient'
+
+  const handleOptionClick = (option, e) => {
+    if (option.action === 'chat') {
+      e.preventDefault()
+      openChat(true)
+    }
+  }
 
   return (
     <>
@@ -57,14 +66,28 @@ export default function Support() {
             {supportOptions.map((option, i) => (
               <motion.div key={option.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}>
-                <Link to={option.to} className="block card p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
-                  <div className={clsx("w-14 h-14 rounded-2xl flex items-center justify-center text-white",
-                    isGradient ? `bg-gradient-to-br ${option.color}` : "bg-primary-500")}>
-                    <option.icon className="w-7 h-7" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-bold">{option.title}</h3>
-                  <p className="mt-1 text-dark-500 text-sm">{option.desc}</p>
-                </Link>
+                {option.action ? (
+                  <button
+                    onClick={(e) => handleOptionClick(option, e)}
+                    className="block w-full text-left card p-6 hover:shadow-lg hover:-translate-y-1 transition-all"
+                  >
+                    <div className={clsx("w-14 h-14 rounded-2xl flex items-center justify-center text-white",
+                      isGradient ? `bg-gradient-to-br ${option.color}` : "bg-primary-500")}>
+                      <option.icon className="w-7 h-7" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-bold">{option.title}</h3>
+                    <p className="mt-1 text-dark-500 text-sm">{option.desc}</p>
+                  </button>
+                ) : (
+                  <Link to={option.to} className="block card p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
+                    <div className={clsx("w-14 h-14 rounded-2xl flex items-center justify-center text-white",
+                      isGradient ? `bg-gradient-to-br ${option.color}` : "bg-primary-500")}>
+                      <option.icon className="w-7 h-7" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-bold">{option.title}</h3>
+                    <p className="mt-1 text-dark-500 text-sm">{option.desc}</p>
+                  </Link>
+                )}
               </motion.div>
             ))}
           </div>
