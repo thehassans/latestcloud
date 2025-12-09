@@ -27,10 +27,16 @@ const cardElementOptions = {
   },
 }
 
-function CheckoutForm({ stripeEnabled }) {
-  const navigate = useNavigate()
+// Stripe-enabled checkout form (uses Stripe hooks)
+function StripeCheckoutForm() {
   const stripe = useStripe()
   const elements = useElements()
+  return <CheckoutFormInner stripeEnabled={true} stripe={stripe} elements={elements} />
+}
+
+// Main checkout form component
+function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null }) {
+  const navigate = useNavigate()
   const { items, coupon, getTotal, clearCart } = useCartStore()
   const { format } = useCurrencyStore()
   const { user } = useAuthStore()
@@ -363,10 +369,10 @@ export default function Checkout() {
   if (stripeEnabled && stripePromise) {
     return (
       <Elements stripe={stripePromise}>
-        <CheckoutForm stripeEnabled={true} />
+        <StripeCheckoutForm />
       </Elements>
     )
   }
 
-  return <CheckoutForm stripeEnabled={false} />
+  return <CheckoutFormInner stripeEnabled={false} />
 }
