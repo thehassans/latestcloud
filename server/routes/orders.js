@@ -134,7 +134,7 @@ router.post('/', authenticate, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { items, coupon_code, payment_method, billing_address, notes } = req.body;
+    const { items, coupon_code, payment_method, payment_proof, billing_address, notes } = req.body;
 
     // Validate and calculate totals
     let subtotal = 0;
@@ -212,11 +212,14 @@ router.post('/', authenticate, [
     const orderUuid = uuidv4();
     const orderNumber = generateOrderNumber();
 
+    // Set payment status based on method (pending for bank/cash, unpaid for card/paypal)
+    const initialPaymentStatus = (payment_method === 'bank' || payment_method === 'cash') ? 'pending' : 'unpaid';
+
     // Create order
     const result = await db.query(`
-      INSERT INTO orders (uuid, user_id, order_number, status, payment_status, payment_method, subtotal, discount, total, billing_address, notes, ip_address)
-      VALUES (?, ?, ?, 'pending', 'unpaid', ?, ?, ?, ?, ?, ?, ?)
-    `, [orderUuid, req.user.id, orderNumber, payment_method, subtotal, discount, total, JSON.stringify(billing_address), notes, req.ip]);
+      INSERT INTO orders (uuid, user_id, order_number, status, payment_status, payment_method, payment_proof, subtotal, discount, total, billing_address, notes, ip_address)
+      VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [orderUuid, req.user.id, orderNumber, initialPaymentStatus, payment_method, payment_proof || null, subtotal, discount, total, JSON.stringify(billing_address), notes, req.ip]);
 
     const orderId = Number(result.insertId);
 

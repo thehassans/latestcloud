@@ -1,10 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { CreditCard, Lock, CheckCircle } from 'lucide-react'
+import { CreditCard, Lock, CheckCircle, Building2, Banknote, Upload, X } from 'lucide-react'
 import { useCartStore, useCurrencyStore, useAuthStore } from '../store/useStore'
 import { ordersAPI } from '../lib/api'
 import toast from 'react-hot-toast'
+
+const paymentMethods = [
+  { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, requiresProof: false },
+  { id: 'paypal', name: 'PayPal', icon: CreditCard, requiresProof: false },
+  { id: 'bank', name: 'Bank Transfer', icon: Building2, requiresProof: true },
+  { id: 'cash', name: 'Cash Payment', icon: Banknote, requiresProof: true },
+]
 
 export default function Checkout() {
   const navigate = useNavigate()
@@ -14,8 +21,38 @@ export default function Checkout() {
   const { subtotal, discount, total } = getTotal()
   const [loading, setLoading] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('card')
+  const [paymentProof, setPaymentProof] = useState(null)
+  const [paymentProofPreview, setPaymentProofPreview] = useState(null)
+
+  const selectedMethod = paymentMethods.find(m => m.id === paymentMethod)
+
+  const handleProofUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size must be less than 5MB')
+        return
+      }
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPaymentProof(reader.result)
+        setPaymentProofPreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeProof = () => {
+    setPaymentProof(null)
+    setPaymentProofPreview(null)
+  }
 
   const handleCheckout = async () => {
+    if (selectedMethod?.requiresProof && !paymentProof) {
+      toast.error('Please upload payment proof')
+      return
+    }
+
     setLoading(true)
     try {
       const orderItems = items.map(item => ({
@@ -34,6 +71,7 @@ export default function Checkout() {
         items: orderItems,
         coupon_code: coupon?.code,
         payment_method: paymentMethod,
+        payment_proof: paymentProof,
         billing_address: {
           name: `${user.first_name} ${user.last_name}`,
           email: user.email
@@ -41,7 +79,7 @@ export default function Checkout() {
       })
 
       clearCart()
-      toast.success('Order placed successfully!')
+      toast.success('Order placed successfully! ' + (selectedMethod?.requiresProof ? 'We will verify your payment shortly.' : ''))
       navigate('/dashboard/orders')
     } catch (err) {
       toast.error(err.response?.data?.error || 'Checkout failed')
@@ -84,16 +122,58 @@ export default function Checkout() {
               <div className="card p-6">
                 <h2 className="text-lg font-bold mb-4">Payment Method</h2>
                 <div className="space-y-3">
-                  {['card', 'paypal', 'bank'].map((method) => (
-                    <label key={method} className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors
-                      ${paymentMethod === method ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
-                      <input type="radio" name="payment" value={method} checked={paymentMethod === method}
-                        onChange={() => setPaymentMethod(method)} className="text-primary-500" />
-                      <CreditCard className="w-5 h-5" />
-                      <span className="capitalize">{method === 'card' ? 'Credit/Debit Card' : method === 'paypal' ? 'PayPal' : 'Bank Transfer'}</span>
+                  {paymentMethods.map((method) => (
+                    <label key={method.id} className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors
+                      ${paymentMethod === method.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
+                      <input type="radio" name="payment" value={method.id} checked={paymentMethod === method.id}
+                        onChange={() => setPaymentMethod(method.id)} className="text-primary-500" />
+                      <method.icon className="w-5 h-5" />
+                      <span>{method.name}</span>
+                      {method.requiresProof && <span className="ml-auto text-xs text-dark-500">(Proof required)</span>}
                     </label>
                   ))}
                 </div>
+
+                {/* Payment Proof Upload for Bank/Cash */}
+                {selectedMethod?.requiresProof && (
+                  <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                    <h3 className="font-medium text-amber-800 dark:text-amber-200 mb-2">Payment Instructions</h3>
+                    {paymentMethod === 'bank' && (
+                      <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                        <p className="mb-2">Transfer to:</p>
+                        <p><strong>Bank:</strong> Example Bank</p>
+                        <p><strong>Account:</strong> 1234567890</p>
+                        <p><strong>Name:</strong> Magnetic Clouds Ltd</p>
+                      </div>
+                    )}
+                    {paymentMethod === 'cash' && (
+                      <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                        <p>Contact us to arrange cash payment. Upload receipt after payment.</p>
+                      </div>
+                    )}
+                    
+                    <label className="block">
+                      <span className="text-sm font-medium mb-2 block">Upload Payment Proof *</span>
+                      {paymentProofPreview ? (
+                        <div className="relative inline-block">
+                          <img src={paymentProofPreview} alt="Payment proof" className="max-w-xs max-h-48 rounded-lg border" />
+                          <button onClick={removeProof} className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-dark-300 dark:border-dark-600 rounded-xl p-6 text-center cursor-pointer hover:border-primary-500 transition-colors">
+                          <input type="file" accept="image/*" onChange={handleProofUpload} className="hidden" id="proof-upload" />
+                          <label htmlFor="proof-upload" className="cursor-pointer">
+                            <Upload className="w-8 h-8 mx-auto mb-2 text-dark-400" />
+                            <p className="text-sm text-dark-500">Click to upload receipt/screenshot</p>
+                            <p className="text-xs text-dark-400">Max 5MB, JPG/PNG</p>
+                          </label>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                )}
               </div>
             </div>
 
