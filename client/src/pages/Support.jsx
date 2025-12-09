@@ -30,10 +30,11 @@ const stats = [
 ]
 
 export default function Support() {
-  const { themeStyle } = useThemeStore()
+  const { themeStyle, theme } = useThemeStore()
   const { isAuthenticated } = useAuthStore()
   const { setIsOpen: openChat } = useAIAgent()
   const isGradient = themeStyle === 'gradient'
+  const isDark = theme === 'dark'
 
   const handleOptionClick = (option, e) => {
     if (option.action === 'chat') {
@@ -50,13 +51,25 @@ export default function Support() {
       </Helmet>
 
       {/* Ultra Premium Hero */}
-      <section className="relative min-h-[60vh] bg-dark-950 overflow-hidden flex items-center">
+      <section className={clsx(
+        "relative min-h-[60vh] overflow-hidden flex items-center",
+        isDark ? "bg-dark-950" : "bg-gradient-to-b from-violet-50 via-white to-purple-50"
+      )}>
         {/* Animated background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-950/50 via-dark-950 to-purple-950/50" />
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-violet-500/10 via-transparent to-purple-500/10 rounded-full blur-2xl" />
+          {isDark ? (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-950/50 via-dark-950 to-purple-950/50" />
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-violet-500/10 via-transparent to-purple-500/10 rounded-full blur-2xl" />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-200/40 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-200/40 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </>
+          )}
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
@@ -64,7 +77,10 @@ export default function Support() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500/10 border border-violet-500/20 text-violet-400 rounded-full text-sm font-medium mb-6"
+              className={clsx(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6",
+                isDark ? "bg-violet-500/10 border border-violet-500/20 text-violet-400" : "bg-violet-100 border border-violet-200 text-violet-600"
+              )}
             >
               <Headphones className="w-4 h-4" />
               24/7 Expert Support
@@ -73,10 +89,13 @@ export default function Support() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white mb-6"
+              className={clsx(
+                "text-4xl md:text-5xl lg:text-6xl font-bold font-display mb-6",
+                isDark ? "text-white" : "text-dark-900"
+              )}
             >
               How Can We{' '}
-              <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                 Help
               </span>?
             </motion.h1>
@@ -84,7 +103,7 @@ export default function Support() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-dark-300 max-w-2xl mx-auto"
+              className={clsx("text-lg max-w-2xl mx-auto", isDark ? "text-dark-300" : "text-dark-600")}
             >
               Our expert support team is available around the clock to assist you with any questions or issues.
             </motion.p>
@@ -99,13 +118,19 @@ export default function Support() {
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-purple-500 rounded-2xl blur opacity-20" />
-              <div className="relative bg-dark-800/80 backdrop-blur-sm border border-dark-700 rounded-2xl p-2 flex gap-2">
+              <div className={clsx(
+                "relative backdrop-blur-sm rounded-2xl p-2 flex gap-2",
+                isDark ? "bg-dark-800/80 border border-dark-700" : "bg-white/80 border border-violet-100 shadow-lg"
+              )}>
                 <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <Search className={clsx("absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5", isDark ? "text-dark-400" : "text-dark-400")} />
                   <input
                     type="text"
                     placeholder="Search for help articles..."
-                    className="w-full bg-transparent pl-12 pr-4 py-4 text-white placeholder-dark-400 focus:outline-none text-lg"
+                    className={clsx(
+                      "w-full bg-transparent pl-12 pr-4 py-4 focus:outline-none text-lg",
+                      isDark ? "text-white placeholder-dark-400" : "text-dark-900 placeholder-dark-400"
+                    )}
                   />
                 </div>
                 <button className="px-6 py-4 bg-gradient-to-r from-violet-500 to-purple-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-violet-500/25 transition-all">
@@ -124,12 +149,15 @@ export default function Support() {
           >
             {stats.map((stat) => (
               <div key={stat.label} className="text-center flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                  <stat.icon className="w-5 h-5 text-violet-400" />
+                <div className={clsx(
+                  "w-10 h-10 rounded-lg flex items-center justify-center",
+                  isDark ? "bg-violet-500/20" : "bg-violet-100"
+                )}>
+                  <stat.icon className={clsx("w-5 h-5", isDark ? "text-violet-400" : "text-violet-600")} />
                 </div>
                 <div className="text-left">
-                  <div className="text-xl font-bold text-white">{stat.value}</div>
-                  <div className="text-dark-400 text-sm">{stat.label}</div>
+                  <div className={clsx("text-xl font-bold", isDark ? "text-white" : "text-dark-900")}>{stat.value}</div>
+                  <div className={clsx("text-sm", isDark ? "text-dark-400" : "text-dark-500")}>{stat.label}</div>
                 </div>
               </div>
             ))}

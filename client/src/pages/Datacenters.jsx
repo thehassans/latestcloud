@@ -93,13 +93,25 @@ export default function Datacenters() {
       </Helmet>
 
       {/* Ultra Premium Hero */}
-      <section className="relative py-20 bg-dark-950 overflow-hidden">
+      <section className={clsx(
+        "relative py-20 overflow-hidden",
+        isDark ? "bg-dark-950" : "bg-gradient-to-b from-indigo-50 via-white to-blue-50"
+      )}>
         {/* Animated background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/50 via-dark-950 to-blue-950/50" />
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-indigo-500/10 via-transparent to-blue-500/10 rounded-full blur-2xl" />
+          {isDark ? (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/50 via-dark-950 to-blue-950/50" />
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-indigo-500/10 via-transparent to-blue-500/10 rounded-full blur-2xl" />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-200/40 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-200/40 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </>
+          )}
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -107,7 +119,10 @@ export default function Datacenters() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full text-sm font-medium mb-6"
+              className={clsx(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6",
+                isDark ? "bg-indigo-500/10 border border-indigo-500/20 text-indigo-400" : "bg-indigo-100 border border-indigo-200 text-indigo-600"
+              )}
             >
               <Globe className="w-4 h-4" />
               Global Infrastructure
@@ -116,10 +131,13 @@ export default function Datacenters() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white mb-6"
+              className={clsx(
+                "text-4xl md:text-5xl lg:text-6xl font-bold font-display mb-6",
+                isDark ? "text-white" : "text-dark-900"
+              )}
             >
               Global{' '}
-              <span className="bg-gradient-to-r from-indigo-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-indigo-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                 Datacenters
               </span>
             </motion.h1>
@@ -127,7 +145,7 @@ export default function Datacenters() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-dark-300 max-w-2xl mx-auto"
+              className={clsx("text-lg max-w-2xl mx-auto", isDark ? "text-dark-300" : "text-dark-600")}
             >
               Deploy your applications closer to your users with our worldwide datacenter network.
             </motion.p>
@@ -147,8 +165,8 @@ export default function Datacenters() {
               { value: 'Tier-4', label: 'Security' }
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">{stat.value}</div>
-                <div className="text-dark-400 text-sm">{stat.label}</div>
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-500 to-blue-500 bg-clip-text text-transparent">{stat.value}</div>
+                <div className={clsx("text-sm", isDark ? "text-dark-400" : "text-dark-500")}>{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -158,18 +176,18 @@ export default function Datacenters() {
       {/* Map Section */}
       <section className="py-12 bg-white dark:bg-dark-900">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="rounded-3xl overflow-hidden shadow-2xl border-2 border-indigo-500/20 dark:border-indigo-500/30 relative z-0" style={{ height: '450px' }}>
+          <div className={clsx(
+            "rounded-3xl overflow-hidden shadow-2xl relative z-0",
+            isDark ? "border-2 border-indigo-500/30" : "border-2 border-indigo-200"
+          )} style={{ height: '450px' }}>
             <MapContainer 
+              key={`map-${isDark}`}
               center={[20, 0]} 
               zoom={2} 
               style={{ height: '100%', width: '100%' }} 
               scrollWheelZoom={false}
-              zoomControl={false}
+              zoomControl={true}
               attributionControl={false}
-              dragging={false}
-              doubleClickZoom={false}
-              touchZoom={false}
-              keyboard={false}
             >
               <TileLayer url={isDark ? darkTileUrl : lightTileUrl} />
               <MapController selectedLocation={selectedLocation} locations={locations} />

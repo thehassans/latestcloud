@@ -26,9 +26,10 @@ const features = [
 
 export default function SSL() {
   const { format } = useCurrencyStore()
-  const { themeStyle } = useThemeStore()
+  const { themeStyle, theme } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const isDark = theme === 'dark'
 
   const { data: pricingData } = useQuery({
     queryKey: ['pricing'],
@@ -57,13 +58,25 @@ export default function SSL() {
       </Helmet>
 
       {/* Ultra Premium Hero with Plans */}
-      <section className="relative min-h-screen bg-dark-950 overflow-hidden">
+      <section className={clsx(
+        "relative min-h-screen overflow-hidden",
+        isDark ? "bg-dark-950" : "bg-gradient-to-b from-green-50 via-white to-emerald-50"
+      )}>
         {/* Animated background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-green-950/50 via-dark-950 to-emerald-950/50" />
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-green-500/10 via-transparent to-emerald-500/10 rounded-full blur-2xl" />
+          {isDark ? (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-950/50 via-dark-950 to-emerald-950/50" />
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-500/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-green-500/10 via-transparent to-emerald-500/10 rounded-full blur-2xl" />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-200/40 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </>
+          )}
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
@@ -72,7 +85,10 @@ export default function SSL() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 text-green-400 rounded-full text-sm font-medium mb-6"
+              className={clsx(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6",
+                isDark ? "bg-green-500/10 border border-green-500/20 text-green-400" : "bg-green-100 border border-green-200 text-green-600"
+              )}
             >
               <ShieldCheck className="w-4 h-4" />
               Website Security
@@ -81,9 +97,12 @@ export default function SSL() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white mb-6"
+              className={clsx(
+                "text-4xl md:text-5xl lg:text-6xl font-bold font-display mb-6",
+                isDark ? "text-white" : "text-dark-900"
+              )}
             >
-              <span className="bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 bg-clip-text text-transparent">
                 SSL
               </span>{' '}
               Certificates
@@ -92,7 +111,7 @@ export default function SSL() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-dark-300 max-w-2xl mx-auto"
+              className={clsx("text-lg max-w-2xl mx-auto", isDark ? "text-dark-300" : "text-dark-600")}
             >
               Secure your website with industry-standard encryption. Free SSL included with all hosting plans.
             </motion.p>
@@ -112,8 +131,8 @@ export default function SSL() {
               { value: '99.9%', label: 'Compatibility' }
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">{stat.value}</div>
-                <div className="text-dark-400 text-sm">{stat.label}</div>
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">{stat.value}</div>
+                <div className={clsx("text-sm", isDark ? "text-dark-400" : "text-dark-500")}>{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -130,7 +149,9 @@ export default function SSL() {
                   "relative group rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02]",
                   plan.popular
                     ? "bg-gradient-to-b from-green-500/20 to-emerald-500/10 border-2 border-green-500/50"
-                    : "bg-dark-800/50 backdrop-blur-sm border border-dark-700/50 hover:border-green-500/30"
+                    : isDark 
+                      ? "bg-dark-800/50 backdrop-blur-sm border border-dark-700/50 hover:border-green-500/30"
+                      : "bg-white/80 backdrop-blur-sm border border-green-100 hover:border-green-300 shadow-lg"
                 )}
               >
                 {plan.popular && (
@@ -146,18 +167,18 @@ export default function SSL() {
                   <Lock className="w-7 h-7 text-white" />
                 </div>
 
-                <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                <p className="text-sm text-dark-400 mt-1">{plan.description}</p>
+                <h3 className={clsx("text-xl font-bold", isDark ? "text-white" : "text-dark-900")}>{plan.name}</h3>
+                <p className={clsx("text-sm mt-1", isDark ? "text-dark-400" : "text-dark-500")}>{plan.description}</p>
 
                 <div className="my-6">
-                  <span className="text-4xl font-bold text-white">{format(plan.price)}</span>
-                  <span className="text-dark-400">/year</span>
+                  <span className={clsx("text-4xl font-bold", isDark ? "text-white" : "text-dark-900")}>{format(plan.price)}</span>
+                  <span className={isDark ? "text-dark-400" : "text-dark-500"}>/year</span>
                 </div>
 
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((f, j) => (
-                    <li key={j} className="flex items-center gap-2 text-sm text-dark-300">
-                      <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />{f}
+                    <li key={j} className={clsx("flex items-center gap-2 text-sm", isDark ? "text-dark-300" : "text-dark-600")}>
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
@@ -168,7 +189,7 @@ export default function SSL() {
                     "w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
                     plan.popular
                       ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:shadow-lg hover:shadow-green-500/25"
-                      : "bg-dark-700 text-white hover:bg-dark-600"
+                      : isDark ? "bg-dark-700 text-white hover:bg-dark-600" : "bg-green-100 text-green-700 hover:bg-green-200"
                   )}
                 >
                   Get SSL <ArrowRight className="w-4 h-4" />
@@ -182,18 +203,18 @@ export default function SSL() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="mt-12 flex flex-wrap justify-center gap-6 text-dark-400 text-sm"
+            className={clsx("mt-12 flex flex-wrap justify-center gap-6 text-sm", isDark ? "text-dark-400" : "text-dark-600")}
           >
             <div className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-green-400" />
+              <Lock className="w-5 h-5 text-green-500" />
               256-bit Encryption
             </div>
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-emerald-400" />
+              <Shield className="w-5 h-5 text-emerald-500" />
               All Major Browsers
             </div>
             <div className="flex items-center gap-2">
-              <Award className="w-5 h-5 text-teal-400" />
+              <Award className="w-5 h-5 text-teal-500" />
               Warranty Protection
             </div>
           </motion.div>
