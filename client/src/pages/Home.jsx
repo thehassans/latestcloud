@@ -197,76 +197,199 @@ export default function Home() {
                     {/* Status indicator with Logo - Magnet attracting clouds */}
                     <div className="flex items-center justify-center mb-8">
                       <div className="relative">
-                        {/* Floating clouds being attracted to the magnet */}
+                        {/* Ultra Premium Magnet + Clouds Vector Animation */}
+                        
+                        {/* Outer glow rings */}
+                        <div className="absolute inset-0 -m-16">
+                          {[0, 1, 2].map((i) => (
+                            <motion.div
+                              key={i}
+                              className="absolute inset-0 rounded-full"
+                              style={{
+                                background: `radial-gradient(circle, transparent 60%, rgba(139, 92, 246, ${0.1 - i * 0.03}) 100%)`,
+                                margin: `${i * 20}px`
+                              }}
+                              animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+                              transition={{ duration: 3 + i, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                          ))}
+                        </div>
+
+                        {/* Magnetic field curved lines */}
+                        <svg className="absolute inset-0 w-full h-full -m-8" viewBox="0 0 200 200" style={{ width: 'calc(100% + 64px)', height: 'calc(100% + 64px)' }}>
+                          <defs>
+                            <linearGradient id="fieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.6" />
+                              <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                            </linearGradient>
+                          </defs>
+                          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+                            <motion.path
+                              key={angle}
+                              d={`M 100 100 Q ${100 + 60 * Math.cos((angle - 20) * Math.PI / 180)} ${100 + 60 * Math.sin((angle - 20) * Math.PI / 180)} ${100 + 85 * Math.cos(angle * Math.PI / 180)} ${100 + 85 * Math.sin(angle * Math.PI / 180)}`}
+                              fill="none"
+                              stroke="url(#fieldGradient)"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              initial={{ pathLength: 0, opacity: 0 }}
+                              animate={{ pathLength: [0, 1, 0], opacity: [0, 0.6, 0] }}
+                              transition={{ duration: 2.5, delay: i * 0.2, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                          ))}
+                        </svg>
+
+                        {/* Floating clouds being attracted */}
                         {[
-                          { x: -80, y: -60, delay: 0, size: 'w-8 h-8' },
-                          { x: 90, y: -40, delay: 0.5, size: 'w-6 h-6' },
-                          { x: -100, y: 30, delay: 1, size: 'w-7 h-7' },
-                          { x: 85, y: 50, delay: 1.5, size: 'w-5 h-5' },
-                          { x: -60, y: 80, delay: 2, size: 'w-6 h-6' },
-                          { x: 70, y: -70, delay: 2.5, size: 'w-5 h-5' },
+                          { x: -95, y: -70, delay: 0, scale: 1.2 },
+                          { x: 100, y: -50, delay: 0.4, scale: 0.9 },
+                          { x: -110, y: 40, delay: 0.8, scale: 1 },
+                          { x: 95, y: 65, delay: 1.2, scale: 0.8 },
+                          { x: -70, y: 90, delay: 1.6, scale: 0.7 },
+                          { x: 80, y: -85, delay: 2, scale: 0.85 },
+                          { x: -45, y: -100, delay: 2.4, scale: 0.75 },
+                          { x: 55, y: 95, delay: 2.8, scale: 0.65 },
                         ].map((cloud, i) => (
                           <motion.div
                             key={i}
-                            className="absolute"
-                            style={{ left: '50%', top: '50%' }}
+                            className="absolute left-1/2 top-1/2"
+                            style={{ marginLeft: -12, marginTop: -12 }}
                             animate={{
-                              x: [cloud.x, cloud.x * 0.3, cloud.x],
-                              y: [cloud.y, cloud.y * 0.3, cloud.y],
-                              opacity: [0.4, 0.9, 0.4],
-                              scale: [1, 1.2, 1]
+                              x: [cloud.x, cloud.x * 0.2, cloud.x],
+                              y: [cloud.y, cloud.y * 0.2, cloud.y],
+                              opacity: [0.3, 1, 0.3],
+                              scale: [cloud.scale, cloud.scale * 1.3, cloud.scale]
                             }}
                             transition={{
-                              duration: 3,
+                              duration: 3.5,
                               delay: cloud.delay,
                               repeat: Infinity,
                               ease: "easeInOut"
                             }}
                           >
-                            <Cloud className={`${cloud.size} text-primary-400/60`} />
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="drop-shadow-lg">
+                              <path
+                                d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"
+                                fill="url(#cloudGrad)"
+                                stroke="rgba(139, 92, 246, 0.5)"
+                                strokeWidth="0.5"
+                              />
+                              <defs>
+                                <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                  <stop offset="0%" stopColor="#a78bfa" />
+                                  <stop offset="100%" stopColor="#818cf8" />
+                                </linearGradient>
+                              </defs>
+                            </svg>
                           </motion.div>
                         ))}
-                        
-                        {/* Magnetic field lines */}
+
+                        {/* Main magnet circle with premium design */}
                         <motion.div
-                          className="absolute inset-0 -m-12"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                          animate={{ scale: [1, 1.03, 1] }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                          className="relative z-10 w-44 h-44"
                         >
-                          {[0, 60, 120, 180, 240, 300].map((angle) => (
-                            <motion.div
-                              key={angle}
-                              className="absolute left-1/2 top-1/2 w-1 h-16 -ml-0.5 origin-bottom"
-                              style={{ transform: `rotate(${angle}deg) translateY(-100%)` }}
-                              animate={{ opacity: [0.1, 0.4, 0.1] }}
-                              transition={{ duration: 2, repeat: Infinity, delay: angle / 360 }}
-                            >
-                              <div className="w-full h-full bg-gradient-to-t from-primary-500/40 to-transparent rounded-full" />
-                            </motion.div>
-                          ))}
+                          {/* Gradient border ring */}
+                          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 p-[3px] shadow-2xl shadow-purple-500/40">
+                            <div className="w-full h-full rounded-full bg-gradient-to-br from-dark-800 to-dark-900 flex items-center justify-center">
+                              
+                              {/* Vector Magnet SVG */}
+                              <svg viewBox="0 0 100 100" className="w-28 h-28" fill="none">
+                                <defs>
+                                  <linearGradient id="magnetRed" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#f43f5e" />
+                                    <stop offset="100%" stopColor="#dc2626" />
+                                  </linearGradient>
+                                  <linearGradient id="magnetBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#6366f1" />
+                                    <stop offset="100%" stopColor="#4f46e5" />
+                                  </linearGradient>
+                                  <linearGradient id="magnetSilver" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#e2e8f0" />
+                                    <stop offset="100%" stopColor="#94a3b8" />
+                                  </linearGradient>
+                                  <filter id="magnetGlow" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                    <feMerge>
+                                      <feMergeNode in="coloredBlur"/>
+                                      <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                  </filter>
+                                </defs>
+                                
+                                {/* Horseshoe magnet shape */}
+                                <g filter="url(#magnetGlow)">
+                                  {/* Left pole (red/north) */}
+                                  <path d="M25 30 L25 65 C25 75 35 85 50 85 L50 70 C40 70 35 65 35 58 L35 30 Z" fill="url(#magnetRed)" />
+                                  <rect x="25" y="20" width="10" height="15" rx="2" fill="url(#magnetSilver)" />
+                                  
+                                  {/* Right pole (blue/south) */}
+                                  <path d="M75 30 L75 65 C75 75 65 85 50 85 L50 70 C60 70 65 65 65 58 L65 30 Z" fill="url(#magnetBlue)" />
+                                  <rect x="65" y="20" width="10" height="15" rx="2" fill="url(#magnetSilver)" />
+                                  
+                                  {/* Metallic shine */}
+                                  <path d="M28 30 L28 55 C28 62 35 68 45 70 L45 72 C32 70 25 62 25 52 L25 30 Z" fill="rgba(255,255,255,0.2)" />
+                                  <path d="M72 30 L72 55 C72 62 65 68 55 70 L55 72 C68 70 75 62 75 52 L75 30 Z" fill="rgba(255,255,255,0.15)" />
+                                </g>
+                                
+                                {/* Magnetic attraction particles */}
+                                <motion.g
+                                  animate={{ opacity: [0.4, 1, 0.4] }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                >
+                                  <circle cx="50" cy="55" r="2" fill="#a78bfa" />
+                                  <circle cx="45" cy="50" r="1.5" fill="#c4b5fd" />
+                                  <circle cx="55" cy="50" r="1.5" fill="#c4b5fd" />
+                                </motion.g>
+                              </svg>
+                              
+                            </div>
+                          </div>
+                          
+                          {/* Inner glow */}
+                          <div className="absolute inset-4 rounded-full bg-gradient-to-t from-purple-500/20 to-transparent blur-xl" />
                         </motion.div>
 
-                        {/* Main logo circle */}
-                        <motion.div
-                          animate={{ scale: [1, 1.05, 1] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                          className="relative z-10 w-44 h-44 rounded-full bg-gradient-to-br from-primary-400 via-purple-500 to-indigo-600 p-1.5 shadow-2xl shadow-primary-500/50"
-                        >
-                          <div className="w-full h-full rounded-full bg-white dark:bg-dark-900 flex items-center justify-center overflow-hidden">
-                            {logo && logo.startsWith('data:image') ? (
-                              <img src={logo} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center">
-                                <Cloud className="w-16 h-16 text-white" />
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
+                        {/* Energy particles flowing to magnet */}
+                        {[...Array(12)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute w-1.5 h-1.5 rounded-full bg-gradient-to-r from-violet-400 to-purple-500"
+                            style={{
+                              left: '50%',
+                              top: '50%',
+                            }}
+                            animate={{
+                              x: [Math.cos(i * 30 * Math.PI / 180) * 100, 0],
+                              y: [Math.sin(i * 30 * Math.PI / 180) * 100, 0],
+                              opacity: [0, 1, 0],
+                              scale: [0.5, 1.5, 0]
+                            }}
+                            transition={{
+                              duration: 2,
+                              delay: i * 0.15,
+                              repeat: Infinity,
+                              ease: "easeIn"
+                            }}
+                          />
+                        ))}
                         
                         {/* Pulse rings */}
-                        <div className="absolute inset-0 rounded-full border-2 border-primary-400/30 animate-ping" />
-                        <div className="absolute -inset-4 rounded-full border border-purple-400/20 animate-pulse" />
-                        <div className="absolute -inset-8 rounded-full border border-indigo-400/10 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                        <motion.div 
+                          className="absolute inset-0 rounded-full border-2 border-purple-400/40"
+                          animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                        <motion.div 
+                          className="absolute -inset-4 rounded-full border border-violet-400/30"
+                          animate={{ scale: [1, 1.4], opacity: [0.4, 0] }}
+                          transition={{ duration: 2, delay: 0.5, repeat: Infinity }}
+                        />
+                        <motion.div 
+                          className="absolute -inset-8 rounded-full border border-indigo-400/20"
+                          animate={{ scale: [1, 1.3], opacity: [0.3, 0] }}
+                          transition={{ duration: 2, delay: 1, repeat: Infinity }}
+                        />
                       </div>
                     </div>
 
