@@ -58,12 +58,18 @@ async function findOrCreateOAuthUser(profile, provider) {
   return newUsers[0];
 }
 
+// Get the base URL for OAuth callbacks
+const getBaseUrl = () => {
+  return process.env.API_URL || process.env.APP_URL || 'http://localhost:5000';
+};
+
 // Configure Google Strategy
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${process.env.API_URL || 'http://localhost:5000'}/api/auth/google/callback`
+    callbackURL: `${getBaseUrl()}/api/auth/google/callback`,
+    proxy: true
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       const user = await findOrCreateOAuthUser(profile, 'google');
@@ -79,8 +85,9 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
   passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: `${process.env.API_URL || 'http://localhost:5000'}/api/auth/github/callback`,
-    scope: ['user:email']
+    callbackURL: `${getBaseUrl()}/api/auth/github/callback`,
+    scope: ['user:email'],
+    proxy: true
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       const user = await findOrCreateOAuthUser(profile, 'github');
