@@ -424,7 +424,13 @@ const migrations = [
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES kb_categories(id) ON DELETE SET NULL
-  )`
+  )`,
+  
+  // OAuth provider columns for users table
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) DEFAULT NULL`,
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS github_id VARCHAR(255) DEFAULT NULL`,
+  `CREATE INDEX IF NOT EXISTS idx_google_id ON users(google_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_github_id ON users(github_id)`
 ];
 
 async function runMigrations() {

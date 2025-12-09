@@ -1,11 +1,123 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
 const { v4: uuidv4 } = require('uuid');
 const { body, validationResult } = require('express-validator');
 const db = require('../database/connection');
 const { authenticate, generateToken } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Passport serialization
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const users = await db.query('SELECT * FROM users WHERE id = ?', [id]);
+    done(null, users[0] || null);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+// Helper function to find or create OAuth user
+async function findOrCreateOAuthUser(profile, provider) {
+  const email = profile.emails?.[0]?.value;
+  if (!email) {
+    throw new Error('Email not provided by OAuth provider');
+  }
+
+  // Check if user exists by email
+  let users = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+  
+  if (users.length) {
+    // Update OAuth provider info
+    await db.query(
+      `UPDATE users SET ${provider}_id = ?, avatar = COALESCE(avatar, ?) WHERE id = ?`,
+      [profile.id, profile.photos?.[0]?.value || null, users[0].id]
+    );
+    return users[0];
+  }
+
+  // Create new user
+  const uuid = uuidv4();
+  const firstName = profile.name?.givenName || profile.displayName?.split(' ')[0] || 'User';
+  const lastName = profile.name?.familyName || profile.displayName?.split(' ').slice(1).join(' ') || '';
+  const avatar = profile.photos?.[0]?.value || null;
+
+  await db.query(`
+    INSERT INTO users (uuid, email, first_name, last_name, avatar, ${provider}_id, role, status, password)
+    VALUES (?, ?, ?, ?, ?, ?, 'user', 'active', '')
+  `, [uuid, email, firstName, lastName, avatar, profile.id]);
+
+  const newUsers = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+  return newUsers[0];
+}
+
+// Configure Google Strategy
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: `${process.env.API_URL || 'http://localhost:5000'}/api/auth/google/callback`
+  }, async (accessToken, refreshToken, profile, done) => {
+    try {
+      const user = await findOrCreateOAuthUser(profile, 'google');
+      done(null, user);
+    } catch (error) {
+      done(error, null);
+    }
+  }));
+}
+
+// Configure GitHub Strategy
+if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+  passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: `${process.env.API_URL || 'http://localhost:5000'}/api/auth/github/callback`,
+    scope: ['user:email']
+  }, async (accessToken, refreshToken, profile, done) => {
+    try {
+      const user = await findOrCreateOAuthUser(profile, 'github');
+      done(null, user);
+    } catch (error) {
+      done(error, null);
+    }
+  }));
+}
+
+// Google OAuth routes
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
+
+router.get('/google/callback',
+  passport.authenticate('google', { session: false, failureRedirect: '/login?error=oauth_failed' }),
+  (req, res) => {
+    const token = generateToken({ uuid: req.user.uuid, email: req.user.email, role: req.user.role });
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    res.redirect(`${clientUrl}/oauth-callback?token=${token}`);
+  }
+);
+
+// GitHub OAuth routes
+router.get('/github', passport.authenticate('github', {
+  scope: ['user:email']
+}));
+
+router.get('/github/callback',
+  passport.authenticate('github', { session: false, failureRedirect: '/login?error=oauth_failed' }),
+  (req, res) => {
+    const token = generateToken({ uuid: req.user.uuid, email: req.user.email, role: req.user.role });
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    res.redirect(`${clientUrl}/oauth-callback?token=${token}`);
+  }
+);
 
 // Register
 router.post('/register', [
