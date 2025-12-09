@@ -96,7 +96,17 @@ export const settingsAPI = {
   getTranslations: (locale) => api.get(`/settings/translations/${locale}`),
   getCurrencies: () => api.get('/settings/currencies'),
   getPricing: () => api.get('/settings/pricing'),
-  updatePricing: (category, plans) => api.put('/settings/pricing', { category, plans })
+  updatePricing: (category, plans) => api.put('/settings/pricing', { category, plans }),
+  getPaymentGateway: () => api.get('/settings/payment-gateway'),
+  updatePaymentGateway: (settings) => api.put('/settings/payment-gateway', settings),
+  testPaymentGateway: (gateway) => api.post('/settings/payment-gateway/test', { gateway }),
+  getStripeKey: () => api.get('/settings/stripe-key')
+}
+
+// Payments API
+export const paymentsAPI = {
+  createStripeIntent: (data) => api.post('/payments/stripe/create-intent', data),
+  confirmStripePayment: (data) => api.post('/payments/stripe/confirm', data)
 }
 
 // Pages API

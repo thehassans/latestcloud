@@ -1,28 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { CreditCard, Lock, CheckCircle, Building2, Banknote, Upload, X } from 'lucide-react'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
+import { CreditCard, Lock, CheckCircle, Building2, Banknote, Upload, X, Loader2 } from 'lucide-react'
 import { useCartStore, useCurrencyStore, useAuthStore } from '../store/useStore'
-import { ordersAPI } from '../lib/api'
+import { ordersAPI, paymentsAPI, settingsAPI } from '../lib/api'
 import toast from 'react-hot-toast'
 
 const paymentMethods = [
-  { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, requiresProof: false },
+  { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, requiresProof: false, isStripe: true },
   { id: 'paypal', name: 'PayPal', icon: CreditCard, requiresProof: false },
   { id: 'bank', name: 'Bank Transfer', icon: Building2, requiresProof: true },
   { id: 'cash', name: 'Cash Payment', icon: Banknote, requiresProof: true },
 ]
 
-export default function Checkout() {
+// Stripe Card Input Styles
+const cardElementOptions = {
+  style: {
+    base: {
+      fontSize: '16px',
+      color: '#1f2937',
+      '::placeholder': { color: '#9ca3af' },
+    },
+    invalid: { color: '#ef4444' },
+  },
+}
+
+function CheckoutForm({ stripeEnabled }) {
   const navigate = useNavigate()
+  const stripe = useStripe()
+  const elements = useElements()
   const { items, coupon, getTotal, clearCart } = useCartStore()
   const { format } = useCurrencyStore()
   const { user } = useAuthStore()
   const { subtotal, discount, total } = getTotal()
   const [loading, setLoading] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState('card')
+  const [paymentMethod, setPaymentMethod] = useState(stripeEnabled ? 'card' : 'bank')
   const [paymentProof, setPaymentProof] = useState(null)
   const [paymentProofPreview, setPaymentProofPreview] = useState(null)
+  const [cardComplete, setCardComplete] = useState(false)
 
   const selectedMethod = paymentMethods.find(m => m.id === paymentMethod)
 
@@ -53,6 +70,18 @@ export default function Checkout() {
       return
     }
 
+    // Validate Stripe card if card payment selected
+    if (paymentMethod === 'card' && stripeEnabled) {
+      if (!stripe || !elements) {
+        toast.error('Payment system not ready. Please try again.')
+        return
+      }
+      if (!cardComplete) {
+        toast.error('Please complete your card details')
+        return
+      }
+    }
+
     setLoading(true)
     try {
       const orderItems = items.map(item => ({
@@ -67,7 +96,8 @@ export default function Checkout() {
         quantity: item.quantity || 1
       }))
 
-      await ordersAPI.create({
+      // Create order first
+      const orderRes = await ordersAPI.create({
         items: orderItems,
         coupon_code: coupon?.code,
         payment_method: paymentMethod,
@@ -77,6 +107,49 @@ export default function Checkout() {
           email: user.email
         }
       })
+
+      // Handle Stripe payment
+      if (paymentMethod === 'card' && stripeEnabled && stripe && elements) {
+        try {
+          // Create payment intent
+          const intentRes = await paymentsAPI.createStripeIntent({
+            amount: total,
+            currency: 'usd',
+            order_uuid: orderRes.data.order.uuid
+          })
+
+          const { clientSecret } = intentRes.data
+
+          // Confirm payment with card
+          const cardElement = elements.getElement(CardElement)
+          const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+              card: cardElement,
+              billing_details: {
+                name: `${user.first_name} ${user.last_name}`,
+                email: user.email,
+              },
+            },
+          })
+
+          if (error) {
+            toast.error(error.message)
+            return
+          }
+
+          if (paymentIntent.status === 'succeeded') {
+            // Confirm on backend
+            await paymentsAPI.confirmStripePayment({
+              payment_intent_id: paymentIntent.id,
+              order_uuid: orderRes.data.order.uuid
+            })
+            toast.success('Payment successful!')
+          }
+        } catch (paymentErr) {
+          toast.error('Payment failed. Please try again.')
+          return
+        }
+      }
 
       clearCart()
       toast.success('Order placed successfully! ' + (selectedMethod?.requiresProof ? 'We will verify your payment shortly.' : ''))
@@ -122,17 +195,37 @@ export default function Checkout() {
               <div className="card p-6">
                 <h2 className="text-lg font-bold mb-4">Payment Method</h2>
                 <div className="space-y-3">
-                  {paymentMethods.map((method) => (
-                    <label key={method.id} className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors
-                      ${paymentMethod === method.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
-                      <input type="radio" name="payment" value={method.id} checked={paymentMethod === method.id}
-                        onChange={() => setPaymentMethod(method.id)} className="text-primary-500" />
-                      <method.icon className="w-5 h-5" />
-                      <span>{method.name}</span>
-                      {method.requiresProof && <span className="ml-auto text-xs text-dark-500">(Proof required)</span>}
-                    </label>
-                  ))}
+                  {paymentMethods.map((method) => {
+                    // Skip card if Stripe not enabled
+                    if (method.isStripe && !stripeEnabled) return null
+                    return (
+                      <label key={method.id} className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors
+                        ${paymentMethod === method.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
+                        <input type="radio" name="payment" value={method.id} checked={paymentMethod === method.id}
+                          onChange={() => setPaymentMethod(method.id)} className="text-primary-500" />
+                        <method.icon className="w-5 h-5" />
+                        <span>{method.name}</span>
+                        {method.requiresProof && <span className="ml-auto text-xs text-dark-500">(Proof required)</span>}
+                      </label>
+                    )
+                  })}
                 </div>
+
+                {/* Stripe Card Element */}
+                {paymentMethod === 'card' && stripeEnabled && (
+                  <div className="mt-6">
+                    <label className="block text-sm font-medium mb-2">Card Details</label>
+                    <div className="p-4 border border-dark-200 dark:border-dark-700 rounded-xl bg-white dark:bg-dark-800">
+                      <CardElement 
+                        options={cardElementOptions}
+                        onChange={(e) => setCardComplete(e.complete)}
+                      />
+                    </div>
+                    <p className="text-xs text-dark-500 mt-2 flex items-center gap-1">
+                      <Lock className="w-3 h-3" /> Your card details are secured with 256-bit encryption
+                    </p>
+                  </div>
+                )}
 
                 {/* Payment Proof Upload for Bank/Cash */}
                 {selectedMethod?.requiresProof && (
@@ -205,8 +298,11 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                <button onClick={handleCheckout} disabled={loading} className="btn-primary w-full justify-center">
-                  {loading ? 'Processing...' : (
+                <button onClick={handleCheckout} disabled={loading || (paymentMethod === 'card' && stripeEnabled && (!stripe || !elements))} 
+                  className="btn-primary w-full justify-center">
+                  {loading ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                  ) : (
                     <><Lock className="w-4 h-4 mr-2" /> Pay {format(total)}</>
                   )}
                 </button>
@@ -222,4 +318,55 @@ export default function Checkout() {
       </section>
     </>
   )
+}
+
+// Main Checkout component with Stripe Elements wrapper
+export default function Checkout() {
+  const navigate = useNavigate()
+  const { items } = useCartStore()
+  const [stripePromise, setStripePromise] = useState(null)
+  const [stripeEnabled, setStripeEnabled] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Check if cart is empty
+    if (items.length === 0) {
+      navigate('/cart')
+      return
+    }
+
+    // Load Stripe key
+    const loadStripeKey = async () => {
+      try {
+        const res = await settingsAPI.getStripeKey()
+        if (res.data.enabled && res.data.publishableKey) {
+          setStripeEnabled(true)
+          setStripePromise(loadStripe(res.data.publishableKey))
+        }
+      } catch (err) {
+        console.error('Failed to load Stripe:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadStripeKey()
+  }, [items.length, navigate])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+      </div>
+    )
+  }
+
+  if (stripeEnabled && stripePromise) {
+    return (
+      <Elements stripe={stripePromise}>
+        <CheckoutForm stripeEnabled={true} />
+      </Elements>
+    )
+  }
+
+  return <CheckoutForm stripeEnabled={false} />
 }

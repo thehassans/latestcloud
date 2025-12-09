@@ -288,4 +288,121 @@ router.get('/currencies', async (req, res) => {
   }
 });
 
+// Get payment gateway settings (admin only)
+router.get('/payment-gateway', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const settings = {};
+    const keys = [
+      'stripe_enabled', 'stripe_mode', 
+      'stripe_publishable_key_test', 'stripe_secret_key_test',
+      'stripe_publishable_key_live', 'stripe_secret_key_live',
+      'stripe_webhook_secret',
+      'paypal_enabled', 'paypal_mode',
+      'paypal_client_id_sandbox', 'paypal_secret_sandbox',
+      'paypal_client_id_live', 'paypal_secret_live'
+    ];
+
+    const results = await db.query(
+      'SELECT setting_key, setting_value, value_type FROM settings WHERE setting_key IN (?)',
+      [keys]
+    );
+
+    results.forEach(row => {
+      let value = row.setting_value;
+      if (row.value_type === 'boolean') {
+        value = value === 'true' || value === '1';
+      }
+      settings[row.setting_key] = value;
+    });
+
+    res.json({ settings });
+  } catch (error) {
+    console.error('Get payment gateway error:', error);
+    res.status(500).json({ error: 'Failed to load payment gateway settings' });
+  }
+});
+
+// Update payment gateway settings (admin only)
+router.put('/payment-gateway', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const settings = req.body;
+    
+    for (const [key, value] of Object.entries(settings)) {
+      const valueType = typeof value === 'boolean' ? 'boolean' : 'string';
+      const dbValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : value;
+      
+      await db.query(
+        `INSERT INTO settings (setting_key, setting_value, value_type, category)
+         VALUES (?, ?, ?, 'payment')
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
+        [key, dbValue, valueType]
+      );
+    }
+
+    res.json({ message: 'Payment gateway settings saved' });
+  } catch (error) {
+    console.error('Update payment gateway error:', error);
+    res.status(500).json({ error: 'Failed to save payment gateway settings' });
+  }
+});
+
+// Test payment gateway connection
+router.post('/payment-gateway/test', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { gateway } = req.body;
+    
+    if (gateway === 'stripe') {
+      // Get Stripe keys from settings
+      const modeResult = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'stripe_mode'");
+      const mode = modeResult[0]?.setting_value || 'test';
+      
+      const keyName = mode === 'live' ? 'stripe_secret_key_live' : 'stripe_secret_key_test';
+      const keyResult = await db.query("SELECT setting_value FROM settings WHERE setting_key = ?", [keyName]);
+      const secretKey = keyResult[0]?.setting_value;
+
+      if (!secretKey) {
+        return res.json({ success: false, error: 'Secret key not configured' });
+      }
+
+      // Test connection by checking account
+      const stripe = require('stripe')(secretKey);
+      await stripe.accounts.retrieve();
+      
+      res.json({ success: true, message: 'Stripe connection successful' });
+    } else {
+      res.json({ success: false, error: 'Unknown gateway' });
+    }
+  } catch (error) {
+    console.error('Test payment gateway error:', error);
+    res.json({ success: false, error: error.message });
+  }
+});
+
+// Get Stripe publishable key (public)
+router.get('/stripe-key', async (req, res) => {
+  try {
+    const modeResult = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'stripe_mode'");
+    const enabledResult = await db.query("SELECT setting_value FROM settings WHERE setting_key = 'stripe_enabled'");
+    
+    const mode = modeResult[0]?.setting_value || 'test';
+    const enabled = enabledResult[0]?.setting_value === 'true';
+    
+    if (!enabled) {
+      return res.json({ enabled: false });
+    }
+
+    const keyName = mode === 'live' ? 'stripe_publishable_key_live' : 'stripe_publishable_key_test';
+    const keyResult = await db.query("SELECT setting_value FROM settings WHERE setting_key = ?", [keyName]);
+    
+    res.json({ 
+      enabled: true, 
+      publishableKey: keyResult[0]?.setting_value,
+      mode 
+    });
+  } catch (error) {
+    console.error('Get Stripe key error:', error);
+    res.status(500).json({ error: 'Failed to get Stripe key' });
+  }
+});
+
 module.exports = router;
