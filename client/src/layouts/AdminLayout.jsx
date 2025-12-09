@@ -131,13 +131,16 @@ export default function AdminLayout() {
         {/* Top header */}
         <header className="sticky top-0 z-30 h-16 bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl border-b border-dark-200 dark:border-dark-800">
           <div className="h-full px-4 lg:px-8 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="lg:hidden p-2 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg"
               >
                 <Menu className="w-6 h-6" />
               </button>
+              {logo && logo.startsWith('data:image') && (
+                <img src={logo} alt="" className="h-8 w-auto object-contain" />
+              )}
               <h1 className="text-lg font-semibold">Admin Dashboard</h1>
             </div>
 
