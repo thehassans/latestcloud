@@ -10,16 +10,16 @@ import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
 const defaultPlans = [
-  { name: 'Starter Hosting', price: 2.99, features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'cPanel Access'], color: 'from-blue-500 to-cyan-500' },
-  { name: 'Professional Hosting', price: 5.99, popular: true, features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'cPanel Access', 'Free Domain'], color: 'from-primary-500 to-purple-500' },
-  { name: 'Business Hosting', price: 9.99, features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'cPanel Access', 'Free Domain', 'Staging Environment'], color: 'from-purple-500 to-pink-500' }
+  { name: 'Starter Hosting', price: 2.99, features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'Plesk License Included'], color: 'from-blue-500 to-cyan-500' },
+  { name: 'Professional Hosting', price: 5.99, popular: true, features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'Plesk License Included', 'Free Domain'], color: 'from-primary-500 to-purple-500' },
+  { name: 'Business Hosting', price: 9.99, features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'Plesk License Included', 'Free Domain', 'Staging Environment'], color: 'from-purple-500 to-pink-500' }
 ]
 
 const features = [
   { icon: Zap, title: 'NVMe SSD Storage', desc: 'Up to 10x faster than traditional drives', color: 'from-yellow-500 to-orange-500' },
   { icon: Shield, title: 'Free SSL & Security', desc: 'Enterprise-grade DDoS protection', color: 'from-green-500 to-emerald-500' },
   { icon: Clock, title: '99.99% Uptime SLA', desc: 'Guaranteed with credit compensation', color: 'from-blue-500 to-cyan-500' },
-  { icon: Server, title: 'cPanel Control', desc: 'Industry-standard hosting panel', color: 'from-purple-500 to-pink-500' },
+  { icon: Server, title: 'Plesk Control Panel', desc: 'Professional server management', color: 'from-purple-500 to-pink-500' },
   { icon: Globe, title: 'Global CDN', desc: 'Content delivery in 200+ locations', color: 'from-indigo-500 to-violet-500' },
   { icon: Headphones, title: '24/7 Expert Support', desc: 'Average response time under 5 min', color: 'from-rose-500 to-red-500' },
 ]
