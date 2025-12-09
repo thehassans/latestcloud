@@ -1,6 +1,7 @@
+import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
-import { Cloud as CloudIcon, CheckCircle, Cpu, HardDrive, Gauge, Globe } from 'lucide-react'
+import { Cloud as CloudIcon, CheckCircle, ArrowRight, Cpu, HardDrive, Gauge, Globe, Shield, Zap, Headphones, Lock, RefreshCw } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
@@ -10,31 +11,36 @@ const cloudPlans = [
     name: 'Cloud Starter',
     price: 19.99,
     specs: { cpu: '2 vCPU', ram: '4 GB RAM', storage: '80 GB NVMe', bandwidth: '4 TB Transfer' },
-    features: ['Auto Scaling', 'Load Balancer', 'Daily Backups', '24/7 Support'],
-    color: 'from-blue-500 to-cyan-500'
+    features: ['Auto Scaling', 'Load Balancer', 'Daily Backups', '24/7 Support']
   },
   {
     name: 'Cloud Pro',
     price: 49.99,
     specs: { cpu: '4 vCPU', ram: '8 GB RAM', storage: '160 GB NVMe', bandwidth: '8 TB Transfer' },
     features: ['Auto Scaling', 'Load Balancer', 'Daily Backups', 'DDoS Protection', 'Priority Support'],
-    popular: true,
-    color: 'from-primary-500 to-purple-500'
+    popular: true
   },
   {
     name: 'Cloud Business',
     price: 99.99,
     specs: { cpu: '8 vCPU', ram: '16 GB RAM', storage: '320 GB NVMe', bandwidth: '16 TB Transfer' },
-    features: ['Auto Scaling', 'Load Balancer', 'Hourly Backups', 'DDoS Protection', 'Dedicated Support', 'Custom Firewall'],
-    color: 'from-purple-500 to-pink-500'
+    features: ['Auto Scaling', 'Load Balancer', 'Hourly Backups', 'DDoS Protection', 'Dedicated Support']
   },
   {
     name: 'Cloud Enterprise',
     price: 199.99,
     specs: { cpu: '16 vCPU', ram: '32 GB RAM', storage: '640 GB NVMe', bandwidth: 'Unlimited' },
-    features: ['Auto Scaling', 'Load Balancer', 'Real-time Backups', 'Advanced DDoS', 'SLA 99.99%', 'Dedicated Account Manager'],
-    color: 'from-orange-500 to-red-500'
+    features: ['Auto Scaling', 'Load Balancer', 'Real-time Backups', 'Advanced DDoS', 'SLA 99.99%']
   }
+]
+
+const features = [
+  { icon: RefreshCw, title: 'Auto Scaling', desc: 'Automatically scale resources based on traffic demands', color: 'from-cyan-500 to-blue-500' },
+  { icon: Shield, title: 'DDoS Protection', desc: 'Enterprise-grade protection up to 10Tbps attacks', color: 'from-green-500 to-emerald-500' },
+  { icon: HardDrive, title: 'NVMe SSD Storage', desc: 'Up to 10x faster than traditional SSDs', color: 'from-purple-500 to-pink-500' },
+  { icon: Zap, title: 'Instant Deployment', desc: 'Deploy your cloud server in under 60 seconds', color: 'from-yellow-500 to-orange-500' },
+  { icon: Globe, title: 'Global Network', desc: 'Deploy across 10+ worldwide locations', color: 'from-indigo-500 to-violet-500' },
+  { icon: Headphones, title: '24/7 Expert Support', desc: 'Average response time under 5 minutes', color: 'from-rose-500 to-red-500' },
 ]
 
 export default function Cloud() {
@@ -57,80 +63,129 @@ export default function Cloud() {
 
   return (
     <>
-      <Helmet><title>Cloud Servers - Magnetic Clouds</title></Helmet>
+      <Helmet>
+        <title>Cloud Servers - Magnetic Clouds</title>
+        <meta name="description" content="Auto-scaling cloud infrastructure with 99.99% uptime SLA and global availability." />
+      </Helmet>
 
-      <section className={clsx("relative py-20 overflow-hidden", isGradient ? "bg-gradient-mesh" : "bg-dark-50 dark:bg-dark-950")}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full text-sm font-medium mb-6">
-            <CloudIcon className="w-4 h-4" /> Cloud Infrastructure
-          </motion.div>
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold font-display">
-            Scalable <span className={isGradient ? "text-gradient" : "text-primary-500"}>Cloud Servers</span>
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="mt-6 text-lg text-dark-600 dark:text-dark-400 max-w-2xl mx-auto">
-            Auto-scaling cloud infrastructure with 99.99% uptime SLA and global availability.
-          </motion.p>
+      {/* Ultra Premium Hero with Plans */}
+      <section className="relative min-h-screen bg-dark-950 overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-950/50 via-dark-950 to-blue-950/50" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-cyan-500/10 via-transparent to-blue-500/10 rounded-full blur-2xl" />
         </div>
-      </section>
 
-      <section className="py-20 bg-white dark:bg-dark-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-dark-900 dark:text-white">Cloud Plans</h2>
-            <p className="mt-4 text-dark-500">Instantly scale resources based on demand</p>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-full text-sm font-medium mb-6"
+            >
+              <CloudIcon className="w-4 h-4" />
+              Cloud Infrastructure
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white mb-6"
+            >
+              Scalable{' '}
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Cloud Servers
+              </span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-lg text-dark-300 max-w-2xl mx-auto"
+            >
+              Auto-scaling cloud infrastructure with 99.99% uptime SLA and global availability.
+            </motion.p>
           </div>
 
+          {/* Quick Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap justify-center gap-8 mb-12"
+          >
+            {[
+              { value: '99.99%', label: 'Uptime SLA' },
+              { value: 'Auto', label: 'Scaling' },
+              { value: '10+', label: 'Locations' },
+              { value: '24/7', label: 'Support' }
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">{stat.value}</div>
+                <div className="text-dark-400 text-sm">{stat.label}</div>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {cloudPlans.map((plan, i) => (
               <motion.div
                 key={plan.name}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * i }}
+                transition={{ delay: 0.1 * i + 0.4 }}
                 className={clsx(
-                  "relative p-6 rounded-2xl border-2 transition-all hover:shadow-xl",
+                  "relative group rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02]",
                   plan.popular
-                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/10"
-                    : "border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800"
+                    ? "bg-gradient-to-b from-cyan-500/20 to-blue-500/10 border-2 border-cyan-500/50"
+                    : "bg-dark-800/50 backdrop-blur-sm border border-dark-700/50 hover:border-cyan-500/30"
                 )}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary-500 text-white text-xs font-bold rounded-full">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold rounded-full shadow-lg">
                     BEST VALUE
                   </div>
                 )}
-                <h3 className="text-xl font-bold text-dark-900 dark:text-white">{plan.name}</h3>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-dark-900 dark:text-white">{format(plan.price)}</span>
-                  <span className="text-dark-500">/mo</span>
+
+                <div className="mb-4">
+                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
                 </div>
 
-                <div className="mt-6 p-4 bg-gray-50 dark:bg-dark-700 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Cpu className="w-4 h-4 text-primary-500" />
-                    <span className="text-dark-700 dark:text-dark-200">{plan.specs.cpu}</span>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-white">{format(plan.price)}</span>
+                  <span className="text-dark-400">/month</span>
+                </div>
+
+                {/* Specs */}
+                <div className="p-4 bg-dark-900/50 rounded-2xl mb-6 space-y-3">
+                  <div className="flex items-center gap-3 text-sm">
+                    <Cpu className="w-4 h-4 text-cyan-400" />
+                    <span className="text-white">{plan.specs.cpu}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Gauge className="w-4 h-4 text-primary-500" />
-                    <span className="text-dark-700 dark:text-dark-200">{plan.specs.ram}</span>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Gauge className="w-4 h-4 text-blue-400" />
+                    <span className="text-white">{plan.specs.ram}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <HardDrive className="w-4 h-4 text-primary-500" />
-                    <span className="text-dark-700 dark:text-dark-200">{plan.specs.storage}</span>
+                  <div className="flex items-center gap-3 text-sm">
+                    <HardDrive className="w-4 h-4 text-purple-400" />
+                    <span className="text-white">{plan.specs.storage}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Globe className="w-4 h-4 text-primary-500" />
-                    <span className="text-dark-700 dark:text-dark-200">{plan.specs.bandwidth}</span>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Globe className="w-4 h-4 text-pink-400" />
+                    <span className="text-white">{plan.specs.bandwidth}</span>
                   </div>
                 </div>
 
-                <ul className="mt-6 space-y-2">
-                  {plan.features.map((f, j) => (
-                    <li key={j} className="flex items-center gap-2 text-sm text-dark-600 dark:text-dark-300">
-                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />{f}
+                {/* Features */}
+                <ul className="space-y-2 mb-6">
+                  {plan.features.slice(0, 4).map((feature, j) => (
+                    <li key={j} className="flex items-center gap-2 text-sm text-dark-300">
+                      <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                      {feature}
                     </li>
                   ))}
                 </ul>
@@ -138,47 +193,115 @@ export default function Cloud() {
                 <button
                   onClick={() => handleAddToCart(plan)}
                   className={clsx(
-                    "w-full mt-6 py-3 rounded-xl font-semibold transition-all",
+                    "w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
                     plan.popular
-                      ? "bg-primary-500 text-white hover:bg-primary-600"
-                      : "bg-dark-100 dark:bg-dark-700 text-dark-900 dark:text-white hover:bg-dark-200 dark:hover:bg-dark-600"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-lg hover:shadow-cyan-500/25"
+                      : "bg-dark-700 text-white hover:bg-dark-600"
                   )}
                 >
-                  Deploy Now
+                  Deploy Now <ArrowRight className="w-4 h-4" />
                 </button>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Trust Badges */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="mt-12 flex flex-wrap justify-center gap-6 text-dark-400 text-sm"
+          >
+            <div className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-cyan-400" />
+              Auto Scaling
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-green-400" />
+              DDoS Protection
+            </div>
+            <div className="flex items-center gap-2">
+              <Headphones className="w-5 h-5 text-blue-400" />
+              24/7 Expert Support
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-24 bg-white dark:bg-dark-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold font-display"
+            >
+              Enterprise-Grade{' '}
+              <span className="text-gradient">Cloud Features</span>
+            </motion.h2>
+            <p className="mt-4 text-dark-500 max-w-2xl mx-auto">
+              Everything you need for scalable cloud infrastructure
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 * i }}
+                className="group p-8 rounded-3xl bg-dark-50 dark:bg-dark-800 border border-dark-100 dark:border-dark-700 hover:shadow-xl hover:border-cyan-500/30 transition-all"
+              >
+                <div className={clsx(
+                  "w-16 h-16 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-lg",
+                  feature.color
+                )}>
+                  <feature.icon className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-dark-900 dark:text-white">{feature.title}</h3>
+                <p className="mt-3 text-dark-500">{feature.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 bg-gray-50 dark:bg-dark-800">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-dark-900 dark:text-white mb-12">Cloud Features</h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              { icon: CloudIcon, title: 'Auto Scaling', desc: 'Scale resources automatically' },
-              { icon: Globe, title: 'Global CDN', desc: 'Content delivery worldwide' },
-              { icon: HardDrive, title: 'NVMe Storage', desc: 'Ultra-fast SSD storage' },
-              { icon: Gauge, title: '99.99% Uptime', desc: 'Enterprise-grade reliability' }
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center p-6 bg-white dark:bg-dark-700 rounded-2xl"
-              >
-                <div className="w-14 h-14 mx-auto bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mb-4">
-                  <item.icon className="w-7 h-7 text-primary-600" />
-                </div>
-                <h3 className="font-bold text-dark-900 dark:text-white mb-1">{item.title}</h3>
-                <p className="text-sm text-dark-500">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+      {/* CTA */}
+      <section className="py-24 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl font-bold font-display text-white"
+          >
+            Ready to Scale Your Infrastructure?
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="mt-4 text-lg text-white/80"
+          >
+            Deploy your cloud server in minutes with auto-scaling built-in.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="mt-8 flex flex-wrap justify-center gap-4"
+          >
+            <Link to="/contact" className="bg-white text-cyan-600 px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all flex items-center gap-2">
+              Contact Sales <ArrowRight className="w-5 h-5" />
+            </Link>
+          </motion.div>
         </div>
       </section>
     </>

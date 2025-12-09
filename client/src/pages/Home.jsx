@@ -295,7 +295,7 @@ export default function Home() {
                           </motion.div>
                         ))}
 
-                        {/* Main magnet circle with premium design */}
+                        {/* Main premium cloud favicon circle */}
                         <motion.div
                           animate={{ scale: [1, 1.03, 1] }}
                           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -305,53 +305,57 @@ export default function Home() {
                           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 p-[3px] shadow-2xl shadow-purple-500/40">
                             <div className="w-full h-full rounded-full bg-gradient-to-br from-dark-800 to-dark-900 flex items-center justify-center">
                               
-                              {/* Vector Magnet SVG */}
-                              <svg viewBox="0 0 100 100" className="w-28 h-28" fill="none">
+                              {/* Premium Cloud Favicon SVG */}
+                              <svg viewBox="0 0 100 100" className="w-24 h-24" fill="none">
                                 <defs>
-                                  <linearGradient id="magnetRed" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#f43f5e" />
-                                    <stop offset="100%" stopColor="#dc2626" />
+                                  <linearGradient id="cloudMainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#a78bfa" />
+                                    <stop offset="50%" stopColor="#8b5cf6" />
+                                    <stop offset="100%" stopColor="#6366f1" />
                                   </linearGradient>
-                                  <linearGradient id="magnetBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#6366f1" />
-                                    <stop offset="100%" stopColor="#4f46e5" />
+                                  <linearGradient id="cloudShine" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
+                                    <stop offset="100%" stopColor="rgba(255,255,255,0)" />
                                   </linearGradient>
-                                  <linearGradient id="magnetSilver" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#e2e8f0" />
-                                    <stop offset="100%" stopColor="#94a3b8" />
-                                  </linearGradient>
-                                  <filter id="magnetGlow" x="-50%" y="-50%" width="200%" height="200%">
-                                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                  <filter id="cloudGlow" x="-50%" y="-50%" width="200%" height="200%">
+                                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                                     <feMerge>
                                       <feMergeNode in="coloredBlur"/>
                                       <feMergeNode in="SourceGraphic"/>
                                     </feMerge>
                                   </filter>
+                                  <filter id="innerShadow">
+                                    <feOffset dx="0" dy="2"/>
+                                    <feGaussianBlur stdDeviation="2"/>
+                                    <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1"/>
+                                    <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0"/>
+                                    <feBlend in2="SourceGraphic" mode="normal"/>
+                                  </filter>
                                 </defs>
                                 
-                                {/* Horseshoe magnet shape */}
-                                <g filter="url(#magnetGlow)">
-                                  {/* Left pole (red/north) */}
-                                  <path d="M25 30 L25 65 C25 75 35 85 50 85 L50 70 C40 70 35 65 35 58 L35 30 Z" fill="url(#magnetRed)" />
-                                  <rect x="25" y="20" width="10" height="15" rx="2" fill="url(#magnetSilver)" />
-                                  
-                                  {/* Right pole (blue/south) */}
-                                  <path d="M75 30 L75 65 C75 75 65 85 50 85 L50 70 C60 70 65 65 65 58 L65 30 Z" fill="url(#magnetBlue)" />
-                                  <rect x="65" y="20" width="10" height="15" rx="2" fill="url(#magnetSilver)" />
-                                  
-                                  {/* Metallic shine */}
-                                  <path d="M28 30 L28 55 C28 62 35 68 45 70 L45 72 C32 70 25 62 25 52 L25 30 Z" fill="rgba(255,255,255,0.2)" />
-                                  <path d="M72 30 L72 55 C72 62 65 68 55 70 L55 72 C68 70 75 62 75 52 L75 30 Z" fill="rgba(255,255,255,0.15)" />
+                                {/* Cloud shape with premium styling */}
+                                <g filter="url(#cloudGlow)">
+                                  <path 
+                                    d="M75 55h-2.5A18 18 0 0 0 40 38a18 18 0 0 0-17.8 15.5A12 12 0 0 0 25 77h50a12 12 0 0 0 0-24z" 
+                                    fill="url(#cloudMainGrad)"
+                                    filter="url(#innerShadow)"
+                                  />
+                                  {/* Shine overlay */}
+                                  <path 
+                                    d="M75 55h-2.5A18 18 0 0 0 40 38a18 18 0 0 0-17.8 15.5A12 12 0 0 0 25 77h50a12 12 0 0 0 0-24z" 
+                                    fill="url(#cloudShine)"
+                                    opacity="0.5"
+                                  />
                                 </g>
                                 
-                                {/* Magnetic attraction particles */}
+                                {/* Animated sparkles */}
                                 <motion.g
                                   animate={{ opacity: [0.4, 1, 0.4] }}
-                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                  transition={{ duration: 2, repeat: Infinity }}
                                 >
-                                  <circle cx="50" cy="55" r="2" fill="#a78bfa" />
-                                  <circle cx="45" cy="50" r="1.5" fill="#c4b5fd" />
-                                  <circle cx="55" cy="50" r="1.5" fill="#c4b5fd" />
+                                  <circle cx="35" cy="58" r="2" fill="white" opacity="0.8" />
+                                  <circle cx="50" cy="52" r="1.5" fill="white" opacity="0.6" />
+                                  <circle cx="65" cy="60" r="1.5" fill="white" opacity="0.7" />
                                 </motion.g>
                               </svg>
                               
