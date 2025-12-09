@@ -73,9 +73,14 @@ async function findOrCreateOAuthUser(profile, provider) {
   }
 }
 
-// Get the base URL for OAuth callbacks
+// Get the base URL for OAuth callbacks (server-side callback URL)
 const getBaseUrl = () => {
   return process.env.API_URL || process.env.APP_URL || 'http://localhost:5000';
+};
+
+// Get the client URL for redirect after OAuth
+const getClientUrl = () => {
+  return process.env.CLIENT_URL || process.env.API_URL || process.env.APP_URL || 'http://localhost:5173';
 };
 
 // Configure Google Strategy
@@ -120,7 +125,7 @@ router.get('/google', passport.authenticate('google', {
 
 router.get('/google/callback', (req, res, next) => {
   passport.authenticate('google', { session: false }, (err, user, info) => {
-    const clientUrl = getBaseUrl();
+    const clientUrl = getClientUrl();
     
     if (err) {
       console.error('Google OAuth error:', err);
@@ -149,7 +154,7 @@ router.get('/github', passport.authenticate('github', {
 
 router.get('/github/callback', (req, res, next) => {
   passport.authenticate('github', { session: false }, (err, user, info) => {
-    const clientUrl = getBaseUrl();
+    const clientUrl = getClientUrl();
     
     if (err) {
       console.error('GitHub OAuth error:', err);
