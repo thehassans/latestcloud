@@ -397,10 +397,10 @@ export default function Home() {
                     <div className="text-center mb-8">
                       <h3 className="text-2xl font-bold mb-2">
                         <span className="bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent">
-                          All Systems Operational
+                          Powerful Cloud Infrastructure
                         </span>
                       </h3>
-                      <p className="text-dark-600 dark:text-dark-400">Real-time infrastructure monitoring</p>
+                      <p className="text-dark-600 dark:text-dark-400">Enterprise-grade servers at your fingertips</p>
                     </div>
 
                     {/* Stats row with 4 columns - uniform alignment */}
