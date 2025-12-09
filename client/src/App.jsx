@@ -45,6 +45,7 @@ const Partners = lazy(() => import('./pages/Partners'))
 const KnowledgeBase = lazy(() => import('./pages/KnowledgeBase'))
 const SystemStatus = lazy(() => import('./pages/SystemStatus'))
 const ReportAbuse = lazy(() => import('./pages/ReportAbuse'))
+const Reviews = lazy(() => import('./pages/Reviews'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
@@ -185,6 +186,7 @@ function App() {
           <Route path="/knowledge-base" element={<KnowledgeBase />} />
           <Route path="/status" element={<SystemStatus />} />
           <Route path="/report-abuse" element={<ReportAbuse />} />
+          <Route path="/reviews" element={<Reviews />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

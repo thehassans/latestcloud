@@ -153,14 +153,24 @@ export default function Home() {
               </div>
 
               {/* Trust indicators */}
-              <div className="mt-10 flex items-center gap-6">
+              <Link to="/reviews" className="mt-10 flex items-center gap-6 group cursor-pointer">
                 <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
+                  {[
+                    { name: 'Sarah M.', img: 'https://randomuser.me/api/portraits/women/44.jpg' },
+                    { name: 'James K.', img: 'https://randomuser.me/api/portraits/men/32.jpg' },
+                    { name: 'Emily R.', img: null, initial: 'E' },
+                    { name: 'Michael T.', img: 'https://randomuser.me/api/portraits/men/67.jpg' },
+                    { name: 'Lisa P.', img: null, initial: 'L' },
+                  ].map((user, i) => (
                     <div
                       key={i}
-                      className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 border-2 border-white dark:border-dark-900 flex items-center justify-center text-white text-xs font-bold"
+                      className="w-10 h-10 rounded-full border-2 border-white dark:border-dark-900 overflow-hidden flex items-center justify-center bg-gradient-to-br from-primary-400 to-purple-500 text-white text-xs font-bold transition-transform group-hover:scale-105"
                     >
-                      {String.fromCharCode(64 + i)}
+                      {user.img ? (
+                        <img src={user.img} alt={user.name} className="w-full h-full object-cover" />
+                      ) : (
+                        user.initial
+                      )}
                     </div>
                   ))}
                 </div>
@@ -170,9 +180,11 @@ export default function Home() {
                       <Star key={i} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                     ))}
                   </div>
-                  <p className="text-sm text-dark-500">4.9/5 from 2000+ reviews</p>
+                  <p className="text-sm text-dark-500 group-hover:text-primary-500 transition-colors">
+                    4.9/5 from 2000+ reviews <span className="text-primary-500">→</span>
+                  </p>
                 </div>
-              </div>
+              </Link>
             </motion.div>
 
             {/* Right content - Ultra Premium Status Display */}
