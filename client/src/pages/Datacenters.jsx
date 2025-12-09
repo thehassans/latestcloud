@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { MapPin, Server, Shield, Zap, Navigation } from 'lucide-react'
+import { MapPin, Server, Shield, Zap, Navigation, Globe, ArrowRight, Wifi, Clock, Lock } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import { settingsAPI } from '../lib/api'
 import { useThemeStore } from '../store/useStore'
@@ -91,26 +92,73 @@ export default function Datacenters() {
         <meta name="description" content="10+ datacenter locations worldwide for optimal performance and low latency." />
       </Helmet>
 
-      <section className={clsx("py-20", isGradient ? "bg-gradient-mesh" : "bg-dark-50 dark:bg-dark-950")}>
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 rounded-full text-sm font-medium mb-6">
-            <MapPin className="w-4 h-4" /> Global Infrastructure
+      {/* Ultra Premium Hero */}
+      <section className="relative py-20 bg-dark-950 overflow-hidden">
+        {/* Animated background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/50 via-dark-950 to-blue-950/50" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-indigo-500/10 via-transparent to-blue-500/10 rounded-full blur-2xl" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full text-sm font-medium mb-6"
+            >
+              <Globe className="w-4 h-4" />
+              Global Infrastructure
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white mb-6"
+            >
+              Global{' '}
+              <span className="bg-gradient-to-r from-indigo-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                Datacenters
+              </span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-lg text-dark-300 max-w-2xl mx-auto"
+            >
+              Deploy your applications closer to your users with our worldwide datacenter network.
+            </motion.p>
+          </div>
+
+          {/* Quick Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap justify-center gap-8 mb-8"
+          >
+            {[
+              { value: '10+', label: 'Locations' },
+              { value: '<50ms', label: 'Latency' },
+              { value: '99.99%', label: 'Uptime' },
+              { value: 'Tier-4', label: 'Security' }
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">{stat.value}</div>
+                <div className="text-dark-400 text-sm">{stat.label}</div>
+              </div>
+            ))}
           </motion.div>
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold font-display">
-            Global <span className={isGradient ? "text-gradient" : "text-primary-500"}>Datacenters</span>
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="mt-6 text-lg text-dark-500 max-w-2xl mx-auto">
-            Deploy your applications closer to your users with our worldwide datacenter network.
-          </motion.p>
         </div>
       </section>
 
-      <section className="py-8">
+      {/* Map Section */}
+      <section className="py-12 bg-white dark:bg-dark-900">
         <div className="max-w-5xl mx-auto px-4">
-          <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-primary-500/20 dark:border-primary-500/30 relative z-0" style={{ height: '400px' }}>
+          <div className="rounded-3xl overflow-hidden shadow-2xl border-2 border-indigo-500/20 dark:border-indigo-500/30 relative z-0" style={{ height: '450px' }}>
             <MapContainer 
               center={[20, 0]} 
               zoom={2} 
@@ -163,47 +211,60 @@ export default function Datacenters() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-heading text-center mb-12">Our Locations</h2>
-          <p className="text-center text-dark-500 -mt-8 mb-8">Click on a location to view it on the map</p>
+      {/* Locations Grid */}
+      <section className="py-20 bg-dark-50 dark:bg-dark-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold font-display"
+            >
+              Our{' '}
+              <span className="text-gradient">Locations</span>
+            </motion.h2>
+            <p className="mt-4 text-dark-500">Click on a location to view it on the map</p>
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {locations.map((dc, i) => (
               <motion.button
                 key={dc.id}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
                 onClick={() => {
                   setSelectedLocation(dc.id)
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  window.scrollTo({ top: 300, behavior: 'smooth' })
                 }}
                 className={clsx(
-                  "card p-6 text-left transition-all duration-300 hover:scale-[1.02]",
+                  "group p-6 rounded-2xl text-left transition-all duration-300 hover:scale-[1.02]",
                   selectedLocation === dc.id
-                    ? "ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                    : "hover:shadow-lg"
+                    ? "bg-gradient-to-br from-indigo-500/10 to-blue-500/5 border-2 border-indigo-500/50"
+                    : "bg-white dark:bg-dark-800 border border-dark-100 dark:border-dark-700 hover:shadow-xl hover:border-indigo-500/30"
                 )}
               >
                 <div className="flex items-start gap-4">
                   <div className={clsx(
-                    "w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all",
+                    "w-14 h-14 rounded-2xl flex items-center justify-center text-white transition-all shadow-lg",
                     selectedLocation === dc.id
-                      ? "bg-gradient-to-br from-primary-500 to-purple-500 scale-110"
-                      : isGradient ? "bg-gradient-to-br from-primary-500 to-secondary-500" : "bg-primary-500"
+                      ? "bg-gradient-to-br from-indigo-500 to-blue-500 scale-110"
+                      : "bg-gradient-to-br from-indigo-500 to-blue-600 group-hover:scale-110"
                   )}>
-                    <Server className="w-6 h-6" />
+                    <Server className="w-7 h-7" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg">{dc.name}</h3>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-dark-900 dark:text-white">{dc.name}</h3>
                     <p className="text-dark-500">{dc.location}</p>
                     <p className="text-sm text-dark-400 mt-2">{dc.description}</p>
                   </div>
                 </div>
                 {selectedLocation === dc.id && (
-                  <div className="mt-3 flex items-center gap-1 text-primary-500 text-sm font-medium">
+                  <div className="mt-4 flex items-center gap-2 text-indigo-500 text-sm font-medium">
                     <MapPin className="w-4 h-4" />
-                    Currently viewing
+                    Currently viewing on map
                   </div>
                 )}
               </motion.button>
@@ -212,31 +273,88 @@ export default function Datacenters() {
         </div>
       </section>
 
-      <section className={clsx("section", isGradient ? "bg-gradient-mesh" : "bg-dark-50 dark:bg-dark-900")}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div>
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                <Zap className="w-8 h-8 text-primary-500" />
-              </div>
-              <h3 className="mt-4 text-xl font-bold">Low Latency</h3>
-              <p className="mt-2 text-dark-500">Sub-millisecond response times with strategically placed servers.</p>
-            </div>
-            <div>
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <Shield className="w-8 h-8 text-green-500" />
-              </div>
-              <h3 className="mt-4 text-xl font-bold">Tier-4 Security</h3>
-              <p className="mt-2 text-dark-500">Enterprise-grade physical and network security.</p>
-            </div>
-            <div>
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <Server className="w-8 h-8 text-blue-500" />
-              </div>
-              <h3 className="mt-4 text-xl font-bold">99.99% Uptime</h3>
-              <p className="mt-2 text-dark-500">Redundant power, cooling, and network connectivity.</p>
-            </div>
+      {/* Features */}
+      <section className="py-20 bg-white dark:bg-dark-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold font-display"
+            >
+              Enterprise-Grade{' '}
+              <span className="text-gradient">Infrastructure</span>
+            </motion.h2>
+            <p className="mt-4 text-dark-500 max-w-2xl mx-auto">
+              Built for reliability, performance, and security
+            </p>
           </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Zap, title: 'Low Latency', desc: 'Sub-millisecond response times worldwide', color: 'from-yellow-500 to-orange-500' },
+              { icon: Shield, title: 'Tier-4 Security', desc: 'Enterprise-grade protection', color: 'from-green-500 to-emerald-500' },
+              { icon: Server, title: '99.99% Uptime', desc: 'Redundant infrastructure', color: 'from-blue-500 to-cyan-500' },
+              { icon: Wifi, title: '10Gbps Network', desc: 'Premium network connectivity', color: 'from-purple-500 to-pink-500' }
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group p-8 rounded-3xl bg-dark-50 dark:bg-dark-800 border border-dark-100 dark:border-dark-700 hover:shadow-xl hover:border-indigo-500/30 transition-all text-center"
+              >
+                <div className={clsx(
+                  "w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform shadow-lg",
+                  item.color
+                )}>
+                  <item.icon className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-dark-900 dark:text-white">{item.title}</h3>
+                <p className="mt-2 text-dark-500">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl md:text-4xl font-bold font-display text-white"
+          >
+            Deploy Closer to Your Users
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="mt-4 text-lg text-white/80"
+          >
+            Choose from 10+ strategic locations worldwide for optimal performance.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="mt-8 flex flex-wrap justify-center gap-4"
+          >
+            <Link to="/vps" className="bg-white text-indigo-600 px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all flex items-center gap-2">
+              Deploy Now <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link to="/contact" className="bg-white/10 text-white border border-white/30 px-8 py-4 rounded-xl font-semibold hover:bg-white/20 transition-all">
+              Contact Sales
+            </Link>
+          </motion.div>
         </div>
       </section>
     </>
