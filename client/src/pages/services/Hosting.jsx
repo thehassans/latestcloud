@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle, ArrowRight, Server, Shield, Clock, Zap, Globe, Headphones, Star, MessageCircle, Lock } from 'lucide-react'
+import { CheckCircle, ArrowRight, Server, Shield, Clock, Zap, Globe, Headphones, Star, MessageCircle, Lock, HardDrive, Database, Check, X } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
 import { settingsAPI } from '../../lib/api'
 import { useAIAgent } from '../../contexts/AIAgentContext'
@@ -10,9 +11,52 @@ import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
 const defaultPlans = [
-  { name: 'Starter Hosting', price: 2.99, features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'Plesk License Included'], color: 'from-blue-500 to-cyan-500' },
-  { name: 'Professional Hosting', price: 5.99, popular: true, features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'Plesk License Included', 'Free Domain'], color: 'from-primary-500 to-purple-500' },
-  { name: 'Business Hosting', price: 9.99, features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'Plesk License Included', 'Free Domain', 'Staging Environment'], color: 'from-purple-500 to-pink-500' }
+  { 
+    name: 'Starter', 
+    price: 2.99, 
+    websites: '1 Website',
+    storage: '10 GB SSD',
+    bandwidth: '100 GB',
+    email: '5 Accounts',
+    ssl: true,
+    backup: 'Weekly',
+    support: 'Email',
+    cpanel: true,
+    features: ['1 Website', '10 GB SSD Storage', 'Free SSL Certificate', 'Weekly Backups', '24/7 Support', 'Plesk License Included'], 
+    color: 'from-blue-500 to-cyan-500' 
+  },
+  { 
+    name: 'Professional', 
+    price: 5.99, 
+    popular: true, 
+    websites: '10 Websites',
+    storage: '50 GB SSD',
+    bandwidth: '500 GB',
+    email: '50 Accounts',
+    ssl: true,
+    backup: 'Daily',
+    support: 'Priority',
+    cpanel: true,
+    freeDomain: true,
+    features: ['Unlimited Websites', '50 GB SSD Storage', 'Free SSL Certificate', 'Daily Backups', 'Priority Support', 'Plesk License Included', 'Free Domain'], 
+    color: 'from-primary-500 to-purple-500' 
+  },
+  { 
+    name: 'Business', 
+    price: 9.99, 
+    websites: 'Unlimited',
+    storage: '100 GB NVMe',
+    bandwidth: 'Unlimited',
+    email: 'Unlimited',
+    ssl: true,
+    backup: 'Real-time',
+    support: 'Dedicated',
+    cpanel: true,
+    freeDomain: true,
+    staging: true,
+    features: ['Unlimited Websites', '100 GB NVMe Storage', 'Free SSL Certificate', 'Real-time Backups', 'Dedicated Support', 'Plesk License Included', 'Free Domain', 'Staging Environment'], 
+    color: 'from-purple-500 to-pink-500' 
+  }
 ]
 
 const features = [
@@ -22,6 +66,16 @@ const features = [
   { icon: Server, title: 'Plesk Control Panel', desc: 'Professional server management', color: 'from-purple-500 to-pink-500' },
   { icon: Globe, title: 'Global CDN', desc: 'Content delivery in 200+ locations', color: 'from-indigo-500 to-violet-500' },
   { icon: Headphones, title: '24/7 Expert Support', desc: 'Average response time under 5 min', color: 'from-rose-500 to-red-500' },
+]
+
+// Spec rows for comparison table
+const specRows = [
+  { key: 'websites', label: 'Websites', icon: Globe },
+  { key: 'storage', label: 'Storage', icon: HardDrive },
+  { key: 'bandwidth', label: 'Bandwidth', icon: Database },
+  { key: 'email', label: 'Email Accounts', icon: MessageCircle },
+  { key: 'backup', label: 'Backups', icon: Clock },
+  { key: 'support', label: 'Support', icon: Headphones },
 ]
 
 export default function Hosting() {
@@ -62,9 +116,9 @@ export default function Hosting() {
         <meta name="description" content="Fast, reliable web hosting with free SSL, daily backups, and 24/7 support. Starting at $2.99/month." />
       </Helmet>
 
-      {/* Hero with integrated pricing */}
+      {/* Hero Section */}
       <section className={clsx(
-        "relative overflow-hidden",
+        "relative overflow-hidden py-20",
         isDark ? "bg-gradient-to-b from-dark-950 via-dark-900 to-dark-950" : "bg-gradient-to-b from-primary-50 via-white to-purple-50"
       )}>
         {/* Animated background */}
@@ -83,9 +137,9 @@ export default function Hosting() {
           )}
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -143,73 +197,177 @@ export default function Hosting() {
               ))}
             </motion.div>
           </div>
+        </div>
+      </section>
 
-          {/* Pricing Cards - Now in hero */}
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-            {hostingPlans.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + i * 0.1 }}
-                className={clsx(
-                  "relative p-8 rounded-3xl backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] group",
-                  plan.popular
-                    ? "bg-gradient-to-b from-primary-500/20 to-purple-500/10 border-2 border-primary-500/50 shadow-2xl shadow-primary-500/20"
-                    : isDark 
-                      ? "bg-white/5 border border-white/10 hover:border-white/20"
-                      : "bg-white/80 border border-primary-100 hover:border-primary-300 shadow-lg"
-                )}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-primary-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-lg">
-                    ⭐ MOST POPULAR
-                  </div>
-                )}
-                
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform`}>
-                  <Server className="w-8 h-8 text-white" />
-                </div>
-                
-                <h3 className={clsx("text-xl font-bold", isDark ? "text-white" : "text-dark-900")}>{plan.name}</h3>
-                
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className={clsx("text-5xl font-bold", isDark ? "text-white" : "text-dark-900")}>{format(plan.price)}</span>
-                  <span className={isDark ? "text-dark-400" : "text-dark-500"}>/month</span>
-                </div>
-                
-                <p className={clsx("mt-2 text-sm", isDark ? "text-dark-400" : "text-dark-500")}>Billed monthly, cancel anytime</p>
-                
-                <ul className="mt-8 space-y-4">
-                  {plan.features.map((f, j) => (
-                    <li key={j} className={clsx("flex items-center gap-3 text-sm", isDark ? "text-dark-200" : "text-dark-600")}>
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                
-                <button
-                  onClick={() => handleAddToCart(plan)}
+      {/* Row-by-Row Pricing Table */}
+      <section className={clsx("py-16", isDark ? "bg-dark-900" : "bg-white")}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className={clsx(
+              "rounded-3xl overflow-hidden border",
+              isDark ? "bg-dark-800/50 border-dark-700" : "bg-white border-gray-200 shadow-xl"
+            )}
+          >
+            {/* Table Header - Plan Names & Prices */}
+            <div className={clsx(
+              "grid grid-cols-4 border-b",
+              isDark ? "border-dark-700" : "border-gray-200"
+            )}>
+              <div className={clsx(
+                "p-6 font-semibold",
+                isDark ? "bg-dark-800 text-white" : "bg-gray-50 text-dark-900"
+              )}>
+                <Server className="w-6 h-6 mb-2 text-primary-500" />
+                Compare Plans
+              </div>
+              {hostingPlans.map((plan, i) => (
+                <div
+                  key={plan.name}
                   className={clsx(
-                    "w-full mt-8 py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 group-hover:gap-3",
-                    plan.popular
-                      ? "bg-gradient-to-r from-primary-500 to-purple-500 text-white hover:shadow-lg hover:shadow-primary-500/30"
-                      : isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-primary-100 text-primary-700 hover:bg-primary-200"
+                    "p-6 text-center relative",
+                    plan.popular 
+                      ? "bg-gradient-to-b from-primary-500/10 to-purple-500/5" 
+                      : isDark ? "bg-dark-800/50" : "bg-gray-50/50"
                   )}
                 >
-                  Get Started <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </button>
-              </motion.div>
+                  {plan.popular && (
+                    <div className="absolute -top-0 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-primary-500 to-purple-500 text-white text-xs font-bold rounded-b-lg">
+                      POPULAR
+                    </div>
+                  )}
+                  <h3 className={clsx(
+                    "text-lg font-bold mb-2",
+                    isDark ? "text-white" : "text-dark-900"
+                  )}>{plan.name}</h3>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className={clsx(
+                      "text-3xl font-bold",
+                      plan.popular ? "text-primary-500" : isDark ? "text-white" : "text-dark-900"
+                    )}>{format(plan.price)}</span>
+                    <span className={isDark ? "text-dark-400" : "text-dark-500"}>/mo</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Spec Rows */}
+            {specRows.map((spec, rowIndex) => (
+              <div
+                key={spec.key}
+                className={clsx(
+                  "grid grid-cols-4 border-b",
+                  isDark ? "border-dark-700" : "border-gray-100",
+                  rowIndex % 2 === 0 
+                    ? isDark ? "bg-dark-800/30" : "bg-gray-50/50"
+                    : ""
+                )}
+              >
+                <div className={clsx(
+                  "p-4 flex items-center gap-3",
+                  isDark ? "text-dark-300" : "text-dark-600"
+                )}>
+                  <spec.icon className="w-5 h-5 text-primary-500" />
+                  <span className="font-medium">{spec.label}</span>
+                </div>
+                {hostingPlans.map((plan) => (
+                  <div
+                    key={`${plan.name}-${spec.key}`}
+                    className={clsx(
+                      "p-4 text-center flex items-center justify-center",
+                      plan.popular ? "bg-primary-500/5" : "",
+                      isDark ? "text-white" : "text-dark-800"
+                    )}
+                  >
+                    <span className="font-medium">{plan[spec.key] || '-'}</span>
+                  </div>
+                ))}
+              </div>
             ))}
-          </div>
+
+            {/* Boolean Features */}
+            {[
+              { key: 'ssl', label: 'Free SSL Certificate' },
+              { key: 'cpanel', label: 'Plesk/cPanel' },
+              { key: 'freeDomain', label: 'Free Domain' },
+              { key: 'staging', label: 'Staging Environment' },
+            ].map((feature, rowIndex) => (
+              <div
+                key={feature.key}
+                className={clsx(
+                  "grid grid-cols-4 border-b",
+                  isDark ? "border-dark-700" : "border-gray-100",
+                  (specRows.length + rowIndex) % 2 === 0 
+                    ? isDark ? "bg-dark-800/30" : "bg-gray-50/50"
+                    : ""
+                )}
+              >
+                <div className={clsx(
+                  "p-4 flex items-center gap-3",
+                  isDark ? "text-dark-300" : "text-dark-600"
+                )}>
+                  <Shield className="w-5 h-5 text-primary-500" />
+                  <span className="font-medium">{feature.label}</span>
+                </div>
+                {hostingPlans.map((plan) => (
+                  <div
+                    key={`${plan.name}-${feature.key}`}
+                    className={clsx(
+                      "p-4 text-center flex items-center justify-center",
+                      plan.popular ? "bg-primary-500/5" : ""
+                    )}
+                  >
+                    {plan[feature.key] ? (
+                      <Check className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <X className="w-5 h-5 text-dark-400" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Action Row */}
+            <div className={clsx(
+              "grid grid-cols-4",
+              isDark ? "bg-dark-800" : "bg-gray-50"
+            )}>
+              <div className="p-6"></div>
+              {hostingPlans.map((plan) => (
+                <div
+                  key={`action-${plan.name}`}
+                  className={clsx(
+                    "p-6 text-center",
+                    plan.popular ? "bg-primary-500/5" : ""
+                  )}
+                >
+                  <button
+                    onClick={() => handleAddToCart(plan)}
+                    className={clsx(
+                      "w-full py-3 px-6 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
+                      plan.popular
+                        ? "bg-gradient-to-r from-primary-500 to-purple-500 text-white hover:shadow-lg hover:shadow-primary-500/30"
+                        : isDark 
+                          ? "bg-white/10 text-white hover:bg-white/20 border border-white/20" 
+                          : "bg-primary-100 text-primary-700 hover:bg-primary-200"
+                    )}
+                  >
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
           
           {/* Trust badges */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className={clsx("mt-12 flex flex-wrap justify-center items-center gap-6 text-sm", isDark ? "text-dark-400" : "text-dark-600")}
+            className={clsx("mt-8 flex flex-wrap justify-center items-center gap-6 text-sm", isDark ? "text-dark-400" : "text-dark-600")}
           >
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-green-500" />

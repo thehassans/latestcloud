@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { CreditCard, Key, Eye, EyeOff, Save, TestTube, CheckCircle, AlertCircle, Building2, Banknote } from 'lucide-react'
+import { CreditCard, Key, Eye, EyeOff, Save, TestTube, CheckCircle, AlertCircle, Building2, Banknote, Smartphone, Wallet } from 'lucide-react'
 import { settingsAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
 
@@ -17,6 +17,24 @@ export default function AdminPaymentGateway() {
     stripe_publishable_key_live: '',
     stripe_secret_key_live: '',
     stripe_webhook_secret: '',
+    // PayPal
+    paypal_enabled: false,
+    paypal_mode: 'sandbox',
+    paypal_client_id_sandbox: '',
+    paypal_secret_sandbox: '',
+    paypal_client_id_live: '',
+    paypal_secret_live: '',
+    // bKash
+    bkash_enabled: false,
+    bkash_number: '',
+    bkash_account_type: 'personal',
+    bkash_instructions: '',
+    // Rocket
+    rocket_enabled: false,
+    rocket_number: '',
+    rocket_account_type: 'personal',
+    rocket_instructions: '',
+    // Bank & Cash
     bank_transfer_enabled: true,
     bank_name: '',
     bank_account_number: '',
@@ -250,6 +268,255 @@ export default function AdminPaymentGateway() {
                 <TestTube className="w-4 h-4 mr-2" />
                 {testing ? 'Testing...' : 'Test Connection'}
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* PayPal Settings */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-[#003087] rounded-xl flex items-center justify-center">
+                <Wallet className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">PayPal</h2>
+                <p className="text-sm text-dark-500">Accept PayPal payments worldwide</p>
+              </div>
+            </div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={settings.paypal_enabled}
+                onChange={(e) => setSettings(prev => ({ ...prev, paypal_enabled: e.target.checked }))}
+                className="w-5 h-5 rounded text-primary-500"
+              />
+              <span className="font-medium">Enabled</span>
+            </label>
+          </div>
+
+          {settings.paypal_enabled && (
+            <div className="space-y-6">
+              {/* Mode Selection */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Mode</label>
+                <div className="flex gap-4">
+                  <label className={`flex-1 p-4 border rounded-xl cursor-pointer transition-colors ${settings.paypal_mode === 'sandbox' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
+                    <input
+                      type="radio"
+                      name="paypal_mode"
+                      value="sandbox"
+                      checked={settings.paypal_mode === 'sandbox'}
+                      onChange={(e) => setSettings(prev => ({ ...prev, paypal_mode: e.target.value }))}
+                      className="hidden"
+                    />
+                    <div className="flex items-center gap-2">
+                      <TestTube className="w-5 h-5 text-amber-500" />
+                      <span className="font-medium">Sandbox</span>
+                    </div>
+                    <p className="text-xs text-dark-500 mt-1">Use for testing</p>
+                  </label>
+                  <label className={`flex-1 p-4 border rounded-xl cursor-pointer transition-colors ${settings.paypal_mode === 'live' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
+                    <input
+                      type="radio"
+                      name="paypal_mode"
+                      value="live"
+                      checked={settings.paypal_mode === 'live'}
+                      onChange={(e) => setSettings(prev => ({ ...prev, paypal_mode: e.target.value }))}
+                      className="hidden"
+                    />
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <span className="font-medium">Live</span>
+                    </div>
+                    <p className="text-xs text-dark-500 mt-1">Accept real payments</p>
+                  </label>
+                </div>
+              </div>
+
+              {/* Sandbox Keys */}
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                <h3 className="font-medium text-amber-800 dark:text-amber-200 mb-4 flex items-center gap-2">
+                  <TestTube className="w-4 h-4" /> Sandbox Credentials
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Client ID (Sandbox)</label>
+                    <input
+                      type="text"
+                      value={settings.paypal_client_id_sandbox}
+                      onChange={(e) => setSettings(prev => ({ ...prev, paypal_client_id_sandbox: e.target.value }))}
+                      placeholder="AX..."
+                      className="input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Secret (Sandbox)</label>
+                    <input
+                      type={showSecretKey ? 'text' : 'password'}
+                      value={settings.paypal_secret_sandbox}
+                      onChange={(e) => setSettings(prev => ({ ...prev, paypal_secret_sandbox: e.target.value }))}
+                      placeholder="EK..."
+                      className="input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Keys */}
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                <h3 className="font-medium text-green-800 dark:text-green-200 mb-4 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" /> Live Credentials
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Client ID (Live)</label>
+                    <input
+                      type="text"
+                      value={settings.paypal_client_id_live}
+                      onChange={(e) => setSettings(prev => ({ ...prev, paypal_client_id_live: e.target.value }))}
+                      placeholder="AX..."
+                      className="input"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Secret (Live)</label>
+                    <input
+                      type={showSecretKey ? 'text' : 'password'}
+                      value={settings.paypal_secret_live}
+                      onChange={(e) => setSettings(prev => ({ ...prev, paypal_secret_live: e.target.value }))}
+                      placeholder="EK..."
+                      className="input"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* bKash Settings */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-[#E2136E] rounded-xl flex items-center justify-center">
+                <Smartphone className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">bKash</h2>
+                <p className="text-sm text-dark-500">Accept bKash mobile payments (Bangladesh)</p>
+              </div>
+            </div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={settings.bkash_enabled}
+                onChange={(e) => setSettings(prev => ({ ...prev, bkash_enabled: e.target.checked }))}
+                className="w-5 h-5 rounded text-primary-500"
+              />
+              <span className="font-medium">Enabled</span>
+            </label>
+          </div>
+
+          {settings.bkash_enabled && (
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">bKash Number *</label>
+                  <input
+                    type="text"
+                    value={settings.bkash_number}
+                    onChange={(e) => setSettings(prev => ({ ...prev, bkash_number: e.target.value }))}
+                    placeholder="e.g. 01XXXXXXXXX"
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Account Type</label>
+                  <select
+                    value={settings.bkash_account_type}
+                    onChange={(e) => setSettings(prev => ({ ...prev, bkash_account_type: e.target.value }))}
+                    className="input"
+                  >
+                    <option value="personal">Personal</option>
+                    <option value="merchant">Merchant</option>
+                    <option value="agent">Agent</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Payment Instructions</label>
+                <textarea
+                  value={settings.bkash_instructions}
+                  onChange={(e) => setSettings(prev => ({ ...prev, bkash_instructions: e.target.value }))}
+                  placeholder="e.g. Send Money to 01XXXXXXXXX and use Order ID as reference..."
+                  rows={3}
+                  className="input"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Rocket Settings */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-[#8C3494] rounded-xl flex items-center justify-center">
+                <Smartphone className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">Rocket</h2>
+                <p className="text-sm text-dark-500">Accept Rocket mobile payments (Bangladesh)</p>
+              </div>
+            </div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={settings.rocket_enabled}
+                onChange={(e) => setSettings(prev => ({ ...prev, rocket_enabled: e.target.checked }))}
+                className="w-5 h-5 rounded text-primary-500"
+              />
+              <span className="font-medium">Enabled</span>
+            </label>
+          </div>
+
+          {settings.rocket_enabled && (
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Rocket Number *</label>
+                  <input
+                    type="text"
+                    value={settings.rocket_number}
+                    onChange={(e) => setSettings(prev => ({ ...prev, rocket_number: e.target.value }))}
+                    placeholder="e.g. 01XXXXXXXXX"
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Account Type</label>
+                  <select
+                    value={settings.rocket_account_type}
+                    onChange={(e) => setSettings(prev => ({ ...prev, rocket_account_type: e.target.value }))}
+                    className="input"
+                  >
+                    <option value="personal">Personal</option>
+                    <option value="merchant">Merchant</option>
+                    <option value="agent">Agent</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Payment Instructions</label>
+                <textarea
+                  value={settings.rocket_instructions}
+                  onChange={(e) => setSettings(prev => ({ ...prev, rocket_instructions: e.target.value }))}
+                  placeholder="e.g. Send Money to 01XXXXXXXXX and use Order ID as reference..."
+                  rows={3}
+                  className="input"
+                />
+              </div>
             </div>
           )}
         </div>

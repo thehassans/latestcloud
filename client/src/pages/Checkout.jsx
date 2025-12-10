@@ -3,21 +3,30 @@ import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
-import { CreditCard, Lock, CheckCircle, Building2, Banknote, Upload, X, Loader2 } from 'lucide-react'
+import { CreditCard, Lock, CheckCircle, Building2, Banknote, Upload, X, Loader2, Smartphone, Wallet } from 'lucide-react'
 import { useCartStore, useCurrencyStore, useAuthStore } from '../store/useStore'
 import { ordersAPI, paymentsAPI, settingsAPI } from '../lib/api'
 import toast from 'react-hot-toast'
 
-const getPaymentMethods = (stripeEnabled, bankEnabled, cashEnabled) => {
+const getPaymentMethods = (settings) => {
   const methods = []
-  if (stripeEnabled) {
-    methods.push({ id: 'card', name: 'Credit/Debit Card', icon: CreditCard, requiresProof: false, isStripe: true })
+  if (settings.stripe_enabled) {
+    methods.push({ id: 'card', name: 'Card', icon: CreditCard, requiresProof: false, isStripe: true, color: 'bg-[#635BFF]' })
   }
-  if (bankEnabled) {
-    methods.push({ id: 'bank', name: 'Bank Transfer', icon: Building2, requiresProof: true })
+  if (settings.paypal_enabled) {
+    methods.push({ id: 'paypal', name: 'PayPal', icon: Wallet, requiresProof: true, color: 'bg-[#003087]' })
   }
-  if (cashEnabled) {
-    methods.push({ id: 'cash', name: 'Cash Payment', icon: Banknote, requiresProof: true })
+  if (settings.bkash_enabled) {
+    methods.push({ id: 'bkash', name: 'bKash', icon: Smartphone, requiresProof: true, color: 'bg-[#E2136E]', details: settings.bkash_details })
+  }
+  if (settings.rocket_enabled) {
+    methods.push({ id: 'rocket', name: 'Rocket', icon: Smartphone, requiresProof: true, color: 'bg-[#8C3494]', details: settings.rocket_details })
+  }
+  if (settings.bank_transfer_enabled) {
+    methods.push({ id: 'bank', name: 'Bank', icon: Building2, requiresProof: true, color: 'bg-emerald-600', details: settings.bank_details })
+  }
+  if (settings.cash_payment_enabled) {
+    methods.push({ id: 'cash', name: 'Cash', icon: Banknote, requiresProof: true, color: 'bg-amber-600' })
   }
   return methods
 }
@@ -50,11 +59,9 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
   const { subtotal, discount, total } = getTotal()
   const [loading, setLoading] = useState(false)
   
-  const bankEnabled = paymentSettings.bank_transfer_enabled !== false
-  const cashEnabled = paymentSettings.cash_payment_enabled !== false
-  const paymentMethods = getPaymentMethods(stripeEnabled, bankEnabled, cashEnabled)
+  const paymentMethods = getPaymentMethods({ ...paymentSettings, stripe_enabled: stripeEnabled })
   
-  const [paymentMethod, setPaymentMethod] = useState(stripeEnabled ? 'card' : (bankEnabled ? 'bank' : 'cash'))
+  const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0]?.id || 'card')
   const [paymentProof, setPaymentProof] = useState(null)
   const [paymentProofPreview, setPaymentProofPreview] = useState(null)
   const [cardComplete, setCardComplete] = useState(false)
@@ -212,18 +219,22 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
 
               <div className="card p-6">
                 <h2 className="text-lg font-bold mb-4">Payment Method</h2>
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {paymentMethods.map((method) => {
                     // Skip card if Stripe not enabled
                     if (method.isStripe && !stripeEnabled) return null
                     return (
-                      <label key={method.id} className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-colors
-                        ${paymentMethod === method.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
+                      <label key={method.id} className={`flex flex-col items-center gap-2 p-4 border rounded-xl cursor-pointer transition-all hover:scale-[1.02]
+                        ${paymentMethod === method.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-lg' : 'border-dark-200 dark:border-dark-700'}`}>
                         <input type="radio" name="payment" value={method.id} checked={paymentMethod === method.id}
-                          onChange={() => setPaymentMethod(method.id)} className="text-primary-500" />
-                        <method.icon className="w-5 h-5" />
-                        <span>{method.name}</span>
-                        {method.requiresProof && <span className="ml-auto text-xs text-dark-500">(Proof required)</span>}
+                          onChange={() => setPaymentMethod(method.id)} className="hidden" />
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${method.color || 'bg-gray-600'}`}>
+                          <method.icon className="w-6 h-6 text-white" />
+                        </div>
+                        <span className="font-medium text-sm">{method.name}</span>
+                        {paymentMethod === method.id && (
+                          <CheckCircle className="w-4 h-4 text-primary-500 absolute top-2 right-2" />
+                        )}
                       </label>
                     )
                   })}
@@ -245,10 +256,62 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
                   </div>
                 )}
 
-                {/* Payment Proof Upload for Bank/Cash */}
+                {/* Payment Proof Upload for Bank/Cash/bKash/Rocket/PayPal */}
                 {selectedMethod?.requiresProof && (
                   <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
                     <h3 className="font-medium text-amber-800 dark:text-amber-200 mb-2">Payment Instructions</h3>
+                    
+                    {/* bKash */}
+                    {paymentMethod === 'bkash' && (
+                      <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-8 h-8 bg-[#E2136E] rounded-lg flex items-center justify-center">
+                            <Smartphone className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="font-bold">bKash</span>
+                        </div>
+                        <p><strong>Number:</strong> {paymentSettings.bkash_details?.number || 'Not configured'}</p>
+                        <p><strong>Account Type:</strong> {paymentSettings.bkash_details?.account_type || 'Personal'}</p>
+                        {paymentSettings.bkash_details?.instructions && (
+                          <p className="mt-2 text-xs">{paymentSettings.bkash_details.instructions}</p>
+                        )}
+                        <p className="mt-2 text-xs">Use your Order ID as reference when sending payment.</p>
+                      </div>
+                    )}
+                    
+                    {/* Rocket */}
+                    {paymentMethod === 'rocket' && (
+                      <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-8 h-8 bg-[#8C3494] rounded-lg flex items-center justify-center">
+                            <Smartphone className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="font-bold">Rocket</span>
+                        </div>
+                        <p><strong>Number:</strong> {paymentSettings.rocket_details?.number || 'Not configured'}</p>
+                        <p><strong>Account Type:</strong> {paymentSettings.rocket_details?.account_type || 'Personal'}</p>
+                        {paymentSettings.rocket_details?.instructions && (
+                          <p className="mt-2 text-xs">{paymentSettings.rocket_details.instructions}</p>
+                        )}
+                        <p className="mt-2 text-xs">Use your Order ID as reference when sending payment.</p>
+                      </div>
+                    )}
+                    
+                    {/* PayPal */}
+                    {paymentMethod === 'paypal' && (
+                      <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-8 h-8 bg-[#003087] rounded-lg flex items-center justify-center">
+                            <Wallet className="w-4 h-4 text-white" />
+                          </div>
+                          <span className="font-bold">PayPal</span>
+                        </div>
+                        <p>Please send payment via PayPal and upload the confirmation screenshot.</p>
+                        <p className="mt-2 text-xs">Include your Order ID in the payment note.</p>
+                      </div>
+                    )}
+                    
+                    {/* Bank Transfer */}
                     {paymentMethod === 'bank' && (
                       <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
                         <p className="mb-2">Transfer to:</p>
@@ -260,6 +323,8 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
                         )}
                       </div>
                     )}
+                    
+                    {/* Cash */}
                     {paymentMethod === 'cash' && (
                       <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
                         <p>{paymentSettings.cash_instructions || 'Contact us to arrange cash payment. Upload receipt after payment.'}</p>

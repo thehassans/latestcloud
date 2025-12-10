@@ -297,6 +297,15 @@ router.get('/payment-gateway', authenticate, requireRole('admin'), async (req, r
       'stripe_publishable_key_test', 'stripe_secret_key_test',
       'stripe_publishable_key_live', 'stripe_secret_key_live',
       'stripe_webhook_secret',
+      // PayPal
+      'paypal_enabled', 'paypal_mode',
+      'paypal_client_id_sandbox', 'paypal_secret_sandbox',
+      'paypal_client_id_live', 'paypal_secret_live',
+      // bKash
+      'bkash_enabled', 'bkash_number', 'bkash_account_type', 'bkash_instructions',
+      // Rocket
+      'rocket_enabled', 'rocket_number', 'rocket_account_type', 'rocket_instructions',
+      // Bank & Cash
       'bank_transfer_enabled', 'bank_name', 'bank_account_number',
       'bank_account_holder', 'bank_additional_info',
       'cash_payment_enabled', 'cash_payment_instructions'
@@ -382,8 +391,11 @@ router.post('/payment-gateway/test', authenticate, requireRole('admin'), async (
 router.get('/payment-methods', async (req, res) => {
   try {
     const keys = [
-      'stripe_enabled', 'bank_transfer_enabled', 'cash_payment_enabled',
+      'stripe_enabled', 'paypal_enabled', 'bkash_enabled', 'rocket_enabled',
+      'bank_transfer_enabled', 'cash_payment_enabled',
       'bank_name', 'bank_account_number', 'bank_account_holder', 'bank_additional_info',
+      'bkash_number', 'bkash_account_type', 'bkash_instructions',
+      'rocket_number', 'rocket_account_type', 'rocket_instructions',
       'cash_payment_instructions'
     ];
     
@@ -403,6 +415,9 @@ router.get('/payment-methods', async (req, res) => {
 
     res.json({
       stripe_enabled: settings.stripe_enabled || false,
+      paypal_enabled: settings.paypal_enabled || false,
+      bkash_enabled: settings.bkash_enabled || false,
+      rocket_enabled: settings.rocket_enabled || false,
       bank_transfer_enabled: settings.bank_transfer_enabled !== false,
       cash_payment_enabled: settings.cash_payment_enabled !== false,
       bank_details: {
@@ -410,6 +425,16 @@ router.get('/payment-methods', async (req, res) => {
         account_number: settings.bank_account_number || '',
         account_holder: settings.bank_account_holder || '',
         additional_info: settings.bank_additional_info || ''
+      },
+      bkash_details: {
+        number: settings.bkash_number || '',
+        account_type: settings.bkash_account_type || 'personal',
+        instructions: settings.bkash_instructions || 'Send payment to our bKash number and use Order ID as reference.'
+      },
+      rocket_details: {
+        number: settings.rocket_number || '',
+        account_type: settings.rocket_account_type || 'personal',
+        instructions: settings.rocket_instructions || 'Send payment to our Rocket number and use Order ID as reference.'
       },
       cash_instructions: settings.cash_payment_instructions || 'Contact us to arrange cash payment. Upload receipt after payment.'
     });
