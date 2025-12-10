@@ -419,6 +419,68 @@ router.get('/payment-methods', async (req, res) => {
   }
 });
 
+// Get custom VPS pricing (public)
+router.get('/custom-vps-pricing', async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT setting_value FROM settings WHERE setting_key = 'custom_vps_pricing'"
+    );
+    
+    const defaultPricing = {
+      cpu_price_per_core: 3.00,
+      ram_price_per_gb: 1.50,
+      storage_price_per_gb: 0.05,
+      bandwidth_price_per_tb: 1.00,
+      min_cpu: 1, min_ram: 1, min_storage: 20, min_bandwidth: 1,
+      max_cpu: 32, max_ram: 128, max_storage: 2000, max_bandwidth: 100,
+      cpu_step: 1, ram_step: 1, storage_step: 10, bandwidth_step: 1,
+      base_fee: 2.00,
+      ddos_protection_price: 5.00,
+      backup_price: 3.00,
+      managed_support_price: 10.00,
+    };
+    
+    let pricing = defaultPricing;
+    if (result[0]?.setting_value) {
+      try {
+        pricing = { ...defaultPricing, ...JSON.parse(result[0].setting_value) };
+      } catch (e) {}
+    }
+    
+    res.json({ pricing });
+  } catch (error) {
+    console.error('Get custom VPS pricing error:', error);
+    res.status(500).json({ error: 'Failed to load pricing' });
+  }
+});
+
+// Update custom VPS pricing (admin only)
+router.put('/custom-vps-pricing', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const pricing = req.body;
+    const value = JSON.stringify(pricing);
+    
+    const existing = await db.query("SELECT id FROM settings WHERE setting_key = 'custom_vps_pricing'");
+    
+    if (existing && existing.length > 0) {
+      await db.query(
+        "UPDATE settings SET setting_value = ?, setting_type = 'json', is_public = TRUE WHERE setting_key = 'custom_vps_pricing'",
+        [value]
+      );
+    } else {
+      await db.query(
+        "INSERT INTO settings (setting_key, setting_value, setting_type, is_public, category) VALUES ('custom_vps_pricing', ?, 'json', TRUE, 'pricing')",
+        [value]
+      );
+    }
+    
+    res.json({ message: 'Custom VPS pricing saved' });
+  } catch (error) {
+    console.error('Update custom VPS pricing error:', error);
+    res.status(500).json({ error: 'Failed to save pricing' });
+  }
+});
+
 // Get Stripe publishable key (public)
 router.get('/stripe-key', async (req, res) => {
   try {

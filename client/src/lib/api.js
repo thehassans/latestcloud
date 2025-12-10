@@ -101,7 +101,9 @@ export const settingsAPI = {
   updatePaymentGateway: (settings) => api.put('/settings/payment-gateway', settings),
   testPaymentGateway: (gateway) => api.post('/settings/payment-gateway/test', { gateway }),
   getStripeKey: () => api.get('/settings/stripe-key'),
-  getPaymentMethods: () => api.get('/settings/payment-methods')
+  getPaymentMethods: () => api.get('/settings/payment-methods'),
+  getCustomVPSPricing: () => api.get('/settings/custom-vps-pricing'),
+  updateCustomVPSPricing: (pricing) => api.put('/settings/custom-vps-pricing', pricing)
 }
 
 // Payments API

@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle, ArrowRight, HardDrive, Shield, Cpu, Gauge, Globe, Zap, Server, Lock, Headphones, Star } from 'lucide-react'
+import { CheckCircle, ArrowRight, HardDrive, Shield, Cpu, Gauge, Globe, Zap, Server, Lock, Headphones, Star, Settings, Plus, Minus } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
 import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
@@ -29,11 +30,87 @@ export default function VPS() {
   const { themeStyle } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  
+  // Custom VPS configurator state
+  const [customConfig, setCustomConfig] = useState({
+    cpu: 2,
+    ram: 4,
+    storage: 80,
+    bandwidth: 3,
+    ddos: false,
+    backup: false,
+    managed: false
+  })
 
   const { data: pricingData } = useQuery({
     queryKey: ['pricing'],
     queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
   })
+  
+  const { data: customPricing } = useQuery({
+    queryKey: ['custom-vps-pricing'],
+    queryFn: () => settingsAPI.getCustomVPSPricing().then(res => res.data.pricing)
+  })
+  
+  // Default pricing if not loaded
+  const pricing = customPricing || {
+    cpu_price_per_core: 3.00,
+    ram_price_per_gb: 1.50,
+    storage_price_per_gb: 0.05,
+    bandwidth_price_per_tb: 1.00,
+    min_cpu: 1, min_ram: 1, min_storage: 20, min_bandwidth: 1,
+    max_cpu: 32, max_ram: 128, max_storage: 2000, max_bandwidth: 100,
+    cpu_step: 1, ram_step: 1, storage_step: 10, bandwidth_step: 1,
+    base_fee: 2.00,
+    ddos_protection_price: 5.00,
+    backup_price: 3.00,
+    managed_support_price: 10.00,
+  }
+  
+  // Calculate custom VPS price
+  const calculateCustomPrice = () => {
+    let total = pricing.base_fee
+    total += customConfig.cpu * pricing.cpu_price_per_core
+    total += customConfig.ram * pricing.ram_price_per_gb
+    total += customConfig.storage * pricing.storage_price_per_gb
+    total += customConfig.bandwidth * pricing.bandwidth_price_per_tb
+    if (customConfig.ddos) total += pricing.ddos_protection_price
+    if (customConfig.backup) total += pricing.backup_price
+    if (customConfig.managed) total += pricing.managed_support_price
+    return total
+  }
+  
+  const handleAddCustomToCart = () => {
+    const price = calculateCustomPrice()
+    addItem({
+      id: `custom-vps-${Date.now()}`,
+      type: 'product',
+      name: `Custom VPS (${customConfig.cpu} vCPU, ${customConfig.ram}GB RAM, ${customConfig.storage}GB SSD)`,
+      price: price,
+      billingCycle: 'monthly',
+      product_type: 'vps',
+      customConfig: customConfig
+    })
+    toast.success('Custom VPS added to cart!')
+  }
+  
+  const updateConfig = (key, value) => {
+    setCustomConfig(prev => ({ ...prev, [key]: value }))
+  }
+  
+  const incrementConfig = (key, step, max) => {
+    setCustomConfig(prev => ({
+      ...prev,
+      [key]: Math.min(prev[key] + step, max)
+    }))
+  }
+  
+  const decrementConfig = (key, step, min) => {
+    setCustomConfig(prev => ({
+      ...prev,
+      [key]: Math.max(prev[key] - step, min)
+    }))
+  }
 
   const vpsPlans = (pricingData?.vps || defaultPlans).map(p => ({
     ...p,
@@ -215,6 +292,331 @@ export default function VPS() {
             <div className="flex items-center gap-2">
               <Headphones className="w-5 h-5 text-purple-400" />
               24/7 Expert Support
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Custom VPS Configurator */}
+      <section className="py-24 bg-white dark:bg-dark-900">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/30 text-purple-600 dark:text-purple-400 rounded-full text-sm font-medium mb-6"
+            >
+              <Settings className="w-4 h-4" />
+              Build Your Own
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold font-display"
+            >
+              Customize Your{' '}
+              <span className="text-gradient">VPS Server</span>
+            </motion.h2>
+            <p className="mt-4 text-dark-500 max-w-2xl mx-auto">
+              Configure your perfect server with exactly the resources you need
+            </p>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="card p-8 border-2 border-purple-500/20"
+          >
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Configuration Controls */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* CPU */}
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Cpu className="w-5 h-5 text-blue-500" />
+                      <span className="font-medium">vCPU Cores</span>
+                    </div>
+                    <span className="text-sm text-dark-500">${pricing.cpu_price_per_core}/core</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => decrementConfig('cpu', pricing.cpu_step, pricing.min_cpu)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-blue-500 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={pricing.min_cpu}
+                        max={pricing.max_cpu}
+                        step={pricing.cpu_step}
+                        value={customConfig.cpu}
+                        onChange={(e) => updateConfig('cpu', parseInt(e.target.value))}
+                        className="w-full accent-blue-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => incrementConfig('cpu', pricing.cpu_step, pricing.max_cpu)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-blue-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div className="w-20 text-center">
+                      <span className="text-2xl font-bold text-blue-600">{customConfig.cpu}</span>
+                      <span className="text-sm text-dark-500 ml-1">cores</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RAM */}
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Gauge className="w-5 h-5 text-purple-500" />
+                      <span className="font-medium">RAM Memory</span>
+                    </div>
+                    <span className="text-sm text-dark-500">${pricing.ram_price_per_gb}/GB</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => decrementConfig('ram', pricing.ram_step, pricing.min_ram)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-purple-500 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={pricing.min_ram}
+                        max={pricing.max_ram}
+                        step={pricing.ram_step}
+                        value={customConfig.ram}
+                        onChange={(e) => updateConfig('ram', parseInt(e.target.value))}
+                        className="w-full accent-purple-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => incrementConfig('ram', pricing.ram_step, pricing.max_ram)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-purple-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div className="w-20 text-center">
+                      <span className="text-2xl font-bold text-purple-600">{customConfig.ram}</span>
+                      <span className="text-sm text-dark-500 ml-1">GB</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Storage */}
+                <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <HardDrive className="w-5 h-5 text-pink-500" />
+                      <span className="font-medium">NVMe Storage</span>
+                    </div>
+                    <span className="text-sm text-dark-500">${pricing.storage_price_per_gb}/GB</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => decrementConfig('storage', pricing.storage_step, pricing.min_storage)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-pink-500 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={pricing.min_storage}
+                        max={pricing.max_storage}
+                        step={pricing.storage_step}
+                        value={customConfig.storage}
+                        onChange={(e) => updateConfig('storage', parseInt(e.target.value))}
+                        className="w-full accent-pink-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => incrementConfig('storage', pricing.storage_step, pricing.max_storage)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-pink-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div className="w-20 text-center">
+                      <span className="text-2xl font-bold text-pink-600">{customConfig.storage}</span>
+                      <span className="text-sm text-dark-500 ml-1">GB</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bandwidth */}
+                <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-5 h-5 text-cyan-500" />
+                      <span className="font-medium">Bandwidth</span>
+                    </div>
+                    <span className="text-sm text-dark-500">${pricing.bandwidth_price_per_tb}/TB</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => decrementConfig('bandwidth', pricing.bandwidth_step, pricing.min_bandwidth)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-cyan-500 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={pricing.min_bandwidth}
+                        max={pricing.max_bandwidth}
+                        step={pricing.bandwidth_step}
+                        value={customConfig.bandwidth}
+                        onChange={(e) => updateConfig('bandwidth', parseInt(e.target.value))}
+                        className="w-full accent-cyan-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => incrementConfig('bandwidth', pricing.bandwidth_step, pricing.max_bandwidth)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-cyan-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div className="w-20 text-center">
+                      <span className="text-2xl font-bold text-cyan-600">{customConfig.bandwidth}</span>
+                      <span className="text-sm text-dark-500 ml-1">TB</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add-ons */}
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <label className={clsx(
+                    "p-4 rounded-xl border-2 cursor-pointer transition-all",
+                    customConfig.ddos 
+                      ? "border-green-500 bg-green-50 dark:bg-green-900/20" 
+                      : "border-dark-200 dark:border-dark-700 hover:border-green-500/50"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={customConfig.ddos}
+                      onChange={(e) => updateConfig('ddos', e.target.checked)}
+                      className="hidden"
+                    />
+                    <Shield className="w-6 h-6 text-green-500 mb-2" />
+                    <div className="font-medium text-sm">DDoS Protection</div>
+                    <div className="text-xs text-dark-500">+${pricing.ddos_protection_price}/mo</div>
+                  </label>
+
+                  <label className={clsx(
+                    "p-4 rounded-xl border-2 cursor-pointer transition-all",
+                    customConfig.backup 
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" 
+                      : "border-dark-200 dark:border-dark-700 hover:border-blue-500/50"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={customConfig.backup}
+                      onChange={(e) => updateConfig('backup', e.target.checked)}
+                      className="hidden"
+                    />
+                    <HardDrive className="w-6 h-6 text-blue-500 mb-2" />
+                    <div className="font-medium text-sm">Auto Backups</div>
+                    <div className="text-xs text-dark-500">+${pricing.backup_price}/mo</div>
+                  </label>
+
+                  <label className={clsx(
+                    "p-4 rounded-xl border-2 cursor-pointer transition-all",
+                    customConfig.managed 
+                      ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20" 
+                      : "border-dark-200 dark:border-dark-700 hover:border-purple-500/50"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={customConfig.managed}
+                      onChange={(e) => updateConfig('managed', e.target.checked)}
+                      className="hidden"
+                    />
+                    <Headphones className="w-6 h-6 text-purple-500 mb-2" />
+                    <div className="font-medium text-sm">Managed Support</div>
+                    <div className="text-xs text-dark-500">+${pricing.managed_support_price}/mo</div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Price Summary */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-24 p-6 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-2xl border border-purple-500/20">
+                  <h3 className="text-lg font-bold mb-4">Your Configuration</h3>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">Base Fee</span>
+                      <span>${pricing.base_fee.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">{customConfig.cpu} vCPU</span>
+                      <span>${(customConfig.cpu * pricing.cpu_price_per_core).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">{customConfig.ram} GB RAM</span>
+                      <span>${(customConfig.ram * pricing.ram_price_per_gb).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">{customConfig.storage} GB Storage</span>
+                      <span>${(customConfig.storage * pricing.storage_price_per_gb).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">{customConfig.bandwidth} TB Bandwidth</span>
+                      <span>${(customConfig.bandwidth * pricing.bandwidth_price_per_tb).toFixed(2)}</span>
+                    </div>
+                    {customConfig.ddos && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>DDoS Protection</span>
+                        <span>+${pricing.ddos_protection_price.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {customConfig.backup && (
+                      <div className="flex justify-between text-sm text-blue-600">
+                        <span>Auto Backups</span>
+                        <span>+${pricing.backup_price.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {customConfig.managed && (
+                      <div className="flex justify-between text-sm text-purple-600">
+                        <span>Managed Support</span>
+                        <span>+${pricing.managed_support_price.toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t border-dark-200 dark:border-dark-700 pt-4 mb-6">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-lg font-medium">Total</span>
+                      <div>
+                        <span className="text-3xl font-bold text-gradient">{format(calculateCustomPrice())}</span>
+                        <span className="text-dark-500">/mo</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleAddCustomToCart}
+                    className="w-full btn-primary justify-center py-4"
+                  >
+                    <Server className="w-5 h-5 mr-2" />
+                    Deploy Custom VPS
+                  </button>
+
+                  <p className="text-xs text-dark-500 text-center mt-4">
+                    Instant deployment • Full root access
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
