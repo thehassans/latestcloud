@@ -100,7 +100,8 @@ export const settingsAPI = {
   getPaymentGateway: () => api.get('/settings/payment-gateway'),
   updatePaymentGateway: (settings) => api.put('/settings/payment-gateway', settings),
   testPaymentGateway: (gateway) => api.post('/settings/payment-gateway/test', { gateway }),
-  getStripeKey: () => api.get('/settings/stripe-key')
+  getStripeKey: () => api.get('/settings/stripe-key'),
+  getPaymentMethods: () => api.get('/settings/payment-methods')
 }
 
 // Payments API

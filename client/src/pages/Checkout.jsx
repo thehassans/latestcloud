@@ -8,12 +8,19 @@ import { useCartStore, useCurrencyStore, useAuthStore } from '../store/useStore'
 import { ordersAPI, paymentsAPI, settingsAPI } from '../lib/api'
 import toast from 'react-hot-toast'
 
-const paymentMethods = [
-  { id: 'card', name: 'Credit/Debit Card', icon: CreditCard, requiresProof: false, isStripe: true },
-  { id: 'paypal', name: 'PayPal', icon: CreditCard, requiresProof: false },
-  { id: 'bank', name: 'Bank Transfer', icon: Building2, requiresProof: true },
-  { id: 'cash', name: 'Cash Payment', icon: Banknote, requiresProof: true },
-]
+const getPaymentMethods = (stripeEnabled, bankEnabled, cashEnabled) => {
+  const methods = []
+  if (stripeEnabled) {
+    methods.push({ id: 'card', name: 'Credit/Debit Card', icon: CreditCard, requiresProof: false, isStripe: true })
+  }
+  if (bankEnabled) {
+    methods.push({ id: 'bank', name: 'Bank Transfer', icon: Building2, requiresProof: true })
+  }
+  if (cashEnabled) {
+    methods.push({ id: 'cash', name: 'Cash Payment', icon: Banknote, requiresProof: true })
+  }
+  return methods
+}
 
 // Stripe Card Input Styles
 const cardElementOptions = {
@@ -28,21 +35,26 @@ const cardElementOptions = {
 }
 
 // Stripe-enabled checkout form (uses Stripe hooks)
-function StripeCheckoutForm() {
+function StripeCheckoutForm({ paymentSettings }) {
   const stripe = useStripe()
   const elements = useElements()
-  return <CheckoutFormInner stripeEnabled={true} stripe={stripe} elements={elements} />
+  return <CheckoutFormInner stripeEnabled={true} stripe={stripe} elements={elements} paymentSettings={paymentSettings} />
 }
 
 // Main checkout form component
-function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null }) {
+function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paymentSettings = {} }) {
   const navigate = useNavigate()
   const { items, coupon, getTotal, clearCart } = useCartStore()
   const { format } = useCurrencyStore()
   const { user } = useAuthStore()
   const { subtotal, discount, total } = getTotal()
   const [loading, setLoading] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState(stripeEnabled ? 'card' : 'bank')
+  
+  const bankEnabled = paymentSettings.bank_transfer_enabled !== false
+  const cashEnabled = paymentSettings.cash_payment_enabled !== false
+  const paymentMethods = getPaymentMethods(stripeEnabled, bankEnabled, cashEnabled)
+  
+  const [paymentMethod, setPaymentMethod] = useState(stripeEnabled ? 'card' : (bankEnabled ? 'bank' : 'cash'))
   const [paymentProof, setPaymentProof] = useState(null)
   const [paymentProofPreview, setPaymentProofPreview] = useState(null)
   const [cardComplete, setCardComplete] = useState(false)
@@ -240,14 +252,17 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null }) {
                     {paymentMethod === 'bank' && (
                       <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
                         <p className="mb-2">Transfer to:</p>
-                        <p><strong>Bank:</strong> Example Bank</p>
-                        <p><strong>Account:</strong> 1234567890</p>
-                        <p><strong>Name:</strong> Magnetic Clouds Ltd</p>
+                        <p><strong>Bank:</strong> {paymentSettings.bank_details?.bank_name || 'Not configured'}</p>
+                        <p><strong>Account:</strong> {paymentSettings.bank_details?.account_number || 'Not configured'}</p>
+                        <p><strong>Name:</strong> {paymentSettings.bank_details?.account_holder || 'Not configured'}</p>
+                        {paymentSettings.bank_details?.additional_info && (
+                          <p className="mt-2 text-xs">{paymentSettings.bank_details.additional_info}</p>
+                        )}
                       </div>
                     )}
                     {paymentMethod === 'cash' && (
                       <div className="text-sm text-amber-700 dark:text-amber-300 mb-4">
-                        <p>Contact us to arrange cash payment. Upload receipt after payment.</p>
+                        <p>{paymentSettings.cash_instructions || 'Contact us to arrange cash payment. Upload receipt after payment.'}</p>
                       </div>
                     )}
                     
@@ -332,6 +347,7 @@ export default function Checkout() {
   const { items } = useCartStore()
   const [stripePromise, setStripePromise] = useState(null)
   const [stripeEnabled, setStripeEnabled] = useState(false)
+  const [paymentSettings, setPaymentSettings] = useState({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -341,21 +357,28 @@ export default function Checkout() {
       return
     }
 
-    // Load Stripe key
-    const loadStripeKey = async () => {
+    // Load payment settings
+    const loadPaymentSettings = async () => {
       try {
-        const res = await settingsAPI.getStripeKey()
-        if (res.data.enabled && res.data.publishableKey) {
+        // Load both Stripe key and payment methods in parallel
+        const [stripeRes, methodsRes] = await Promise.all([
+          settingsAPI.getStripeKey(),
+          settingsAPI.getPaymentMethods()
+        ])
+        
+        if (stripeRes.data.enabled && stripeRes.data.publishableKey) {
           setStripeEnabled(true)
-          setStripePromise(loadStripe(res.data.publishableKey))
+          setStripePromise(loadStripe(stripeRes.data.publishableKey))
         }
+        
+        setPaymentSettings(methodsRes.data)
       } catch (err) {
-        console.error('Failed to load Stripe:', err)
+        console.error('Failed to load payment settings:', err)
       } finally {
         setLoading(false)
       }
     }
-    loadStripeKey()
+    loadPaymentSettings()
   }, [items.length, navigate])
 
   if (loading) {
@@ -369,10 +392,10 @@ export default function Checkout() {
   if (stripeEnabled && stripePromise) {
     return (
       <Elements stripe={stripePromise}>
-        <StripeCheckoutForm />
+        <StripeCheckoutForm paymentSettings={paymentSettings} />
       </Elements>
     )
   }
 
-  return <CheckoutFormInner stripeEnabled={false} />
+  return <CheckoutFormInner stripeEnabled={false} paymentSettings={paymentSettings} />
 }

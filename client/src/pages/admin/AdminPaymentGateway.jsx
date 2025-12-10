@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { CreditCard, Key, Eye, EyeOff, Save, TestTube, CheckCircle, AlertCircle } from 'lucide-react'
+import { CreditCard, Key, Eye, EyeOff, Save, TestTube, CheckCircle, AlertCircle, Building2, Banknote } from 'lucide-react'
 import { settingsAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
 
@@ -17,12 +17,13 @@ export default function AdminPaymentGateway() {
     stripe_publishable_key_live: '',
     stripe_secret_key_live: '',
     stripe_webhook_secret: '',
-    paypal_enabled: false,
-    paypal_mode: 'sandbox',
-    paypal_client_id_sandbox: '',
-    paypal_secret_sandbox: '',
-    paypal_client_id_live: '',
-    paypal_secret_live: '',
+    bank_transfer_enabled: true,
+    bank_name: '',
+    bank_account_number: '',
+    bank_account_holder: '',
+    bank_additional_info: '',
+    cash_payment_enabled: true,
+    cash_payment_instructions: '',
   })
 
   useEffect(() => {
@@ -253,81 +254,110 @@ export default function AdminPaymentGateway() {
           )}
         </div>
 
-        {/* PayPal Settings */}
+        {/* Bank Transfer Settings */}
         <div className="card p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-[#003087] rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-sm">PP</span>
+              <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-bold">PayPal</h2>
-                <p className="text-sm text-dark-500">Accept PayPal payments</p>
+                <h2 className="text-lg font-bold">Bank Transfer</h2>
+                <p className="text-sm text-dark-500">Accept bank transfer payments</p>
               </div>
             </div>
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={settings.paypal_enabled}
-                onChange={(e) => setSettings(prev => ({ ...prev, paypal_enabled: e.target.checked }))}
+                checked={settings.bank_transfer_enabled}
+                onChange={(e) => setSettings(prev => ({ ...prev, bank_transfer_enabled: e.target.checked }))}
                 className="w-5 h-5 rounded text-primary-500"
               />
               <span className="font-medium">Enabled</span>
             </label>
           </div>
 
-          {settings.paypal_enabled && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Mode</label>
-                <div className="flex gap-4">
-                  <label className={`flex-1 p-4 border rounded-xl cursor-pointer transition-colors ${settings.paypal_mode === 'sandbox' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
-                    <input type="radio" name="paypal_mode" value="sandbox" checked={settings.paypal_mode === 'sandbox'}
-                      onChange={(e) => setSettings(prev => ({ ...prev, paypal_mode: e.target.value }))} className="hidden" />
-                    <div className="flex items-center gap-2">
-                      <TestTube className="w-5 h-5 text-amber-500" />
-                      <span className="font-medium">Sandbox</span>
-                    </div>
-                  </label>
-                  <label className={`flex-1 p-4 border rounded-xl cursor-pointer transition-colors ${settings.paypal_mode === 'live' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-dark-200 dark:border-dark-700'}`}>
-                    <input type="radio" name="paypal_mode" value="live" checked={settings.paypal_mode === 'live'}
-                      onChange={(e) => setSettings(prev => ({ ...prev, paypal_mode: e.target.value }))} className="hidden" />
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                      <span className="font-medium">Live</span>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
+          {settings.bank_transfer_enabled && (
+            <div className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Client ID ({settings.paypal_mode})</label>
+                  <label className="block text-sm font-medium mb-2">Bank Name *</label>
                   <input
                     type="text"
-                    value={settings.paypal_mode === 'sandbox' ? settings.paypal_client_id_sandbox : settings.paypal_client_id_live}
-                    onChange={(e) => setSettings(prev => ({ 
-                      ...prev, 
-                      [settings.paypal_mode === 'sandbox' ? 'paypal_client_id_sandbox' : 'paypal_client_id_live']: e.target.value 
-                    }))}
-                    placeholder="Client ID"
+                    value={settings.bank_name}
+                    onChange={(e) => setSettings(prev => ({ ...prev, bank_name: e.target.value }))}
+                    placeholder="e.g. Chase Bank, HSBC"
                     className="input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Secret ({settings.paypal_mode})</label>
+                  <label className="block text-sm font-medium mb-2">Account Number *</label>
                   <input
-                    type="password"
-                    value={settings.paypal_mode === 'sandbox' ? settings.paypal_secret_sandbox : settings.paypal_secret_live}
-                    onChange={(e) => setSettings(prev => ({ 
-                      ...prev, 
-                      [settings.paypal_mode === 'sandbox' ? 'paypal_secret_sandbox' : 'paypal_secret_live']: e.target.value 
-                    }))}
-                    placeholder="Secret"
+                    type="text"
+                    value={settings.bank_account_number}
+                    onChange={(e) => setSettings(prev => ({ ...prev, bank_account_number: e.target.value }))}
+                    placeholder="e.g. 1234567890"
                     className="input"
                   />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Account Holder Name *</label>
+                <input
+                  type="text"
+                  value={settings.bank_account_holder}
+                  onChange={(e) => setSettings(prev => ({ ...prev, bank_account_holder: e.target.value }))}
+                  placeholder="e.g. Magnetic Clouds Ltd"
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Additional Info (Optional)</label>
+                <textarea
+                  value={settings.bank_additional_info}
+                  onChange={(e) => setSettings(prev => ({ ...prev, bank_additional_info: e.target.value }))}
+                  placeholder="e.g. SWIFT Code, Branch Name, Routing Number"
+                  rows={2}
+                  className="input"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Cash Payment Settings */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-amber-600 rounded-xl flex items-center justify-center">
+                <Banknote className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold">Cash Payment</h2>
+                <p className="text-sm text-dark-500">Accept cash/in-person payments</p>
+              </div>
+            </div>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={settings.cash_payment_enabled}
+                onChange={(e) => setSettings(prev => ({ ...prev, cash_payment_enabled: e.target.checked }))}
+                className="w-5 h-5 rounded text-primary-500"
+              />
+              <span className="font-medium">Enabled</span>
+            </label>
+          </div>
+
+          {settings.cash_payment_enabled && (
+            <div>
+              <label className="block text-sm font-medium mb-2">Payment Instructions</label>
+              <textarea
+                value={settings.cash_payment_instructions}
+                onChange={(e) => setSettings(prev => ({ ...prev, cash_payment_instructions: e.target.value }))}
+                placeholder="Instructions for customers on how to make cash payments..."
+                rows={3}
+                className="input"
+              />
             </div>
           )}
         </div>
@@ -348,12 +378,8 @@ export default function AdminPaymentGateway() {
               </ol>
             </div>
             <div>
-              <h4 className="font-medium">PayPal Setup:</h4>
-              <ol className="list-decimal list-inside space-y-1 ml-2">
-                <li>Go to <a href="https://developer.paypal.com" target="_blank" rel="noopener" className="underline">PayPal Developer</a></li>
-                <li>Create an app in My Apps & Credentials</li>
-                <li>Copy your Client ID and Secret</li>
-              </ol>
+              <h4 className="font-medium">Bank Transfer:</h4>
+              <p className="ml-2">Customers will see your bank details and upload payment proof after transfer.</p>
             </div>
           </div>
         </div>

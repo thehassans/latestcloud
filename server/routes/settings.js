@@ -297,9 +297,9 @@ router.get('/payment-gateway', authenticate, requireRole('admin'), async (req, r
       'stripe_publishable_key_test', 'stripe_secret_key_test',
       'stripe_publishable_key_live', 'stripe_secret_key_live',
       'stripe_webhook_secret',
-      'paypal_enabled', 'paypal_mode',
-      'paypal_client_id_sandbox', 'paypal_secret_sandbox',
-      'paypal_client_id_live', 'paypal_secret_live'
+      'bank_transfer_enabled', 'bank_name', 'bank_account_number',
+      'bank_account_holder', 'bank_additional_info',
+      'cash_payment_enabled', 'cash_payment_instructions'
     ];
 
     const results = await db.query(
@@ -375,6 +375,47 @@ router.post('/payment-gateway/test', authenticate, requireRole('admin'), async (
   } catch (error) {
     console.error('Test payment gateway error:', error);
     res.json({ success: false, error: error.message });
+  }
+});
+
+// Get payment methods and bank details (public)
+router.get('/payment-methods', async (req, res) => {
+  try {
+    const keys = [
+      'stripe_enabled', 'bank_transfer_enabled', 'cash_payment_enabled',
+      'bank_name', 'bank_account_number', 'bank_account_holder', 'bank_additional_info',
+      'cash_payment_instructions'
+    ];
+    
+    const results = await db.query(
+      'SELECT setting_key, setting_value, value_type FROM settings WHERE setting_key IN (?)',
+      [keys]
+    );
+
+    const settings = {};
+    results.forEach(row => {
+      let value = row.setting_value;
+      if (row.value_type === 'boolean') {
+        value = value === 'true' || value === '1';
+      }
+      settings[row.setting_key] = value;
+    });
+
+    res.json({
+      stripe_enabled: settings.stripe_enabled || false,
+      bank_transfer_enabled: settings.bank_transfer_enabled !== false,
+      cash_payment_enabled: settings.cash_payment_enabled !== false,
+      bank_details: {
+        bank_name: settings.bank_name || '',
+        account_number: settings.bank_account_number || '',
+        account_holder: settings.bank_account_holder || '',
+        additional_info: settings.bank_additional_info || ''
+      },
+      cash_instructions: settings.cash_payment_instructions || 'Contact us to arrange cash payment. Upload receipt after payment.'
+    });
+  } catch (error) {
+    console.error('Get payment methods error:', error);
+    res.status(500).json({ error: 'Failed to load payment methods' });
   }
 });
 
