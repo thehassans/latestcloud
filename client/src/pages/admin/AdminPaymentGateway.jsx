@@ -1,8 +1,40 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { CreditCard, Key, Eye, EyeOff, Save, TestTube, CheckCircle, AlertCircle, Building2, Banknote, Smartphone, Wallet } from 'lucide-react'
+import { CreditCard, Key, Eye, EyeOff, Save, TestTube, CheckCircle, AlertCircle, Building2, Banknote, Smartphone, Wallet, Loader2 } from 'lucide-react'
 import { settingsAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
+import clsx from 'clsx'
+
+// Ultra Premium Toggle Switch Component
+const PremiumToggle = ({ enabled, onChange, label }) => (
+  <button
+    type="button"
+    onClick={() => onChange(!enabled)}
+    className="flex items-center gap-3 group"
+  >
+    <div className={clsx(
+      "relative w-14 h-8 rounded-full transition-all duration-300 shadow-inner",
+      enabled 
+        ? "bg-gradient-to-r from-emerald-500 to-green-500 shadow-emerald-500/30" 
+        : "bg-dark-300 dark:bg-dark-600"
+    )}>
+      <div className={clsx(
+        "absolute top-1 w-6 h-6 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center",
+        enabled 
+          ? "left-7 bg-white" 
+          : "left-1 bg-white"
+      )}>
+        {enabled && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+      </div>
+    </div>
+    <span className={clsx(
+      "font-semibold transition-colors",
+      enabled ? "text-emerald-500" : "text-dark-500"
+    )}>
+      {enabled ? 'Enabled' : 'Disabled'}
+    </span>
+  </button>
+)
 
 export default function AdminPaymentGateway() {
   const [loading, setLoading] = useState(true)
@@ -117,15 +149,10 @@ export default function AdminPaymentGateway() {
                 <p className="text-sm text-dark-500">Accept credit/debit card payments</p>
               </div>
             </div>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.stripe_enabled}
-                onChange={(e) => setSettings(prev => ({ ...prev, stripe_enabled: e.target.checked }))}
-                className="w-5 h-5 rounded text-primary-500"
-              />
-              <span className="font-medium">Enabled</span>
-            </label>
+            <PremiumToggle
+              enabled={settings.stripe_enabled}
+              onChange={(val) => setSettings(prev => ({ ...prev, stripe_enabled: val }))}
+            />
           </div>
 
           {settings.stripe_enabled && (
@@ -284,15 +311,10 @@ export default function AdminPaymentGateway() {
                 <p className="text-sm text-dark-500">Accept PayPal payments worldwide</p>
               </div>
             </div>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.paypal_enabled}
-                onChange={(e) => setSettings(prev => ({ ...prev, paypal_enabled: e.target.checked }))}
-                className="w-5 h-5 rounded text-primary-500"
-              />
-              <span className="font-medium">Enabled</span>
-            </label>
+            <PremiumToggle
+              enabled={settings.paypal_enabled}
+              onChange={(val) => setSettings(prev => ({ ...prev, paypal_enabled: val }))}
+            />
           </div>
 
           {settings.paypal_enabled && (
@@ -407,15 +429,10 @@ export default function AdminPaymentGateway() {
                 <p className="text-sm text-dark-500">Accept bKash mobile payments (Bangladesh)</p>
               </div>
             </div>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.bkash_enabled}
-                onChange={(e) => setSettings(prev => ({ ...prev, bkash_enabled: e.target.checked }))}
-                className="w-5 h-5 rounded text-primary-500"
-              />
-              <span className="font-medium">Enabled</span>
-            </label>
+            <PremiumToggle
+              enabled={settings.bkash_enabled}
+              onChange={(val) => setSettings(prev => ({ ...prev, bkash_enabled: val }))}
+            />
           </div>
 
           {settings.bkash_enabled && (
@@ -470,15 +487,10 @@ export default function AdminPaymentGateway() {
                 <p className="text-sm text-dark-500">Accept Rocket mobile payments (Bangladesh)</p>
               </div>
             </div>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.rocket_enabled}
-                onChange={(e) => setSettings(prev => ({ ...prev, rocket_enabled: e.target.checked }))}
-                className="w-5 h-5 rounded text-primary-500"
-              />
-              <span className="font-medium">Enabled</span>
-            </label>
+            <PremiumToggle
+              enabled={settings.rocket_enabled}
+              onChange={(val) => setSettings(prev => ({ ...prev, rocket_enabled: val }))}
+            />
           </div>
 
           {settings.rocket_enabled && (
@@ -533,15 +545,10 @@ export default function AdminPaymentGateway() {
                 <p className="text-sm text-dark-500">Accept bank transfer payments</p>
               </div>
             </div>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.bank_transfer_enabled}
-                onChange={(e) => setSettings(prev => ({ ...prev, bank_transfer_enabled: e.target.checked }))}
-                className="w-5 h-5 rounded text-primary-500"
-              />
-              <span className="font-medium">Enabled</span>
-            </label>
+            <PremiumToggle
+              enabled={settings.bank_transfer_enabled}
+              onChange={(val) => setSettings(prev => ({ ...prev, bank_transfer_enabled: val }))}
+            />
           </div>
 
           {settings.bank_transfer_enabled && (
@@ -604,15 +611,10 @@ export default function AdminPaymentGateway() {
                 <p className="text-sm text-dark-500">Accept cash/in-person payments</p>
               </div>
             </div>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.cash_payment_enabled}
-                onChange={(e) => setSettings(prev => ({ ...prev, cash_payment_enabled: e.target.checked }))}
-                className="w-5 h-5 rounded text-primary-500"
-              />
-              <span className="font-medium">Enabled</span>
-            </label>
+            <PremiumToggle
+              enabled={settings.cash_payment_enabled}
+              onChange={(val) => setSettings(prev => ({ ...prev, cash_payment_enabled: val }))}
+            />
           </div>
 
           {settings.cash_payment_enabled && (

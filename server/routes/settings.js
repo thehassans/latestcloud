@@ -338,14 +338,22 @@ router.put('/payment-gateway', authenticate, requireRole('admin'), async (req, r
     
     for (const [key, value] of Object.entries(settings)) {
       const valueType = typeof value === 'boolean' ? 'boolean' : 'string';
-      const dbValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : value;
+      const dbValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : (value || '');
       
-      await db.query(
-        `INSERT INTO settings (setting_key, setting_value, value_type, category)
-         VALUES (?, ?, ?, 'payment')
-         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)`,
-        [key, dbValue, valueType]
+      // First try to update existing row
+      const updateResult = await db.query(
+        `UPDATE settings SET setting_value = ?, value_type = ? WHERE setting_key = ?`,
+        [dbValue, valueType, key]
       );
+      
+      // If no row was updated, insert new row
+      if (updateResult.affectedRows === 0) {
+        await db.query(
+          `INSERT INTO settings (setting_key, setting_value, value_type, category)
+           VALUES (?, ?, ?, 'payment')`,
+          [key, dbValue, valueType]
+        );
+      }
     }
 
     res.json({ message: 'Payment gateway settings saved' });
