@@ -80,6 +80,7 @@ const AdminAgentChats = lazy(() => import('./pages/admin/AdminAgentChats'))
 const AdminPricing = lazy(() => import('./pages/admin/AdminPricing'))
 const AdminPaymentGateway = lazy(() => import('./pages/admin/AdminPaymentGateway'))
 const AdminCustomizePlans = lazy(() => import('./pages/admin/AdminCustomizePlans'))
+const AdminEmailSettings = lazy(() => import('./pages/admin/AdminEmailSettings'))
 
 // Protected Route wrapper
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -239,6 +240,7 @@ function App() {
           <Route path="pricing" element={<AdminPricing />} />
           <Route path="payment-gateway" element={<AdminPaymentGateway />} />
           <Route path="customize-plans" element={<AdminCustomizePlans />} />
+          <Route path="email-settings" element={<AdminEmailSettings />} />
         </Route>
 
         {/* 404 */}

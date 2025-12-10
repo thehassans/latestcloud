@@ -103,7 +103,10 @@ export const settingsAPI = {
   getStripeKey: () => api.get('/settings/stripe-key'),
   getPaymentMethods: () => api.get('/settings/payment-methods'),
   getCustomVPSPricing: () => api.get('/settings/custom-vps-pricing'),
-  updateCustomVPSPricing: (pricing) => api.put('/settings/custom-vps-pricing', pricing)
+  updateCustomVPSPricing: (pricing) => api.put('/settings/custom-vps-pricing', pricing),
+  getEmailSettings: () => api.get('/settings/email'),
+  updateEmailSettings: (settings) => api.put('/settings/email', settings),
+  testEmail: (email) => api.post('/settings/email/test', { email })
 }
 
 // Payments API

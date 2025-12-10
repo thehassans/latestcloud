@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { 
   LayoutDashboard, Users, Package, ShoppingCart, Ticket, 
   Globe, Settings, FileText, Image, LogOut, Menu, X,
-  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare, DollarSign, CreditCard, Sliders
+  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare, DollarSign, CreditCard, Sliders, Mail
 } from 'lucide-react'
 import { useAuthStore, useThemeStore } from '../store/useStore'
 import { settingsAPI } from '../lib/api'
@@ -25,6 +25,7 @@ const sidebarLinks = [
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/ai-agent', icon: Bot, label: 'AI Agent' },
   { to: '/admin/ai-chats', icon: MessageSquare, label: 'Chat History' },
+  { to: '/admin/email-settings', icon: Mail, label: 'Email Settings' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
 

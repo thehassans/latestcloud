@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const { body, validationResult } = require('express-validator');
 const db = require('../database/connection');
 const { authenticate } = require('../middleware/auth');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 
@@ -42,6 +43,26 @@ router.post('/', authenticate, [
       INSERT INTO ticket_replies (ticket_id, user_id, message, is_staff_reply)
       VALUES (?, ?, ?, FALSE)
     `, [ticketId, req.user.id, message]);
+
+    // Send email notifications
+    const ticketData = {
+      id: ticketId,
+      uuid: ticketUuid,
+      ticket_number: ticketNumber,
+      subject,
+      priority,
+      department
+    };
+    
+    // Email to customer
+    emailService.sendTicketCreated(ticketData, req.user).catch(err => 
+      console.error('Failed to send ticket email:', err)
+    );
+    
+    // Email to admin
+    emailService.notifyAdminNewTicket(ticketData, req.user).catch(err => 
+      console.error('Failed to notify admin:', err)
+    );
 
     res.status(201).json({
       message: 'Ticket created successfully',

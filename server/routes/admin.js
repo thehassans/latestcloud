@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const slugify = require('slugify');
 const db = require('../database/connection');
 const { authenticate, requireRole } = require('../middleware/auth');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 
@@ -294,10 +295,51 @@ router.put('/orders/:uuid/status', async (req, res) => {
   try {
     const { status, payment_status } = req.body;
     
+    // Get order and user info before update
+    const orders = await db.query(`
+      SELECT o.*, u.email, u.first_name, u.last_name
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      WHERE o.uuid = ?
+    `, [req.params.uuid]);
+    
+    if (!orders.length) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    const order = orders[0];
+    const oldPaymentStatus = order.payment_status;
+    const oldStatus = order.status;
+    
     await db.query(`
       UPDATE orders SET status = COALESCE(?, status), payment_status = COALESCE(?, payment_status)
       WHERE uuid = ?
     `, [status, payment_status, req.params.uuid]);
+
+    // Send email notifications based on status change
+    const user = { email: order.email, first_name: order.first_name, last_name: order.last_name };
+    const orderData = { uuid: order.uuid, id: order.id, total: order.total };
+    
+    // Payment confirmed
+    if (payment_status === 'paid' && oldPaymentStatus !== 'paid') {
+      emailService.sendOrderConfirmed(orderData, user).catch(err => 
+        console.error('Failed to send order confirmed email:', err)
+      );
+    }
+    
+    // Order completed/active
+    if (status === 'active' && oldStatus !== 'active') {
+      emailService.sendOrderCompleted(orderData, user).catch(err => 
+        console.error('Failed to send order completed email:', err)
+      );
+    }
+    
+    // Order cancelled
+    if (status === 'cancelled' && oldStatus !== 'cancelled') {
+      emailService.sendOrderCancelled(orderData, user).catch(err => 
+        console.error('Failed to send order cancelled email:', err)
+      );
+    }
 
     res.json({ message: 'Order updated successfully' });
   } catch (error) {
@@ -355,20 +397,36 @@ router.post('/tickets/:uuid/reply', [
   try {
     const { message } = req.body;
     
-    const tickets = await db.query('SELECT * FROM tickets WHERE uuid = ?', [req.params.uuid]);
+    const tickets = await db.query(`
+      SELECT t.*, u.email, u.first_name, u.last_name
+      FROM tickets t
+      JOIN users u ON t.user_id = u.id
+      WHERE t.uuid = ?
+    `, [req.params.uuid]);
     if (!tickets.length) {
       return res.status(404).json({ error: 'Ticket not found' });
     }
+    
+    const ticket = tickets[0];
 
     await db.query(`
       INSERT INTO ticket_replies (ticket_id, user_id, message, is_staff_reply)
       VALUES (?, ?, ?, TRUE)
-    `, [tickets[0].id, req.user.id, message]);
+    `, [ticket.id, req.user.id, message]);
 
     await db.query(`
       UPDATE tickets SET status = 'answered', updated_at = NOW()
       WHERE id = ?
-    `, [tickets[0].id]);
+    `, [ticket.id]);
+
+    // Send email notification to customer
+    const user = { email: ticket.email, first_name: ticket.first_name, last_name: ticket.last_name };
+    const ticketData = { id: ticket.id, subject: ticket.subject };
+    const reply = { message };
+    
+    emailService.sendTicketReplied(ticketData, user, reply, 'Support Team').catch(err => 
+      console.error('Failed to send ticket reply email:', err)
+    );
 
     res.json({ message: 'Reply added successfully' });
   } catch (error) {

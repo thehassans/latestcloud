@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const { body, validationResult } = require('express-validator');
 const db = require('../database/connection');
 const { authenticate } = require('../middleware/auth');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 
@@ -241,6 +242,27 @@ router.post('/', authenticate, [
       INSERT INTO invoices (uuid, user_id, order_id, invoice_number, status, due_date, subtotal, discount, total)
       VALUES (?, ?, ?, ?, 'unpaid', ?, ?, ?, ?)
     `, [invoiceUuid, req.user.id, orderId, invoiceNumber, dueDate, subtotal, discount, total]);
+
+    // Send email notifications (async, don't wait)
+    const orderData = {
+      uuid: orderUuid,
+      id: orderId,
+      order_number: orderNumber,
+      total,
+      payment_status: initialPaymentStatus,
+      payment_method,
+      items: orderItems
+    };
+    
+    // Email to customer
+    emailService.sendOrderPlaced(orderData, req.user).catch(err => 
+      console.error('Failed to send order email:', err)
+    );
+    
+    // Email to admin
+    emailService.notifyAdminNewOrder(orderData, req.user).catch(err => 
+      console.error('Failed to notify admin:', err)
+    );
 
     res.status(201).json({
       message: 'Order created successfully',

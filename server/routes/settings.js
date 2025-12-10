@@ -419,6 +419,82 @@ router.get('/payment-methods', async (req, res) => {
   }
 });
 
+// Get email settings (admin only)
+router.get('/email', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const keys = [
+      'mailgun_enabled', 'mailgun_api_key', 'mailgun_domain',
+      'mailgun_from_email', 'mailgun_from_name', 'mailgun_region',
+      'welcome_email', 'password_reset', 'order_placed', 'order_confirmed',
+      'order_processing', 'order_completed', 'order_cancelled',
+      'ticket_created', 'ticket_replied', 'ticket_closed',
+      'invoice_generated', 'payment_received', 'service_expiring', 'service_suspended'
+    ];
+
+    const results = await db.query(
+      'SELECT setting_key, setting_value, value_type FROM settings WHERE setting_key IN (?)',
+      [keys]
+    );
+
+    const settings = {};
+    results.forEach(row => {
+      let value = row.setting_value;
+      if (row.value_type === 'boolean') {
+        value = value === 'true' || value === '1';
+      }
+      settings[row.setting_key] = value;
+    });
+
+    res.json({ settings });
+  } catch (error) {
+    console.error('Get email settings error:', error);
+    res.status(500).json({ error: 'Failed to load email settings' });
+  }
+});
+
+// Update email settings (admin only)
+router.put('/email', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const settings = req.body;
+    
+    for (const [key, value] of Object.entries(settings)) {
+      const valueType = typeof value === 'boolean' ? 'boolean' : 'string';
+      const dbValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : value;
+      
+      await db.query(
+        `INSERT INTO settings (setting_key, setting_value, value_type, category)
+         VALUES (?, ?, ?, 'email')
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), value_type = VALUES(value_type)`,
+        [key, dbValue, valueType]
+      );
+    }
+
+    res.json({ message: 'Email settings saved' });
+  } catch (error) {
+    console.error('Update email settings error:', error);
+    res.status(500).json({ error: 'Failed to save email settings' });
+  }
+});
+
+// Test email (admin only)
+router.post('/email/test', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email address required' });
+    }
+
+    const emailService = require('../services/emailService');
+    await emailService.sendTestEmail(email);
+    
+    res.json({ success: true, message: 'Test email sent' });
+  } catch (error) {
+    console.error('Test email error:', error);
+    res.json({ success: false, error: error.message });
+  }
+});
+
 // Get custom VPS pricing (public)
 router.get('/custom-vps-pricing', async (req, res) => {
   try {
