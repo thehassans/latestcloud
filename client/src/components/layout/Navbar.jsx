@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ChevronDown, Moon, Sun, ShoppingCart, Globe, User, Server, Cloud, Database, HardDrive, Shield, Lock, Mail, Archive, Search, Bug, Zap, Wrench, Building2, Users, Gift, Globe2, Bot, Code, Hammer, ShieldCheck } from 'lucide-react'
+import { Menu, X, ChevronDown, Moon, Sun, ShoppingCart, Globe, User, Server, Cloud, Database, HardDrive, Shield, Lock, Mail, Archive, Search, Bug, Zap, Wrench, Building2, Users, Gift, Globe2, Bot, Code, Hammer, ShieldCheck, BarChart3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSettingsStore } from '../../store/useStore'
 import clsx from 'clsx'
@@ -23,6 +23,20 @@ const navItems = [
     ]
   },
   {
+    label: 'Security & Tools',
+    megaMenu: true,
+    children: [
+      // Left column (3 items)
+      { to: '/ssl', label: 'SSL Certificates', desc: 'Secure your site with SSL', icon: Lock },
+      { to: '/backup', label: 'Website Backup', desc: 'Daily automated backups', icon: Archive },
+      { to: '/magnetic-shieldx', label: 'Magnetic ShieldX', desc: 'Auto-fix security extension', icon: ShieldCheck, badge: 'Pro' },
+      // Right column (3 items)
+      { to: '/email', label: 'Professional Email', desc: 'Business email solutions', icon: Mail },
+      { to: '/nobot', label: 'NoBot AI', desc: 'Human-like AI chatbot assistant', icon: Bot, badge: 'New' },
+      { to: '/seo-tools', label: 'SEO Tools', desc: 'Rank higher on search engines', icon: BarChart3, badge: 'New' },
+    ]
+  },
+  {
     label: 'Domains',
     children: [
       { to: '/domains', label: 'Domain Registration', desc: 'Register your perfect domain name', icon: Globe },
@@ -30,17 +44,13 @@ const navItems = [
     ]
   },
   {
-    label: 'Security & Tools',
+    label: 'Services',
     megaMenu: true,
     children: [
-      { to: '/ssl', label: 'SSL Certificates', desc: 'Secure your site with SSL', icon: Lock },
-      { to: '/email', label: 'Professional Email', desc: 'Business email solutions', icon: Mail },
-      { to: '/backup', label: 'Website Backup', desc: 'Daily automated backups', icon: Archive },
-      { to: '/nobot', label: 'NoBot AI', desc: 'Human-like AI chatbot assistant', icon: Bot, badge: 'New' },
+      // Left column (3 items)
       { to: '/web-development', label: 'Web Development', desc: 'Custom website development', icon: Code },
       { to: '/bug-smash', label: 'Bug Smash', desc: 'Instant bug fixing service', icon: Bug, badge: 'Hot' },
       { to: '/magnetic-builder', label: 'Magnetic Builder', desc: '24-hour site builder', icon: Hammer },
-      { to: '/magnetic-shieldx', label: 'Magnetic ShieldX', desc: 'Auto-fix security extension', icon: ShieldCheck, badge: 'Pro' },
     ]
   },
   {
@@ -140,11 +150,16 @@ export default function Navbar() {
                         exit={{ opacity: 0, y: 10 }}
                         className={clsx(
                           "absolute top-full py-4 mt-1 bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-dark-100 dark:border-dark-700",
-                          item.megaMenu ? "w-[600px] left-1/2 -translate-x-1/2" : "left-0 w-72"
+                          item.megaMenu ? "w-[520px] left-1/2 -translate-x-1/2" : "left-0 w-72"
                         )}
                       >
+                        {/* Arrow pointer */}
+                        {item.megaMenu && (
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-dark-800 border-l border-t border-dark-100 dark:border-dark-700 rotate-45" />
+                        )}
                         <div className={clsx(
-                          item.megaMenu && "grid grid-cols-2 gap-2 px-2"
+                          "relative",
+                          item.megaMenu && "grid grid-cols-2 gap-1 px-2"
                         )}>
                           {item.children.map((child) => (
                             <NavLink

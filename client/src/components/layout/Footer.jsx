@@ -21,9 +21,9 @@ const footerLinks = {
   tools: [
     { label: 'SSL Certificates', to: '/ssl' },
     { label: 'NoBot AI', to: '/nobot' },
+    { label: 'SEO Tools', to: '/seo-tools' },
     { label: 'Web Development', to: '/web-development' },
     { label: 'Bug Smash', to: '/bug-smash' },
-    { label: 'Magnetic Builder', to: '/magnetic-builder' },
     { label: 'Magnetic ShieldX', to: '/magnetic-shieldx' },
   ],
   company: [

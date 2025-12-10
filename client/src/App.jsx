@@ -32,6 +32,7 @@ const WebDevelopment = lazy(() => import('./pages/services/WebDevelopment'))
 const BugSmash = lazy(() => import('./pages/services/BugSmash'))
 const MagneticBuilder = lazy(() => import('./pages/services/MagneticBuilder'))
 const MagneticShieldX = lazy(() => import('./pages/services/MagneticShieldX'))
+const SEOTools = lazy(() => import('./pages/services/SEOTools'))
 const Datacenters = lazy(() => import('./pages/Datacenters'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const About = lazy(() => import('./pages/About'))
@@ -189,6 +190,7 @@ function App() {
           <Route path="/bug-smash" element={<BugSmash />} />
           <Route path="/magnetic-builder" element={<MagneticBuilder />} />
           <Route path="/magnetic-shieldx" element={<MagneticShieldX />} />
+          <Route path="/seo-tools" element={<SEOTools />} />
           <Route path="/datacenters" element={<Datacenters />} />
           <Route path="/affiliate" element={<Affiliate />} />
           <Route path="/coupons" element={<Coupons />} />
