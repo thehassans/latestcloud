@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ChevronDown, Moon, Sun, ShoppingCart, Globe, User } from 'lucide-react'
+import { Menu, X, ChevronDown, Moon, Sun, ShoppingCart, Globe, User, Server, Cloud, Database, HardDrive, Shield, Lock, Mail, Archive, Search, Bug, Zap, Wrench, Building2, Users, Gift, Globe2, Bot, Code, Hammer, ShieldCheck } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSettingsStore } from '../../store/useStore'
 import clsx from 'clsx'
@@ -10,35 +10,49 @@ const navItems = [
   {
     label: 'Hosting',
     children: [
-      { to: '/hosting', label: 'Web Hosting' },
-      { to: '/vps', label: 'VPS Servers' },
-      { to: '/cloud', label: 'Cloud Servers' },
-      { to: '/dedicated', label: 'Dedicated Servers' },
+      { to: '/hosting', label: 'VPS Hosting', desc: 'High-performance virtual private servers', icon: Server },
+    ]
+  },
+  {
+    label: 'Servers',
+    children: [
+      { to: '/vps', label: 'VPS Server', desc: 'Scalable virtual private servers', icon: Server },
+      { to: '/bd-server', label: 'BD Server', desc: 'Premium Bangladesh datacenter servers', icon: Globe2 },
+      { to: '/cloud', label: 'Cloud Server', desc: 'Auto-scaling cloud infrastructure', icon: Cloud },
+      { to: '/dedicated', label: 'Dedicated Server', desc: 'Full bare-metal server control', icon: Database },
     ]
   },
   {
     label: 'Domains',
-    to: '/domains'
-  },
-  {
-    label: 'Security',
     children: [
-      { to: '/ssl', label: 'SSL Certificates' },
-      { to: '/email', label: 'Professional Email' },
-      { to: '/backup', label: 'Website Backup' },
+      { to: '/domains', label: 'Domain Registration', desc: 'Register your perfect domain name', icon: Globe },
+      { to: '/domain-transfer', label: 'Domain Transfer', desc: 'Transfer domains to us easily', icon: Globe },
     ]
   },
   {
-    label: 'Datacenters',
-    to: '/datacenters'
+    label: 'Security & Tools',
+    megaMenu: true,
+    children: [
+      { to: '/ssl', label: 'SSL Certificates', desc: 'Secure your site with SSL', icon: Lock },
+      { to: '/email', label: 'Professional Email', desc: 'Business email solutions', icon: Mail },
+      { to: '/backup', label: 'Website Backup', desc: 'Daily automated backups', icon: Archive },
+      { to: '/nobot', label: 'NoBot AI', desc: 'Human-like AI chatbot assistant', icon: Bot, badge: 'New' },
+      { to: '/web-development', label: 'Web Development', desc: 'Custom website development', icon: Code },
+      { to: '/bug-smash', label: 'Bug Smash', desc: 'Instant bug fixing service', icon: Bug, badge: 'Hot' },
+      { to: '/magnetic-builder', label: 'Magnetic Builder', desc: '24-hour site builder', icon: Hammer },
+      { to: '/magnetic-shieldx', label: 'Magnetic ShieldX', desc: 'Auto-fix security extension', icon: ShieldCheck, badge: 'Pro' },
+    ]
   },
   {
-    label: 'Support',
-    to: '/support'
+    label: 'Company',
+    children: [
+      { to: '/about', label: 'About Us', desc: 'Learn about our mission', icon: Building2 },
+      { to: '/affiliate', label: 'Affiliate Program', desc: 'Earn with our affiliate program', icon: Users },
+      { to: '/coupons', label: 'Coupons & Deals', desc: 'Get exclusive discounts', icon: Gift },
+    ]
   },
 ]
 
-const currencies = ['USD', 'EUR', 'GBP', 'BDT', 'INR', 'SGD', 'AUD']
 const languages = [
   { code: 'en', label: 'English' },
   { code: 'bn', label: 'বাংলা' },
@@ -124,22 +138,46 @@ export default function Navbar() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 w-56 py-2 mt-1 bg-white dark:bg-dark-800 rounded-xl shadow-xl border border-dark-100 dark:border-dark-700"
+                        className={clsx(
+                          "absolute top-full left-0 py-4 mt-1 bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-dark-100 dark:border-dark-700",
+                          item.megaMenu ? "w-[700px] -left-40" : "w-72"
+                        )}
                       >
-                        {item.children.map((child) => (
-                          <NavLink
-                            key={child.to}
-                            to={child.to}
-                            className={({ isActive }) => clsx(
-                              "block px-4 py-2.5 text-sm font-medium transition-colors",
-                              isActive 
-                                ? "bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400" 
-                                : "text-dark-700 dark:text-dark-300 hover:bg-dark-50 dark:hover:bg-dark-700"
-                            )}
-                          >
-                            {child.label}
-                          </NavLink>
-                        ))}
+                        <div className={clsx(
+                          item.megaMenu && "grid grid-cols-2 gap-2 px-2"
+                        )}>
+                          {item.children.map((child) => (
+                            <NavLink
+                              key={child.to}
+                              to={child.to}
+                              onClick={() => setActiveDropdown(null)}
+                              className={({ isActive }) => clsx(
+                                "flex items-start gap-3 px-4 py-3 rounded-xl transition-all group",
+                                isActive 
+                                  ? "bg-primary-50 dark:bg-primary-900/30" 
+                                  : "hover:bg-dark-50 dark:hover:bg-dark-700/50"
+                              )}
+                            >
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500/10 to-primary-600/10 dark:from-primary-500/20 dark:to-primary-600/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <child.icon className="w-5 h-5 text-primary-500" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-dark-900 dark:text-white text-sm">{child.label}</span>
+                                  {child.badge && (
+                                    <span className={clsx(
+                                      "px-1.5 py-0.5 text-[10px] font-bold rounded",
+                                      child.badge === 'New' && "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+                                      child.badge === 'Hot' && "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+                                      child.badge === 'Pro' && "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+                                    )}>{child.badge}</span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-dark-500 dark:text-dark-400 mt-0.5 line-clamp-1">{child.desc}</p>
+                              </div>
+                            </NavLink>
+                          ))}
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -163,42 +201,6 @@ export default function Navbar() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
-            {/* Currency selector */}
-            <div className="relative hidden md:block">
-              <button
-                onClick={() => setActiveDropdown(activeDropdown === 'currency' ? null : 'currency')}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white transition-colors"
-              >
-                {currency}
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              <AnimatePresence>
-                {activeDropdown === 'currency' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full right-0 w-24 py-2 mt-1 bg-white dark:bg-dark-800 rounded-xl shadow-xl border border-dark-100 dark:border-dark-700"
-                  >
-                    {currencies.map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => { setCurrency(c); setActiveDropdown(null) }}
-                        className={clsx(
-                          "block w-full text-left px-4 py-2 text-sm transition-colors",
-                          c === currency 
-                            ? "bg-primary-50 dark:bg-primary-900/30 text-primary-600" 
-                            : "hover:bg-dark-50 dark:hover:bg-dark-700"
-                        )}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             {/* Language selector */}
             <div className="relative hidden md:block">
               <button
@@ -295,7 +297,7 @@ export default function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden overflow-hidden"
+              className="lg:hidden overflow-hidden bg-white dark:bg-dark-900"
             >
               <div className="py-4 space-y-2">
                 {navItems.map((item) => (
@@ -317,16 +319,17 @@ export default function Navbar() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="pl-4 space-y-1"
+                            className="pl-2 space-y-1 bg-dark-50 dark:bg-dark-800/50 mx-2 rounded-xl py-2"
                           >
                             {item.children.map((child) => (
                               <NavLink
                                 key={child.to}
                                 to={child.to}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="block px-4 py-2 text-dark-600 dark:text-dark-400 hover:text-primary-500"
+                                className="flex items-center gap-3 px-4 py-2 text-dark-600 dark:text-dark-400 hover:text-primary-500"
                               >
-                                {child.label}
+                                <child.icon className="w-5 h-5 text-primary-500" />
+                                <span>{child.label}</span>
                               </NavLink>
                             ))}
                           </motion.div>

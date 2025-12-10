@@ -21,15 +21,24 @@ const Hosting = lazy(() => import('./pages/services/Hosting'))
 const VPS = lazy(() => import('./pages/services/VPS'))
 const Cloud = lazy(() => import('./pages/services/Cloud'))
 const Dedicated = lazy(() => import('./pages/services/Dedicated'))
+const BDServer = lazy(() => import('./pages/services/BDServer'))
 const Domains = lazy(() => import('./pages/Domains'))
+const DomainTransfer = lazy(() => import('./pages/DomainTransfer'))
 const SSL = lazy(() => import('./pages/services/SSL'))
 const Email = lazy(() => import('./pages/services/Email'))
 const Backup = lazy(() => import('./pages/services/Backup'))
+const NoBot = lazy(() => import('./pages/services/NoBot'))
+const WebDevelopment = lazy(() => import('./pages/services/WebDevelopment'))
+const BugSmash = lazy(() => import('./pages/services/BugSmash'))
+const MagneticBuilder = lazy(() => import('./pages/services/MagneticBuilder'))
+const MagneticShieldX = lazy(() => import('./pages/services/MagneticShieldX'))
 const Datacenters = lazy(() => import('./pages/Datacenters'))
 const Pricing = lazy(() => import('./pages/Pricing'))
 const About = lazy(() => import('./pages/About'))
 const Contact = lazy(() => import('./pages/Contact'))
 const Support = lazy(() => import('./pages/Support'))
+const Affiliate = lazy(() => import('./pages/Affiliate'))
+const Coupons = lazy(() => import('./pages/Coupons'))
 const Terms = lazy(() => import('./pages/legal/Terms'))
 const Privacy = lazy(() => import('./pages/legal/Privacy'))
 const Refund = lazy(() => import('./pages/legal/Refund'))
@@ -169,11 +178,20 @@ function App() {
           <Route path="/vps" element={<VPS />} />
           <Route path="/cloud" element={<Cloud />} />
           <Route path="/dedicated" element={<Dedicated />} />
+          <Route path="/bd-server" element={<BDServer />} />
           <Route path="/domains" element={<Domains />} />
+          <Route path="/domain-transfer" element={<DomainTransfer />} />
           <Route path="/ssl" element={<SSL />} />
           <Route path="/email" element={<Email />} />
           <Route path="/backup" element={<Backup />} />
+          <Route path="/nobot" element={<NoBot />} />
+          <Route path="/web-development" element={<WebDevelopment />} />
+          <Route path="/bug-smash" element={<BugSmash />} />
+          <Route path="/magnetic-builder" element={<MagneticBuilder />} />
+          <Route path="/magnetic-shieldx" element={<MagneticShieldX />} />
           <Route path="/datacenters" element={<Datacenters />} />
+          <Route path="/affiliate" element={<Affiliate />} />
+          <Route path="/coupons" element={<Coupons />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

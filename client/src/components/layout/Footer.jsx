@@ -11,20 +11,28 @@ import { useSiteSettingsStore } from '../../store/useStore'
 
 const footerLinks = {
   services: [
-    { label: 'Web Hosting', to: '/hosting' },
+    { label: 'VPS Hosting', to: '/hosting' },
     { label: 'VPS Servers', to: '/vps' },
+    { label: 'BD Server', to: '/bd-server' },
     { label: 'Cloud Servers', to: '/cloud' },
     { label: 'Dedicated Servers', to: '/dedicated' },
     { label: 'Domain Registration', to: '/domains' },
+  ],
+  tools: [
     { label: 'SSL Certificates', to: '/ssl' },
+    { label: 'NoBot AI', to: '/nobot' },
+    { label: 'Web Development', to: '/web-development' },
+    { label: 'Bug Smash', to: '/bug-smash' },
+    { label: 'Magnetic Builder', to: '/magnetic-builder' },
+    { label: 'Magnetic ShieldX', to: '/magnetic-shieldx' },
   ],
   company: [
     { label: 'About Us', to: '/about' },
     { label: 'Contact Us', to: '/contact' },
     { label: 'Datacenters', to: '/datacenters' },
+    { label: 'Affiliate Program', to: '/affiliate' },
+    { label: 'Coupons & Deals', to: '/coupons' },
     { label: 'Careers', to: '/careers' },
-    { label: 'Blog', to: '/blog' },
-    { label: 'Partners', to: '/partners' },
   ],
   support: [
     { label: 'Help Center', to: '/support' },
@@ -101,7 +109,7 @@ export default function Footer() {
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-8">
           {/* Brand column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/" className="flex items-center gap-3">
@@ -160,6 +168,24 @@ export default function Footer() {
             <h4 className="font-semibold text-lg mb-4">Services</h4>
             <ul className="space-y-3">
               {footerLinks.services.map((link) => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className="text-dark-400 hover:text-white transition-colors inline-flex items-center gap-1 group"
+                  >
+                    <ArrowRight className="w-4 h-4 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tools */}
+          <div>
+            <h4 className="font-semibold text-lg mb-4">Tools</h4>
+            <ul className="space-y-3">
+              {footerLinks.tools.map((link) => (
                 <li key={link.to}>
                   <Link
                     to={link.to}
