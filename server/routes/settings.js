@@ -399,19 +399,29 @@ router.get('/payment-methods', async (req, res) => {
       'cash_payment_instructions'
     ];
     
-    const results = await db.query(
-      'SELECT setting_key, setting_value, value_type FROM settings WHERE setting_key IN (?)',
-      [keys]
-    );
+    let results = [];
+    try {
+      results = await db.query(
+        'SELECT setting_key, setting_value, value_type FROM settings WHERE setting_key IN (?)',
+        [keys]
+      );
+    } catch (dbError) {
+      console.error('Database query error:', dbError);
+      // Continue with empty results
+    }
 
     const settings = {};
-    results.forEach(row => {
-      let value = row.setting_value;
-      if (row.value_type === 'boolean') {
-        value = value === 'true' || value === '1';
-      }
-      settings[row.setting_key] = value;
-    });
+    if (results && Array.isArray(results)) {
+      results.forEach(row => {
+        if (row && row.setting_key) {
+          let value = row.setting_value;
+          if (row.value_type === 'boolean') {
+            value = value === 'true' || value === '1';
+          }
+          settings[row.setting_key] = value;
+        }
+      });
+    }
 
     res.json({
       stripe_enabled: settings.stripe_enabled || false,
@@ -440,7 +450,19 @@ router.get('/payment-methods', async (req, res) => {
     });
   } catch (error) {
     console.error('Get payment methods error:', error);
-    res.status(500).json({ error: 'Failed to load payment methods' });
+    // Return default values instead of error
+    res.json({
+      stripe_enabled: false,
+      paypal_enabled: false,
+      bkash_enabled: false,
+      rocket_enabled: false,
+      bank_transfer_enabled: true,
+      cash_payment_enabled: true,
+      bank_details: { bank_name: '', account_number: '', account_holder: '', additional_info: '' },
+      bkash_details: { number: '', account_type: 'personal', instructions: '' },
+      rocket_details: { number: '', account_type: 'personal', instructions: '' },
+      cash_instructions: 'Contact us to arrange payment.'
+    });
   }
 });
 
