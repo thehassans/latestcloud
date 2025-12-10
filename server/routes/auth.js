@@ -225,6 +225,75 @@ router.post('/register', [
   }
 });
 
+// Guest Checkout - creates account with auto-generated password
+router.post('/guest-checkout', [
+  body('email').isEmail().normalizeEmail(),
+  body('first_name').trim().notEmpty(),
+  body('last_name').trim().notEmpty()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, first_name, last_name, address, city, country } = req.body;
+
+    // Check if email exists
+    const existing = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (existing.length) {
+      // User exists - return existing user with token
+      const user = existing[0];
+      const token = generateToken({ uuid: user.uuid, email: user.email, role: user.role });
+      
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
+      return res.json({
+        message: 'Logged in with existing account',
+        user: { uuid: user.uuid, email: user.email, first_name: user.first_name, last_name: user.last_name, role: user.role },
+        token
+      });
+    }
+
+    // Generate random password
+    const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase() + '!';
+    const hashedPassword = await bcrypt.hash(randomPassword, 12);
+    const uuid = uuidv4();
+
+    await db.query(`
+      INSERT INTO users (uuid, email, password, first_name, last_name, address, city, country, role, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'user', 'active')
+    `, [uuid, email, hashedPassword, first_name, last_name, address || null, city || null, country || null]);
+
+    const token = generateToken({ uuid, email, role: 'user' });
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    // TODO: Send email with password via Mailgun
+    // For now, log the password (remove in production)
+    console.log(`Guest checkout - Email: ${email}, Password: ${randomPassword}`);
+
+    res.status(201).json({
+      message: 'Account created successfully',
+      user: { uuid, email, first_name, last_name, role: 'user' },
+      token
+    });
+  } catch (error) {
+    console.error('Guest checkout error:', error);
+    res.status(500).json({ error: 'Guest checkout failed' });
+  }
+});
+
 // Login
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
