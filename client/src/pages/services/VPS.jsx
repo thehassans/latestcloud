@@ -3,17 +3,25 @@ import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle, ArrowRight, HardDrive, Shield, Cpu, Gauge, Globe, Zap, Server, Lock, Headphones, Star, Settings, Plus, Minus } from 'lucide-react'
+import { CheckCircle, ArrowRight, HardDrive, Shield, Cpu, Gauge, Globe, Zap, Server, Lock, Headphones, Star, Settings, Plus, Minus, Check, X } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
 import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
 const defaultPlans = [
-  { name: 'VPS Basic', price: 9.99, cpu: '1 vCPU', ram: '2 GB RAM', storage: '40 GB NVMe', bandwidth: '2 TB Transfer', features: ['Full Root Access', 'KVM Virtualization', '24/7 Support'] },
-  { name: 'VPS Standard', price: 19.99, popular: true, cpu: '2 vCPU', ram: '4 GB RAM', storage: '80 GB NVMe', bandwidth: '4 TB Transfer', features: ['Full Root Access', 'KVM Virtualization', 'DDoS Protection', 'Priority Support'] },
-  { name: 'VPS Advanced', price: 39.99, cpu: '4 vCPU', ram: '8 GB RAM', storage: '160 GB NVMe', bandwidth: '8 TB Transfer', features: ['Full Root Access', 'KVM Virtualization', 'DDoS Protection', 'Dedicated IP', 'Daily Backups'] },
-  { name: 'VPS Pro', price: 79.99, cpu: '8 vCPU', ram: '16 GB RAM', storage: '320 GB NVMe', bandwidth: '16 TB Transfer', features: ['Full Root Access', 'KVM Virtualization', 'Advanced DDoS', 'Multiple IPs', 'Real-time Backups', 'SLA 99.99%'] }
+  { name: 'VPS Starter', price: 5.99, cpu: '1 vCPU', ram: '1 GB', storage: '25 GB SSD', bandwidth: '1 TB', rootAccess: true, kvm: true, ddos: false, backup: false, support: 'Email', features: ['Full Root Access', 'KVM Virtualization', '24/7 Support'] },
+  { name: 'VPS Professional', price: 12.99, popular: true, cpu: '2 vCPU', ram: '4 GB', storage: '80 GB SSD', bandwidth: '3 TB', rootAccess: true, kvm: true, ddos: true, backup: true, support: 'Priority', features: ['Full Root Access', 'KVM Virtualization', 'DDoS Protection', 'Priority Support'] },
+  { name: 'VPS Business', price: 24.99, cpu: '4 vCPU', ram: '8 GB', storage: '160 GB SSD', bandwidth: '5 TB', rootAccess: true, kvm: true, ddos: true, backup: true, dedicatedIp: true, support: 'Dedicated', features: ['Full Root Access', 'KVM Virtualization', 'DDoS Protection', 'Dedicated IP', 'Daily Backups'] }
+]
+
+// Spec rows for comparison table
+const specRows = [
+  { key: 'cpu', label: 'vCPU Cores', icon: Cpu },
+  { key: 'ram', label: 'RAM Memory', icon: Gauge },
+  { key: 'storage', label: 'NVMe Storage', icon: HardDrive },
+  { key: 'bandwidth', label: 'Bandwidth', icon: Globe },
+  { key: 'support', label: 'Support Level', icon: Headphones },
 ]
 
 const features = [
@@ -27,9 +35,10 @@ const features = [
 
 export default function VPS() {
   const { format } = useCurrencyStore()
-  const { themeStyle } = useThemeStore()
+  const { themeStyle, theme } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const isDark = theme === 'dark'
   
   // Custom VPS configurator state
   const [customConfig, setCustomConfig] = useState({
@@ -199,98 +208,189 @@ export default function VPS() {
             ))}
           </motion.div>
 
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {vpsPlans.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * i + 0.4 }}
-                className={clsx(
-                  "relative group rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02]",
-                  plan.popular
-                    ? "bg-gradient-to-b from-blue-500/20 to-purple-500/10 border-2 border-blue-500/50"
-                    : "bg-white dark:bg-dark-800/50 backdrop-blur-sm border border-gray-200 dark:border-dark-700/50 hover:border-blue-500/30 shadow-lg dark:shadow-none"
-                )}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold rounded-full shadow-lg">
-                    MOST POPULAR
-                  </div>
-                )}
+        </div>
+      </section>
 
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-dark-900 dark:text-white">{plan.name}</h3>
-                </div>
-
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-dark-900 dark:text-white">{format(plan.price)}</span>
-                  <span className="text-dark-500 dark:text-dark-400">/month</span>
-                </div>
-
-                {/* Specs */}
-                <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-2xl mb-6 space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <Cpu className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                    <span className="text-dark-800 dark:text-white">{plan.specs.cpu}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Gauge className="w-4 h-4 text-purple-500 dark:text-purple-400" />
-                    <span className="text-dark-800 dark:text-white">{plan.specs.ram}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <HardDrive className="w-4 h-4 text-pink-500 dark:text-pink-400" />
-                    <span className="text-dark-800 dark:text-white">{plan.specs.storage}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Globe className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-                    <span className="text-dark-800 dark:text-white">{plan.specs.bandwidth}</span>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <ul className="space-y-2 mb-6">
-                  {plan.features.slice(0, 4).map((feature, j) => (
-                    <li key={j} className="flex items-center gap-2 text-sm text-dark-600 dark:text-dark-300">
-                      <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => handleAddToCart(plan)}
-                  className={clsx(
-                    "w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
-                    plan.popular
-                      ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg hover:shadow-blue-500/25"
-                      : "bg-blue-600 dark:bg-dark-700 text-white hover:bg-blue-700 dark:hover:bg-dark-600"
-                  )}
-                >
-                  Get Started <ArrowRight className="w-4 h-4" />
-                </button>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Trust Badges */}
+      {/* Row-by-Row Pricing Table */}
+      <section className={clsx("py-16", isDark ? "bg-dark-900" : "bg-white")}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mt-12 flex flex-wrap justify-center gap-6 text-dark-600 dark:text-dark-400 text-sm"
+            transition={{ delay: 0.4 }}
+            className={clsx(
+              "rounded-3xl overflow-hidden border",
+              isDark ? "bg-dark-800/50 border-dark-700" : "bg-white border-gray-200 shadow-xl"
+            )}
+          >
+            {/* Table Header - Plan Names & Prices */}
+            <div className={clsx(
+              "grid grid-cols-4 border-b",
+              isDark ? "border-dark-700" : "border-gray-200"
+            )}>
+              <div className={clsx(
+                "p-6 font-semibold",
+                isDark ? "bg-dark-800 text-white" : "bg-gray-50 text-dark-900"
+              )}>
+                <Server className="w-6 h-6 mb-2 text-blue-500" />
+                Compare Plans
+              </div>
+              {vpsPlans.map((plan) => (
+                <div
+                  key={plan.name}
+                  className={clsx(
+                    "p-6 text-center relative",
+                    plan.popular 
+                      ? "bg-gradient-to-b from-blue-500/10 to-purple-500/5" 
+                      : isDark ? "bg-dark-800/50" : "bg-gray-50/50"
+                  )}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-0 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold rounded-b-lg">
+                      POPULAR
+                    </div>
+                  )}
+                  <h3 className={clsx(
+                    "text-lg font-bold mb-2",
+                    isDark ? "text-white" : "text-dark-900"
+                  )}>{plan.name.replace('VPS ', '')}</h3>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className={clsx(
+                      "text-3xl font-bold",
+                      plan.popular ? "text-blue-500" : isDark ? "text-white" : "text-dark-900"
+                    )}>{format(plan.price)}</span>
+                    <span className={isDark ? "text-dark-400" : "text-dark-500"}>/mo</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Spec Rows */}
+            {specRows.map((spec, rowIndex) => (
+              <div
+                key={spec.key}
+                className={clsx(
+                  "grid grid-cols-4 border-b",
+                  isDark ? "border-dark-700" : "border-gray-100",
+                  rowIndex % 2 === 0 
+                    ? isDark ? "bg-dark-800/30" : "bg-gray-50/50"
+                    : ""
+                )}
+              >
+                <div className={clsx(
+                  "p-4 flex items-center gap-3",
+                  isDark ? "text-dark-300" : "text-dark-600"
+                )}>
+                  <spec.icon className="w-5 h-5 text-blue-500" />
+                  <span className="font-medium">{spec.label}</span>
+                </div>
+                {vpsPlans.map((plan) => (
+                  <div
+                    key={`${plan.name}-${spec.key}`}
+                    className={clsx(
+                      "p-4 text-center flex items-center justify-center",
+                      plan.popular ? "bg-blue-500/5" : "",
+                      isDark ? "text-white" : "text-dark-800"
+                    )}
+                  >
+                    <span className="font-medium">{plan[spec.key] || '-'}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Boolean Features */}
+            {[
+              { key: 'rootAccess', label: 'Full Root Access' },
+              { key: 'kvm', label: 'KVM Virtualization' },
+              { key: 'ddos', label: 'DDoS Protection' },
+              { key: 'backup', label: 'Daily Backups' },
+              { key: 'dedicatedIp', label: 'Dedicated IP' },
+            ].map((feature, rowIndex) => (
+              <div
+                key={feature.key}
+                className={clsx(
+                  "grid grid-cols-4 border-b",
+                  isDark ? "border-dark-700" : "border-gray-100",
+                  (specRows.length + rowIndex) % 2 === 0 
+                    ? isDark ? "bg-dark-800/30" : "bg-gray-50/50"
+                    : ""
+                )}
+              >
+                <div className={clsx(
+                  "p-4 flex items-center gap-3",
+                  isDark ? "text-dark-300" : "text-dark-600"
+                )}>
+                  <Shield className="w-5 h-5 text-blue-500" />
+                  <span className="font-medium">{feature.label}</span>
+                </div>
+                {vpsPlans.map((plan) => (
+                  <div
+                    key={`${plan.name}-${feature.key}`}
+                    className={clsx(
+                      "p-4 text-center flex items-center justify-center",
+                      plan.popular ? "bg-blue-500/5" : ""
+                    )}
+                  >
+                    {plan[feature.key] ? (
+                      <Check className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <X className="w-5 h-5 text-dark-400" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Action Row */}
+            <div className={clsx(
+              "grid grid-cols-4",
+              isDark ? "bg-dark-800" : "bg-gray-50"
+            )}>
+              <div className="p-6"></div>
+              {vpsPlans.map((plan) => (
+                <div
+                  key={`action-${plan.name}`}
+                  className={clsx(
+                    "p-6 text-center",
+                    plan.popular ? "bg-blue-500/5" : ""
+                  )}
+                >
+                  <button
+                    onClick={() => handleAddToCart(plan)}
+                    className={clsx(
+                      "w-full py-3 px-6 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
+                      plan.popular
+                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg hover:shadow-blue-500/30"
+                        : isDark 
+                          ? "bg-white/10 text-white hover:bg-white/20 border border-white/20" 
+                          : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                    )}
+                  >
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+          
+          {/* Trust badges */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className={clsx("mt-8 flex flex-wrap justify-center items-center gap-6 text-sm", isDark ? "text-dark-400" : "text-dark-600")}
           >
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-400" />
+              <Shield className="w-5 h-5 text-green-500" />
               DDoS Protection
             </div>
             <div className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-blue-400" />
+              <Lock className="w-5 h-5 text-blue-500" />
               Full Root Access
             </div>
             <div className="flex items-center gap-2">
-              <Headphones className="w-5 h-5 text-purple-400" />
+              <Headphones className="w-5 h-5 text-purple-500" />
               24/7 Expert Support
             </div>
           </motion.div>

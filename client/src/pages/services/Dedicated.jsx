@@ -2,16 +2,25 @@ import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { Database, CheckCircle, ArrowRight, Cpu, HardDrive, Shield, Zap, Globe, Server, Headphones, Lock } from 'lucide-react'
+import { Database, CheckCircle, ArrowRight, Cpu, HardDrive, Shield, Zap, Globe, Server, Headphones, Lock, Check, X } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
 import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
 const defaultPlans = [
-  { name: 'Starter Dedicated', price: 99.99, cpu: 'Intel Xeon E-2236', ram: '32 GB DDR4', storage: '1 TB NVMe SSD', bandwidth: '10 TB Transfer', features: ['Full Root Access', 'IPMI Access', 'DDoS Protection', '24/7 Support'] },
-  { name: 'Professional Dedicated', price: 199.99, popular: true, cpu: 'Intel Xeon E-2288G', ram: '64 GB DDR4', storage: '2 TB NVMe SSD', bandwidth: '20 TB Transfer', features: ['Full Root Access', 'IPMI Access', 'Advanced DDoS', 'Priority Support', 'Hardware RAID'] },
-  { name: 'Enterprise Dedicated', price: 399.99, cpu: 'Dual Intel Xeon Gold', ram: '128 GB DDR4', storage: '4 TB NVMe RAID', bandwidth: 'Unlimited', features: ['Full Root Access', 'IPMI Access', 'Premium DDoS', 'Dedicated Support', 'Hardware RAID', 'SLA 99.99%'] }
+  { name: 'Starter', price: 99.99, cpu: 'Intel Xeon E-2236', ram: '32 GB DDR4', storage: '1 TB NVMe', bandwidth: '10 TB', rootAccess: true, ipmi: true, ddos: true, raid: false, support: 'Standard', features: ['Full Root Access', 'IPMI Access', 'DDoS Protection', '24/7 Support'] },
+  { name: 'Professional', price: 199.99, popular: true, cpu: 'Intel Xeon E-2288G', ram: '64 GB DDR4', storage: '2 TB NVMe', bandwidth: '20 TB', rootAccess: true, ipmi: true, ddos: true, raid: true, support: 'Priority', features: ['Full Root Access', 'IPMI Access', 'Advanced DDoS', 'Priority Support', 'Hardware RAID'] },
+  { name: 'Enterprise', price: 399.99, cpu: 'Dual Xeon Gold', ram: '128 GB DDR4', storage: '4 TB RAID', bandwidth: 'Unlimited', rootAccess: true, ipmi: true, ddos: true, raid: true, sla: true, support: 'Dedicated', features: ['Full Root Access', 'IPMI Access', 'Premium DDoS', 'Dedicated Support', 'Hardware RAID', 'SLA 99.99%'] }
+]
+
+// Spec rows for comparison table
+const specRows = [
+  { key: 'cpu', label: 'Processor', icon: Cpu },
+  { key: 'ram', label: 'RAM Memory', icon: Database },
+  { key: 'storage', label: 'Storage', icon: HardDrive },
+  { key: 'bandwidth', label: 'Bandwidth', icon: Globe },
+  { key: 'support', label: 'Support Level', icon: Headphones },
 ]
 
 const features = [
@@ -25,20 +34,17 @@ const features = [
 
 export default function Dedicated() {
   const { format } = useCurrencyStore()
-  const { themeStyle } = useThemeStore()
+  const { themeStyle, theme } = useThemeStore()
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
+  const isDark = theme === 'dark'
 
   const { data: pricingData } = useQuery({
     queryKey: ['pricing'],
     queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
   })
 
-  const dedicatedPlans = (pricingData?.dedicated || defaultPlans).map(p => ({
-    ...p,
-    specs: { cpu: p.cpu, ram: p.ram, storage: p.storage, bandwidth: p.bandwidth },
-    features: p.features || ['Full Root Access', 'IPMI Access', 'DDoS Protection', '24/7 Support']
-  }))
+  const dedicatedPlans = pricingData?.dedicated || defaultPlans
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -59,23 +65,39 @@ export default function Dedicated() {
         <meta name="description" content="Maximum performance with dedicated hardware and full server control. Enterprise-grade bare-metal servers." />
       </Helmet>
 
-      {/* Ultra Premium Hero with Plans */}
-      <section className="relative min-h-screen bg-dark-950 overflow-hidden">
+      {/* Hero Section */}
+      <section className={clsx(
+        "relative overflow-hidden py-20",
+        isDark ? "bg-gradient-to-b from-dark-950 via-dark-900 to-dark-950" : "bg-gradient-to-b from-orange-50 via-white to-red-50"
+      )}>
         {/* Animated background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-950/50 via-dark-950 to-red-950/50" />
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-orange-500/10 via-transparent to-red-500/10 rounded-full blur-2xl" />
+          {isDark ? (
+            <>
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-500/20 via-transparent to-transparent" />
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </>
+          ) : (
+            <>
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-200/40 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-200/40 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </>
+          )}
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-full text-sm font-medium mb-6"
+              className={clsx(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6 backdrop-blur-sm",
+                isDark 
+                  ? "bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 text-orange-400" 
+                  : "bg-orange-100 border border-orange-200 text-orange-600"
+              )}
             >
               <Server className="w-4 h-4" />
               Enterprise Bare-Metal
@@ -84,9 +106,12 @@ export default function Dedicated() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white mb-6"
+              className={clsx(
+                "text-4xl md:text-5xl lg:text-6xl font-bold font-display",
+                isDark ? "text-white" : "text-dark-900"
+              )}
             >
-              <span className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 bg-clip-text text-transparent">
                 Dedicated
               </span>{' '}
               Servers
@@ -95,124 +120,214 @@ export default function Dedicated() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-dark-300 max-w-2xl mx-auto"
+              className={clsx("mt-6 text-lg", isDark ? "text-dark-300" : "text-dark-600")}
             >
               Maximum performance with dedicated hardware. Full server control with enterprise-grade infrastructure.
             </motion.p>
+            
+            {/* Quick stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-8 flex flex-wrap justify-center gap-8"
+            >
+              {[
+                { value: '100%', label: 'Dedicated' },
+                { value: '99.99%', label: 'Uptime SLA' },
+                { value: 'IPMI', label: 'Access' },
+                { value: '24/7', label: 'Support' },
+              ].map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <p className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">{stat.value}</p>
+                  <p className={clsx("text-sm", isDark ? "text-dark-400" : "text-dark-500")}>{stat.label}</p>
+                </div>
+              ))}
+            </motion.div>
           </div>
+        </div>
+      </section>
 
-          {/* Quick Stats */}
+      {/* Row-by-Row Pricing Table */}
+      <section className={clsx("py-16", isDark ? "bg-dark-900" : "bg-white")}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-wrap justify-center gap-8 mb-12"
+            transition={{ delay: 0.4 }}
+            className={clsx(
+              "rounded-3xl overflow-hidden border",
+              isDark ? "bg-dark-800/50 border-dark-700" : "bg-white border-gray-200 shadow-xl"
+            )}
           >
-            {[
-              { value: '100%', label: 'Dedicated' },
-              { value: '99.99%', label: 'Uptime SLA' },
-              { value: 'IPMI', label: 'Access' },
-              { value: '24/7', label: 'Support' }
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">{stat.value}</div>
-                <div className="text-dark-400 text-sm">{stat.label}</div>
+            {/* Table Header - Plan Names & Prices */}
+            <div className={clsx(
+              "grid grid-cols-4 border-b",
+              isDark ? "border-dark-700" : "border-gray-200"
+            )}>
+              <div className={clsx(
+                "p-6 font-semibold",
+                isDark ? "bg-dark-800 text-white" : "bg-gray-50 text-dark-900"
+              )}>
+                <Server className="w-6 h-6 mb-2 text-orange-500" />
+                Compare Plans
               </div>
-            ))}
-          </motion.div>
-
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-8">
-            {dedicatedPlans.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * i + 0.4 }}
-                className={clsx(
-                  "relative group rounded-3xl p-8 transition-all duration-500 hover:scale-[1.02]",
-                  plan.popular
-                    ? "bg-gradient-to-b from-orange-500/20 to-red-500/10 border-2 border-orange-500/50"
-                    : "bg-dark-800/50 backdrop-blur-sm border border-dark-700/50 hover:border-orange-500/30"
-                )}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full shadow-lg">
-                    BEST VALUE
-                  </div>
-                )}
-
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                </div>
-
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-white">{format(plan.price)}</span>
-                  <span className="text-dark-400">/month</span>
-                </div>
-
-                {/* Specs */}
-                <div className="p-4 bg-dark-900/50 rounded-2xl mb-6 space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <Cpu className="w-4 h-4 text-orange-400" />
-                    <span className="text-white">{plan.specs.cpu}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Database className="w-4 h-4 text-red-400" />
-                    <span className="text-white">{plan.specs.ram}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <HardDrive className="w-4 h-4 text-pink-400" />
-                    <span className="text-white">{plan.specs.storage}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Globe className="w-4 h-4 text-yellow-400" />
-                    <span className="text-white">{plan.specs.bandwidth}</span>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <ul className="space-y-2 mb-6">
-                  {plan.features.slice(0, 5).map((feature, j) => (
-                    <li key={j} className="flex items-center gap-2 text-sm text-dark-300">
-                      <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={() => handleAddToCart(plan)}
+              {dedicatedPlans.map((plan) => (
+                <div
+                  key={plan.name}
                   className={clsx(
-                    "w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
-                    plan.popular
-                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg hover:shadow-orange-500/25"
-                      : "bg-dark-700 text-white hover:bg-dark-600"
+                    "p-6 text-center relative",
+                    plan.popular 
+                      ? "bg-gradient-to-b from-orange-500/10 to-red-500/5" 
+                      : isDark ? "bg-dark-800/50" : "bg-gray-50/50"
                   )}
                 >
-                  Configure Server <ArrowRight className="w-4 h-4" />
-                </button>
-              </motion.div>
-            ))}
-          </div>
+                  {plan.popular && (
+                    <div className="absolute -top-0 left-1/2 -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-b-lg">
+                      BEST VALUE
+                    </div>
+                  )}
+                  <h3 className={clsx(
+                    "text-lg font-bold mb-2",
+                    isDark ? "text-white" : "text-dark-900"
+                  )}>{plan.name}</h3>
+                  <div className="flex items-baseline justify-center gap-1">
+                    <span className={clsx(
+                      "text-3xl font-bold",
+                      plan.popular ? "text-orange-500" : isDark ? "text-white" : "text-dark-900"
+                    )}>{format(plan.price)}</span>
+                    <span className={isDark ? "text-dark-400" : "text-dark-500"}>/mo</span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-          {/* Trust Badges */}
+            {/* Spec Rows */}
+            {specRows.map((spec, rowIndex) => (
+              <div
+                key={spec.key}
+                className={clsx(
+                  "grid grid-cols-4 border-b",
+                  isDark ? "border-dark-700" : "border-gray-100",
+                  rowIndex % 2 === 0 
+                    ? isDark ? "bg-dark-800/30" : "bg-gray-50/50"
+                    : ""
+                )}
+              >
+                <div className={clsx(
+                  "p-4 flex items-center gap-3",
+                  isDark ? "text-dark-300" : "text-dark-600"
+                )}>
+                  <spec.icon className="w-5 h-5 text-orange-500" />
+                  <span className="font-medium">{spec.label}</span>
+                </div>
+                {dedicatedPlans.map((plan) => (
+                  <div
+                    key={`${plan.name}-${spec.key}`}
+                    className={clsx(
+                      "p-4 text-center flex items-center justify-center",
+                      plan.popular ? "bg-orange-500/5" : "",
+                      isDark ? "text-white" : "text-dark-800"
+                    )}
+                  >
+                    <span className="font-medium text-sm">{plan[spec.key] || '-'}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Boolean Features */}
+            {[
+              { key: 'rootAccess', label: 'Full Root Access' },
+              { key: 'ipmi', label: 'IPMI Access' },
+              { key: 'ddos', label: 'DDoS Protection' },
+              { key: 'raid', label: 'Hardware RAID' },
+              { key: 'sla', label: 'SLA 99.99%' },
+            ].map((feature, rowIndex) => (
+              <div
+                key={feature.key}
+                className={clsx(
+                  "grid grid-cols-4 border-b",
+                  isDark ? "border-dark-700" : "border-gray-100",
+                  (specRows.length + rowIndex) % 2 === 0 
+                    ? isDark ? "bg-dark-800/30" : "bg-gray-50/50"
+                    : ""
+                )}
+              >
+                <div className={clsx(
+                  "p-4 flex items-center gap-3",
+                  isDark ? "text-dark-300" : "text-dark-600"
+                )}>
+                  <Shield className="w-5 h-5 text-orange-500" />
+                  <span className="font-medium">{feature.label}</span>
+                </div>
+                {dedicatedPlans.map((plan) => (
+                  <div
+                    key={`${plan.name}-${feature.key}`}
+                    className={clsx(
+                      "p-4 text-center flex items-center justify-center",
+                      plan.popular ? "bg-orange-500/5" : ""
+                    )}
+                  >
+                    {plan[feature.key] ? (
+                      <Check className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <X className="w-5 h-5 text-dark-400" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Action Row */}
+            <div className={clsx(
+              "grid grid-cols-4",
+              isDark ? "bg-dark-800" : "bg-gray-50"
+            )}>
+              <div className="p-6"></div>
+              {dedicatedPlans.map((plan) => (
+                <div
+                  key={`action-${plan.name}`}
+                  className={clsx(
+                    "p-6 text-center",
+                    plan.popular ? "bg-orange-500/5" : ""
+                  )}
+                >
+                  <button
+                    onClick={() => handleAddToCart(plan)}
+                    className={clsx(
+                      "w-full py-3 px-6 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
+                      plan.popular
+                        ? "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg hover:shadow-orange-500/30"
+                        : isDark 
+                          ? "bg-white/10 text-white hover:bg-white/20 border border-white/20" 
+                          : "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                    )}
+                  >
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+          
+          {/* Trust badges */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mt-12 flex flex-wrap justify-center gap-6 text-dark-400 text-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className={clsx("mt-8 flex flex-wrap justify-center items-center gap-6 text-sm", isDark ? "text-dark-400" : "text-dark-600")}
           >
             <div className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-orange-400" />
+              <Lock className="w-5 h-5 text-orange-500" />
               Full Root Access
             </div>
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-400" />
+              <Shield className="w-5 h-5 text-green-500" />
               DDoS Protection
             </div>
             <div className="flex items-center gap-2">
-              <Headphones className="w-5 h-5 text-red-400" />
+              <Headphones className="w-5 h-5 text-red-500" />
               Dedicated Support
             </div>
           </motion.div>
