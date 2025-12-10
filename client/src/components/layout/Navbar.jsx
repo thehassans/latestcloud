@@ -139,8 +139,8 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         className={clsx(
-                          "absolute top-full left-0 py-4 mt-1 bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-dark-100 dark:border-dark-700",
-                          item.megaMenu ? "w-[700px] -left-40" : "w-72"
+                          "absolute top-full py-4 mt-1 bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-dark-100 dark:border-dark-700",
+                          item.megaMenu ? "w-[600px] left-1/2 -translate-x-1/2" : "left-0 w-72"
                         )}
                       >
                         <div className={clsx(
@@ -264,20 +264,12 @@ export default function Navbar() {
                 Dashboard
               </Link>
             ) : (
-              <div className="hidden sm:flex items-center gap-2">
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-dark-700 dark:text-dark-300 hover:text-primary-500 font-medium transition-colors"
-                >
-                  {t('nav.login')}
-                </Link>
-                <Link
-                  to="/register"
-                  className="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white font-medium rounded-xl shadow-lg shadow-primary-500/25 transition-all"
-                >
-                  {t('nav.signup')}
-                </Link>
-              </div>
+              <Link
+                to="/login"
+                className="hidden sm:flex items-center gap-2 px-5 py-2.5 text-dark-700 dark:text-dark-300 hover:text-primary-500 font-medium transition-colors"
+              >
+                {t('nav.login')}
+              </Link>
             )}
 
             {/* Mobile menu button */}
@@ -357,22 +349,13 @@ export default function Navbar() {
                       Dashboard
                     </Link>
                   ) : (
-                    <>
-                      <Link
-                        to="/login"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block px-4 py-3 text-center text-dark-700 dark:text-dark-300 font-medium"
-                      >
-                        {t('nav.login')}
-                      </Link>
-                      <Link
-                        to="/register"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block px-4 py-3 text-center bg-primary-500 text-white font-medium rounded-xl"
-                      >
-                        {t('nav.signup')}
-                      </Link>
-                    </>
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-4 py-3 text-center text-dark-700 dark:text-dark-300 font-medium border border-dark-200 dark:border-dark-700 rounded-xl"
+                    >
+                      {t('nav.login')}
+                    </Link>
                   )}
                 </div>
               </div>
