@@ -142,19 +142,15 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         className={clsx(
-                          "bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-dark-100 dark:border-dark-700 overflow-hidden",
+                          "bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-dark-100 dark:border-dark-700 overflow-hidden z-50",
                           item.megaMenu 
-                            ? "fixed top-20 left-1/2 -translate-x-1/2 w-[1000px] max-w-[95vw]" 
+                            ? "fixed inset-x-0 top-20 mx-auto w-[1000px] max-w-[calc(100vw-2rem)]" 
                             : "absolute top-full mt-2 left-0 w-72 py-4"
                         )}
                       >
-                        {/* Arrow pointer for mega menu - centered on page */}
-                        {item.megaMenu && (
-                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-dark-800 border-l border-t border-dark-100 dark:border-dark-700 rotate-45 z-10" />
-                        )}
                         <div className={clsx(
                           "relative",
-                          item.megaMenu ? "grid grid-cols-3 gap-2 p-6" : ""
+                          item.megaMenu ? "grid grid-cols-3 gap-3 p-6" : ""
                         )}>
                           {item.children.map((child) => (
                             <NavLink
