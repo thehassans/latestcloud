@@ -570,6 +570,79 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Reviews Section */}
+      <section className="section bg-dark-50 dark:bg-dark-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="section-heading"
+            >
+              What Our <span className={isGradient ? "text-gradient" : "text-primary-500"}>Customers</span> Say
+            </motion.h2>
+            <p className="section-subheading mx-auto">
+              Trusted by 50,000+ businesses worldwide
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Reviews with comments */}
+            {[
+              { name: 'Sarah Mitchell', role: 'CEO, TechStart', img: 'https://randomuser.me/api/portraits/women/44.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.' },
+              { name: 'Ahmed Hassan', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.' },
+              { name: 'Emily Chen', role: 'E-commerce Owner', img: 'https://randomuser.me/api/portraits/women/68.jpg', rating: 5, comment: 'Migrated from another host and the difference is night and day. Highly recommend!' },
+              { name: 'Michael Brown', role: 'Startup Founder', img: 'https://randomuser.me/api/portraits/men/75.jpg', rating: 5, comment: 'The cloud servers are blazing fast. Perfect for our growing business needs.' },
+              { name: 'Fatima Rahman', role: 'Blogger', img: 'https://randomuser.me/api/portraits/women/26.jpg', rating: 5, comment: 'Simple setup and great performance. My blog loads instantly now!' },
+              { name: 'James Wilson', role: 'Agency Director', img: 'https://randomuser.me/api/portraits/men/52.jpg', rating: 5, comment: 'We host 50+ client sites here. Never had any issues. Premium quality service.' },
+              /* Star-only reviews */
+              { name: 'Priya Sharma', role: 'Designer', img: 'https://randomuser.me/api/portraits/women/89.jpg', rating: 5 },
+              { name: 'David Kim', role: 'Entrepreneur', img: 'https://randomuser.me/api/portraits/men/46.jpg', rating: 5 },
+            ].map((review, i) => (
+              <motion.div
+                key={review.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className={clsx(
+                  "p-6 rounded-2xl transition-all hover:shadow-xl",
+                  "bg-white dark:bg-dark-800 border border-gray-100 dark:border-dark-700"
+                )}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <img src={review.img} alt={review.name} className="w-12 h-12 rounded-full object-cover" />
+                  <div>
+                    <h4 className="font-semibold text-dark-900 dark:text-white">{review.name}</h4>
+                    <p className="text-sm text-dark-500">{review.role}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mb-3">
+                  {[...Array(review.rating)].map((_, j) => (
+                    <Star key={j} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                  ))}
+                </div>
+                {review.comment && (
+                  <p className="text-dark-600 dark:text-dark-400 text-sm">{review.comment}</p>
+                )}
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-10 text-center"
+          >
+            <Link to="/reviews" className="inline-flex items-center gap-2 text-primary-500 font-semibold hover:text-primary-600 transition-colors">
+              View All Reviews <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

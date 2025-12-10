@@ -143,22 +143,16 @@ export default function Navbar() {
                         exit={{ opacity: 0, y: 10 }}
                         className={clsx(
                           "absolute top-full mt-2 bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-dark-100 dark:border-dark-700 overflow-hidden",
-                          item.megaMenu ? "w-[680px] left-1/2 -translate-x-1/2 p-0" : "left-0 w-72 py-4"
+                          item.megaMenu ? "w-[900px] left-1/2 -translate-x-1/2" : "left-0 w-72 py-4"
                         )}
                       >
-                        {/* Ultra Premium Header for Mega Menu */}
+                        {/* Arrow pointer for mega menu */}
                         {item.megaMenu && (
-                          <>
-                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-gradient-to-br from-primary-500 to-secondary-500 rotate-45 z-10" />
-                            <div className="bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-500 p-4 text-white">
-                              <h3 className="font-bold text-lg">Security & Tools</h3>
-                              <p className="text-sm text-white/80">Premium solutions to power your business</p>
-                            </div>
-                          </>
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-dark-800 border-l border-t border-dark-100 dark:border-dark-700 rotate-45 z-10" />
                         )}
                         <div className={clsx(
                           "relative",
-                          item.megaMenu ? "grid grid-cols-2 gap-0 p-4" : ""
+                          item.megaMenu ? "grid grid-cols-3 gap-1 p-4" : ""
                         )}>
                           {item.children.map((child) => (
                             <NavLink
@@ -280,7 +274,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="hidden sm:flex items-center gap-2 px-5 py-2.5 text-dark-700 dark:text-dark-300 hover:text-primary-500 font-medium transition-colors"
+                className="hidden sm:flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-primary-500/10 to-secondary-500/10 dark:from-primary-500/20 dark:to-secondary-500/20 border border-primary-500/30 text-primary-600 dark:text-primary-400 font-medium rounded-xl hover:from-primary-500 hover:to-secondary-500 hover:text-white hover:border-transparent transition-all"
               >
                 {t('nav.login')}
               </Link>
