@@ -61,13 +61,13 @@ export default function VPS() {
       </Helmet>
 
       {/* Ultra Premium Hero with Plans */}
-      <section className="relative min-h-screen bg-dark-950 overflow-hidden">
+      <section className="relative min-h-screen bg-gray-50 dark:bg-dark-950 overflow-hidden">
         {/* Animated background */}
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-950/50 via-dark-950 to-purple-950/50" />
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-blue-500/10 via-transparent to-purple-500/10 rounded-full blur-2xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 via-gray-50 to-purple-100/50 dark:from-blue-950/50 dark:via-dark-950 dark:to-purple-950/50" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 dark:bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-conic from-blue-500/5 via-transparent to-purple-500/5 dark:from-blue-500/10 dark:via-transparent dark:to-purple-500/10 rounded-full blur-2xl" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12">
@@ -76,7 +76,7 @@ export default function VPS() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-sm font-medium mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium mb-6"
             >
               <Server className="w-4 h-4" />
               Virtual Private Servers
@@ -85,7 +85,7 @@ export default function VPS() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-white mb-6"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold font-display text-dark-900 dark:text-white mb-6"
             >
               Powerful{' '}
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -96,7 +96,7 @@ export default function VPS() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-lg text-dark-300 max-w-2xl mx-auto"
+              className="text-lg text-dark-600 dark:text-dark-300 max-w-2xl mx-auto"
             >
               Full root access with dedicated resources. Deploy your applications on enterprise-grade infrastructure.
             </motion.p>
@@ -117,7 +117,7 @@ export default function VPS() {
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">{stat.value}</div>
-                <div className="text-dark-400 text-sm">{stat.label}</div>
+                <div className="text-dark-500 dark:text-dark-400 text-sm">{stat.label}</div>
               </div>
             ))}
           </motion.div>
@@ -134,7 +134,7 @@ export default function VPS() {
                   "relative group rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02]",
                   plan.popular
                     ? "bg-gradient-to-b from-blue-500/20 to-purple-500/10 border-2 border-blue-500/50"
-                    : "bg-dark-800/50 backdrop-blur-sm border border-dark-700/50 hover:border-blue-500/30"
+                    : "bg-white dark:bg-dark-800/50 backdrop-blur-sm border border-gray-200 dark:border-dark-700/50 hover:border-blue-500/30 shadow-lg dark:shadow-none"
                 )}
               >
                 {plan.popular && (
@@ -144,38 +144,38 @@ export default function VPS() {
                 )}
 
                 <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                  <h3 className="text-xl font-bold text-dark-900 dark:text-white">{plan.name}</h3>
                 </div>
 
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-white">{format(plan.price)}</span>
-                  <span className="text-dark-400">/month</span>
+                  <span className="text-4xl font-bold text-dark-900 dark:text-white">{format(plan.price)}</span>
+                  <span className="text-dark-500 dark:text-dark-400">/month</span>
                 </div>
 
                 {/* Specs */}
-                <div className="p-4 bg-dark-900/50 rounded-2xl mb-6 space-y-3">
+                <div className="p-4 bg-gray-100 dark:bg-dark-900/50 rounded-2xl mb-6 space-y-3">
                   <div className="flex items-center gap-3 text-sm">
-                    <Cpu className="w-4 h-4 text-blue-400" />
-                    <span className="text-white">{plan.specs.cpu}</span>
+                    <Cpu className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                    <span className="text-dark-800 dark:text-white">{plan.specs.cpu}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <Gauge className="w-4 h-4 text-purple-400" />
-                    <span className="text-white">{plan.specs.ram}</span>
+                    <Gauge className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                    <span className="text-dark-800 dark:text-white">{plan.specs.ram}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <HardDrive className="w-4 h-4 text-pink-400" />
-                    <span className="text-white">{plan.specs.storage}</span>
+                    <HardDrive className="w-4 h-4 text-pink-500 dark:text-pink-400" />
+                    <span className="text-dark-800 dark:text-white">{plan.specs.storage}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <Globe className="w-4 h-4 text-cyan-400" />
-                    <span className="text-white">{plan.specs.bandwidth}</span>
+                    <Globe className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
+                    <span className="text-dark-800 dark:text-white">{plan.specs.bandwidth}</span>
                   </div>
                 </div>
 
                 {/* Features */}
                 <ul className="space-y-2 mb-6">
                   {plan.features.slice(0, 4).map((feature, j) => (
-                    <li key={j} className="flex items-center gap-2 text-sm text-dark-300">
+                    <li key={j} className="flex items-center gap-2 text-sm text-dark-600 dark:text-dark-300">
                       <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
                       {feature}
                     </li>
@@ -188,7 +188,7 @@ export default function VPS() {
                     "w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2",
                     plan.popular
                       ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg hover:shadow-blue-500/25"
-                      : "bg-dark-700 text-white hover:bg-dark-600"
+                      : "bg-blue-600 dark:bg-dark-700 text-white hover:bg-blue-700 dark:hover:bg-dark-600"
                   )}
                 >
                   Get Started <ArrowRight className="w-4 h-4" />
@@ -202,7 +202,7 @@ export default function VPS() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="mt-12 flex flex-wrap justify-center gap-6 text-dark-400 text-sm"
+            className="mt-12 flex flex-wrap justify-center gap-6 text-dark-600 dark:text-dark-400 text-sm"
           >
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-green-400" />
