@@ -142,7 +142,7 @@ export default function Footer() {
               </a>
               <div className="flex items-start gap-3 text-dark-400">
                 <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                <span>Dhaka, Bangladesh</span>
+                <span>3rd Floor, 45 Albemarle Street,<br/>Mayfair, London W1S 4JL</span>
               </div>
             </div>
 
@@ -300,9 +300,20 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-dark-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <p className="text-dark-400 text-sm text-center">
-            © {new Date().getFullYear()} Magnetic Clouds. All rights reserved.
-          </p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-dark-400 text-sm">
+              © {new Date().getFullYear()} Magnetic Clouds. All rights reserved.
+            </p>
+            <a 
+              href="https://magnetic-infratech.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500/10 to-purple-500/10 border border-primary-500/20 hover:border-primary-500/50 transition-all"
+            >
+              <span className="text-dark-400 text-sm">Powered By</span>
+              <span className="font-bold bg-gradient-to-r from-primary-400 to-purple-400 bg-clip-text text-transparent group-hover:from-primary-300 group-hover:to-purple-300 transition-all">Magnetic Infratech</span>
+            </a>
+          </div>
         </div>
       </div>
     </footer>
