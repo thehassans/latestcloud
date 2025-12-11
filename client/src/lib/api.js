@@ -116,6 +116,13 @@ export const paymentsAPI = {
   confirmStripePayment: (data) => api.post('/payments/stripe/confirm', data)
 }
 
+// Proposals API (public)
+export const proposalsAPI = {
+  getProposal: (uuid) => api.get(`/proposals/${uuid}`),
+  acceptProposal: (uuid, data) => api.post(`/proposals/${uuid}/accept`, data),
+  rejectProposal: (uuid, data) => api.post(`/proposals/${uuid}/reject`, data)
+}
+
 // Pages API
 export const pagesAPI = {
   getPage: (slug) => api.get(`/pages/${slug}`),
@@ -178,6 +185,14 @@ export const adminAPI = {
   
   // Activity
   getActivity: (params) => api.get('/admin/activity', { params }),
+  
+  // Proposals
+  getProposals: (params) => api.get('/admin/proposals', { params }),
+  getProposal: (uuid) => api.get(`/admin/proposals/${uuid}`),
+  createProposal: (data) => api.post('/admin/proposals', data),
+  updateProposal: (uuid, data) => api.put(`/admin/proposals/${uuid}`, data),
+  deleteProposal: (uuid) => api.delete(`/admin/proposals/${uuid}`),
+  sendProposal: (uuid) => api.post(`/admin/proposals/${uuid}/send`),
   
   // Media
   uploadImage: (file) => {

@@ -22,6 +22,7 @@ const uploadRoutes = require('./routes/upload');
 const pageRoutes = require('./routes/pages');
 const aiAgentRoutes = require('./routes/ai-agent');
 const paymentRoutes = require('./routes/payments');
+const proposalRoutes = require('./routes/proposals');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -82,6 +83,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/pages', pageRoutes);
 app.use('/api/ai-agent', aiAgentRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api', proposalRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

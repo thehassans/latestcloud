@@ -91,6 +91,10 @@ const AdminPricing = lazy(() => import('./pages/admin/AdminPricing'))
 const AdminPaymentGateway = lazy(() => import('./pages/admin/AdminPaymentGateway'))
 const AdminCustomizePlans = lazy(() => import('./pages/admin/AdminCustomizePlans'))
 const AdminEmailSettings = lazy(() => import('./pages/admin/AdminEmailSettings'))
+const AdminProposals = lazy(() => import('./pages/admin/AdminProposals'))
+
+// Public pages
+const ProposalView = lazy(() => import('./pages/ProposalView'))
 
 // Protected Route wrapper
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -216,6 +220,7 @@ function App() {
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/proposal/:uuid" element={<ProposalView />} />
         </Route>
 
         {/* Dashboard routes */}
@@ -257,6 +262,7 @@ function App() {
           <Route path="payment-gateway" element={<AdminPaymentGateway />} />
           <Route path="customize-plans" element={<AdminCustomizePlans />} />
           <Route path="email-settings" element={<AdminEmailSettings />} />
+          <Route path="proposals" element={<AdminProposals />} />
         </Route>
 
         {/* 404 */}
