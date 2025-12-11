@@ -430,7 +430,42 @@ const migrations = [
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) DEFAULT NULL`,
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS github_id VARCHAR(255) DEFAULT NULL`,
   `CREATE INDEX IF NOT EXISTS idx_google_id ON users(google_id)`,
-  `CREATE INDEX IF NOT EXISTS idx_github_id ON users(github_id)`
+  `CREATE INDEX IF NOT EXISTS idx_github_id ON users(github_id)`,
+  
+  // Proposals table
+  `CREATE TABLE IF NOT EXISTS proposals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    uuid VARCHAR(36) NOT NULL UNIQUE,
+    proposal_number VARCHAR(50) NOT NULL UNIQUE,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    items JSON NOT NULL,
+    discount DECIMAL(10,2) DEFAULT 0,
+    discount_type ENUM('percentage', 'fixed') DEFAULT 'percentage',
+    tax DECIMAL(5,2) DEFAULT 0,
+    subtotal DECIMAL(10,2) NOT NULL,
+    discount_amount DECIMAL(10,2) DEFAULT 0,
+    tax_amount DECIMAL(10,2) DEFAULT 0,
+    total DECIMAL(10,2) NOT NULL,
+    notes TEXT,
+    terms TEXT,
+    valid_until DATE NOT NULL,
+    template VARCHAR(50) DEFAULT 'modern',
+    bank_method VARCHAR(50) DEFAULT 'bank_transfer',
+    status ENUM('draft', 'sent', 'viewed', 'accepted', 'rejected', 'expired') DEFAULT 'draft',
+    sent_at DATETIME,
+    viewed_at DATETIME,
+    accepted_at DATETIME,
+    rejected_at DATETIME,
+    reject_reason TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_status (status),
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at)
+  )`
 ];
 
 async function runMigrations() {

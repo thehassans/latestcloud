@@ -256,9 +256,9 @@ router.post('/proposals/:uuid/accept', async (req, res) => {
     for (const item of items) {
       const serviceUuid = uuidv4();
       await db.query(`
-        INSERT INTO user_services (uuid, user_id, order_id, product_id, name, status, billing_cycle, next_due_date)
-        VALUES (?, ?, (SELECT id FROM orders WHERE uuid = ?), ?, ?, 'pending', 'monthly', DATE_ADD(NOW(), INTERVAL 1 MONTH))
-      `, [serviceUuid, proposal.user_id, orderUuid, item.product_id || null, item.name]);
+        INSERT INTO services (uuid, user_id, order_item_id, product_id, service_type, name, status, billing_cycle, next_due_date)
+        VALUES (?, ?, NULL, ?, 'hosting', ?, 'pending', 'monthly', DATE_ADD(NOW(), INTERVAL 1 MONTH))
+      `, [serviceUuid, proposal.user_id, item.product_id || null, item.name]);
     }
     
     // Update proposal status
