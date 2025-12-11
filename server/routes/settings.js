@@ -311,18 +311,22 @@ router.get('/payment-gateway', authenticate, requireRole('admin'), async (req, r
       'cash_payment_enabled', 'cash_payment_instructions'
     ];
 
+    // Generate placeholders for IN clause
+    const placeholders = keys.map(() => '?').join(', ');
     const results = await db.query(
-      'SELECT setting_key, setting_value, setting_type FROM settings WHERE setting_key IN (?)',
-      [keys]
+      `SELECT setting_key, setting_value, setting_type FROM settings WHERE setting_key IN (${placeholders})`,
+      keys
     );
 
-    results.forEach(row => {
-      let value = row.setting_value;
-      if (row.setting_type === 'boolean' || row.setting_key.endsWith('_enabled')) {
-        value = value === 'true' || value === '1' || value === true;
-      }
-      settings[row.setting_key] = value;
-    });
+    if (results && Array.isArray(results)) {
+      results.forEach(row => {
+        let value = row.setting_value;
+        if (row.setting_type === 'boolean' || row.setting_key.endsWith('_enabled')) {
+          value = value === 'true' || value === '1' || value === true;
+        }
+        settings[row.setting_key] = value;
+      });
+    }
 
     res.json({ settings });
   } catch (error) {
@@ -409,9 +413,11 @@ router.get('/payment-methods', async (req, res) => {
     
     let results = [];
     try {
+      // Generate placeholders for IN clause
+      const placeholders = keys.map(() => '?').join(', ');
       results = await db.query(
-        'SELECT setting_key, setting_value, setting_type FROM settings WHERE setting_key IN (?)',
-        [keys]
+        `SELECT setting_key, setting_value, setting_type FROM settings WHERE setting_key IN (${placeholders})`,
+        keys
       );
     } catch (dbError) {
       console.error('Database query error:', dbError);
