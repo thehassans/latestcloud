@@ -11,6 +11,79 @@ import { adminAPI, productsAPI, settingsAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
+// Predefined Services by Category
+const SERVICE_CATEGORIES = [
+  {
+    name: 'Hosting',
+    services: [
+      { id: 'hosting-shared', name: 'Shared Hosting', price: 2.99 },
+      { id: 'hosting-business', name: 'Business Hosting', price: 9.99 },
+      { id: 'hosting-wordpress', name: 'WordPress Hosting', price: 5.99 },
+      { id: 'hosting-reseller', name: 'Reseller Hosting', price: 19.99 },
+    ]
+  },
+  {
+    name: 'Servers',
+    services: [
+      { id: 'vps-basic', name: 'VPS Basic', price: 9.99 },
+      { id: 'vps-standard', name: 'VPS Standard', price: 19.99 },
+      { id: 'vps-pro', name: 'VPS Pro', price: 39.99 },
+      { id: 'vps-enterprise', name: 'VPS Enterprise', price: 79.99 },
+      { id: 'bd-server', name: 'BD Server (Bangladesh)', price: 29.99 },
+      { id: 'cloud-starter', name: 'Cloud Server Starter', price: 5.00 },
+      { id: 'cloud-standard', name: 'Cloud Server Standard', price: 10.00 },
+      { id: 'cloud-pro', name: 'Cloud Server Pro', price: 40.00 },
+      { id: 'dedicated-starter', name: 'Dedicated Server Starter', price: 99.00 },
+      { id: 'dedicated-pro', name: 'Dedicated Server Pro', price: 179.00 },
+      { id: 'dedicated-enterprise', name: 'Dedicated Server Enterprise', price: 499.00 },
+    ]
+  },
+  {
+    name: 'Security & Tools',
+    services: [
+      { id: 'ssl-basic', name: 'Basic SSL Certificate', price: 9.99 },
+      { id: 'ssl-business', name: 'Business SSL Certificate', price: 49.99 },
+      { id: 'ssl-wildcard', name: 'Wildcard SSL Certificate', price: 99.99 },
+      { id: 'ssl-ev', name: 'EV SSL Certificate', price: 199.99 },
+      { id: 'email-starter', name: 'Professional Email Starter', price: 1.99 },
+      { id: 'email-business', name: 'Professional Email Business', price: 4.99 },
+      { id: 'email-enterprise', name: 'Professional Email Enterprise', price: 9.99 },
+      { id: 'backup-basic', name: 'Website Backup Basic', price: 2.99 },
+      { id: 'backup-pro', name: 'Website Backup Pro', price: 7.99 },
+      { id: 'backup-enterprise', name: 'Website Backup Enterprise', price: 19.99 },
+      { id: 'nobot-ai', name: 'NoBot AI Chatbot', price: 29.99 },
+      { id: 'web-development', name: 'Custom Web Development', price: 499.00 },
+      { id: 'bug-smash', name: 'Bug Smash Service', price: 49.99 },
+      { id: 'magnetic-builder', name: 'Magnetic Builder (24hr Site)', price: 199.00 },
+      { id: 'magnetic-shieldx', name: 'Magnetic ShieldX Security', price: 14.99 },
+      { id: 'seo-tools', name: 'SEO Tools Package', price: 19.99 },
+    ]
+  },
+  {
+    name: 'Domains',
+    services: [
+      { id: 'domain-com', name: 'Domain Registration (.com)', price: 12.99 },
+      { id: 'domain-net', name: 'Domain Registration (.net)', price: 14.99 },
+      { id: 'domain-org', name: 'Domain Registration (.org)', price: 13.99 },
+      { id: 'domain-io', name: 'Domain Registration (.io)', price: 49.99 },
+      { id: 'domain-bd', name: 'Domain Registration (.bd)', price: 39.99 },
+      { id: 'domain-com-bd', name: 'Domain Registration (.com.bd)', price: 29.99 },
+      { id: 'domain-transfer', name: 'Domain Transfer', price: 12.99 },
+      { id: 'domain-privacy', name: 'Domain Privacy Protection', price: 9.99 },
+    ]
+  },
+  {
+    name: 'Company Services',
+    services: [
+      { id: 'consultation', name: 'IT Consultation (per hour)', price: 50.00 },
+      { id: 'migration', name: 'Website Migration Service', price: 99.00 },
+      { id: 'managed-service', name: 'Managed Hosting Service', price: 49.99 },
+      { id: 'priority-support', name: 'Priority Support Package', price: 29.99 },
+      { id: 'custom-solution', name: 'Custom Solution', price: 0 },
+    ]
+  }
+]
+
 // Invoice Template Designs
 const INVOICE_TEMPLATES = [
   { 
@@ -58,7 +131,7 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
     title: '',
     description: '',
     user_id: '',
-    items: [{ product_id: '', name: '', description: '', quantity: 1, price: 0 }],
+    items: [{ service_id: '', product_id: '', name: '', description: '', quantity: 1, price: 0 }],
     discount: 0,
     discount_type: 'percentage',
     tax: 0,
@@ -86,7 +159,7 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
   const handleAddItem = () => {
     setForm(prev => ({
       ...prev,
-      items: [...prev.items, { product_id: '', name: '', description: '', quantity: 1, price: 0 }]
+      items: [...prev.items, { service_id: '', product_id: '', name: '', description: '', quantity: 1, price: 0 }]
     }))
   }
 
@@ -103,7 +176,24 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
       items: prev.items.map((item, i) => {
         if (i !== index) return item
         
-        // If selecting a product, auto-fill details
+        // If selecting a service from predefined list
+        if (field === 'service_id' && value) {
+          // Find service in categories
+          for (const category of SERVICE_CATEGORIES) {
+            const service = category.services.find(s => s.id === value)
+            if (service) {
+              return {
+                ...item,
+                service_id: value,
+                name: service.name,
+                description: `${category.name} - ${service.name}`,
+                price: service.price
+              }
+            }
+          }
+        }
+        
+        // If selecting a product from database
         if (field === 'product_id' && value) {
           const product = products.find(p => p.id === parseInt(value))
           if (product) {
@@ -383,14 +473,29 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
                     <div className="md:col-span-4">
                       <label className="block text-xs font-medium mb-1 text-dark-500">Select Service</label>
                       <select
-                        value={item.product_id}
-                        onChange={(e) => handleItemChange(index, 'product_id', e.target.value)}
+                        value={item.service_id || ''}
+                        onChange={(e) => handleItemChange(index, 'service_id', e.target.value)}
                         className="input text-sm"
                       >
                         <option value="">Custom item...</option>
-                        {products.map(p => (
-                          <option key={p.id} value={p.id}>{p.name}</option>
+                        {SERVICE_CATEGORIES.map(category => (
+                          <optgroup key={category.name} label={`── ${category.name} ──`}>
+                            {category.services.map(service => (
+                              <option key={service.id} value={service.id}>
+                                {service.name} (${service.price}/mo)
+                              </option>
+                            ))}
+                          </optgroup>
                         ))}
+                        {products.length > 0 && (
+                          <optgroup label="── Products from Database ──">
+                            {products.map(p => (
+                              <option key={`db-${p.id}`} value={`db-${p.id}`}>
+                                {p.name} (${p.price_monthly || p.price || 0}/mo)
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                     </div>
                     <div className="md:col-span-3">
