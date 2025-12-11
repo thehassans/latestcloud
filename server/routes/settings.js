@@ -312,14 +312,14 @@ router.get('/payment-gateway', authenticate, requireRole('admin'), async (req, r
     ];
 
     const results = await db.query(
-      'SELECT setting_key, setting_value, value_type FROM settings WHERE setting_key IN (?)',
+      'SELECT setting_key, setting_value, setting_type FROM settings WHERE setting_key IN (?)',
       [keys]
     );
 
     results.forEach(row => {
       let value = row.setting_value;
-      if (row.value_type === 'boolean') {
-        value = value === 'true' || value === '1';
+      if (row.setting_type === 'boolean' || row.setting_key.endsWith('_enabled')) {
+        value = value === 'true' || value === '1' || value === true;
       }
       settings[row.setting_key] = value;
     });
@@ -337,21 +337,21 @@ router.put('/payment-gateway', authenticate, requireRole('admin'), async (req, r
     const settings = req.body;
     
     for (const [key, value] of Object.entries(settings)) {
-      const valueType = typeof value === 'boolean' ? 'boolean' : 'string';
+      const settingType = typeof value === 'boolean' ? 'boolean' : 'string';
       const dbValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : (value || '');
       
       // First try to update existing row
       const updateResult = await db.query(
-        `UPDATE settings SET setting_value = ?, value_type = ? WHERE setting_key = ?`,
-        [dbValue, valueType, key]
+        `UPDATE settings SET setting_value = ?, setting_type = ? WHERE setting_key = ?`,
+        [dbValue, settingType, key]
       );
       
       // If no row was updated, insert new row
       if (updateResult.affectedRows === 0) {
         await db.query(
-          `INSERT INTO settings (setting_key, setting_value, value_type, category)
+          `INSERT INTO settings (setting_key, setting_value, setting_type, category)
            VALUES (?, ?, ?, 'payment')`,
-          [key, dbValue, valueType]
+          [key, dbValue, settingType]
         );
       }
     }
@@ -410,7 +410,7 @@ router.get('/payment-methods', async (req, res) => {
     let results = [];
     try {
       results = await db.query(
-        'SELECT setting_key, setting_value, value_type FROM settings WHERE setting_key IN (?)',
+        'SELECT setting_key, setting_value, setting_type FROM settings WHERE setting_key IN (?)',
         [keys]
       );
     } catch (dbError) {
@@ -423,8 +423,8 @@ router.get('/payment-methods', async (req, res) => {
       results.forEach(row => {
         if (row && row.setting_key) {
           let value = row.setting_value;
-          if (row.value_type === 'boolean') {
-            value = value === 'true' || value === '1';
+          if (row.setting_type === 'boolean' || row.setting_key.endsWith('_enabled')) {
+            value = value === 'true' || value === '1' || value === true;
           }
           settings[row.setting_key] = value;
         }
