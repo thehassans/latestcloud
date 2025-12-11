@@ -91,35 +91,98 @@ const INVOICE_TEMPLATES = [
     name: 'Modern Minimal', 
     icon: Sparkles,
     gradient: 'from-slate-600 to-slate-800',
-    preview: 'Clean lines with subtle gradients'
+    preview: 'Clean lines with subtle gradients',
+    bgColor: 'bg-white',
+    accentColor: 'border-slate-600',
+    headerBg: 'bg-gradient-to-r from-slate-700 to-slate-900'
   },
   { 
     id: 'premium', 
     name: 'Premium Gold', 
     icon: Crown,
     gradient: 'from-amber-500 to-yellow-600',
-    preview: 'Luxurious gold accents'
+    preview: 'Luxurious gold accents',
+    bgColor: 'bg-amber-50',
+    accentColor: 'border-amber-500',
+    headerBg: 'bg-gradient-to-r from-amber-500 to-yellow-600'
   },
   { 
     id: 'tech', 
     name: 'Tech Futuristic', 
     icon: Zap,
     gradient: 'from-cyan-500 to-blue-600',
-    preview: 'Neon cyber aesthetic'
+    preview: 'Neon cyber aesthetic',
+    bgColor: 'bg-slate-900',
+    accentColor: 'border-cyan-500',
+    headerBg: 'bg-gradient-to-r from-cyan-500 to-blue-600'
   },
   { 
     id: 'corporate', 
     name: 'Corporate Pro', 
     icon: Building2,
     gradient: 'from-indigo-600 to-purple-700',
-    preview: 'Professional business style'
+    preview: 'Professional business style',
+    bgColor: 'bg-indigo-50',
+    accentColor: 'border-indigo-600',
+    headerBg: 'bg-gradient-to-r from-indigo-600 to-purple-700'
   },
   { 
     id: 'elegant', 
     name: 'Elegant Dark', 
     icon: Star,
     gradient: 'from-gray-800 to-black',
-    preview: 'Sophisticated dark theme'
+    preview: 'Sophisticated dark theme',
+    bgColor: 'bg-gray-900',
+    accentColor: 'border-gray-600',
+    headerBg: 'bg-gradient-to-r from-gray-800 to-black'
+  }
+]
+
+// Predefined Terms & Conditions Templates
+const TERMS_TEMPLATES = [
+  {
+    id: 'standard',
+    name: 'Standard',
+    icon: FileText,
+    terms: `1. Payment Terms: Payment is due within 7 days of proposal acceptance.
+2. Service Delivery: Services will be activated within 24-48 hours after payment confirmation.
+3. Refund Policy: 30-day money-back guarantee for hosting services.
+4. Support: 24/7 technical support via ticket system.
+5. Service Level: 99.9% uptime guarantee on all hosting services.`
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    icon: Building2,
+    terms: `1. Payment Terms: Net 30 payment terms. Payment due within 30 days of invoice date.
+2. Service Level Agreement: 99.99% uptime guarantee with service credits for downtime.
+3. Priority Support: Dedicated account manager and priority 24/7 support.
+4. Data Protection: Full GDPR compliance and data processing agreement included.
+5. Termination: 30-day notice period required for service termination.
+6. Liability: Service provider liability limited to fees paid in preceding 12 months.
+7. Confidentiality: All client data treated as strictly confidential.`
+  },
+  {
+    id: 'project',
+    name: 'Project-Based',
+    icon: Package,
+    terms: `1. Project Scope: Work limited to items specified in this proposal.
+2. Payment Schedule: 50% deposit required to commence work, 50% upon completion.
+3. Revisions: Up to 2 rounds of revisions included. Additional revisions billed hourly.
+4. Timeline: Estimated delivery dates subject to timely client feedback.
+5. Ownership: Full ownership transfers upon final payment.
+6. Cancellation: Deposit non-refundable if cancelled after work commences.`
+  },
+  {
+    id: 'subscription',
+    name: 'Subscription',
+    icon: CreditCard,
+    terms: `1. Billing Cycle: Services billed monthly/annually as selected.
+2. Auto-Renewal: Subscription auto-renews unless cancelled 7 days before renewal.
+3. Price Lock: Pricing guaranteed for the initial term.
+4. Upgrades: Upgrade anytime; difference prorated to current billing cycle.
+5. Downgrades: Effective at next billing cycle.
+6. Cancellation: Cancel anytime; service continues until end of paid period.`
   }
 ]
 
@@ -296,13 +359,16 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
 
   if (!isOpen) return null
 
+  const selectedTemplate = INVOICE_TEMPLATES.find(t => t.id === form.template) || INVOICE_TEMPLATES[0]
+  const selectedUser = users.find(u => u.id === parseInt(form.user_id))
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-5xl bg-white dark:bg-dark-800 rounded-2xl shadow-2xl my-8"
+        className="relative w-full max-w-[1400px] bg-white dark:bg-dark-800 rounded-2xl shadow-2xl my-8"
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-gradient-to-r from-primary-600 to-purple-600 rounded-t-2xl p-6">
@@ -324,7 +390,9 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-8">
+        <div className="flex flex-col lg:flex-row">
+          {/* Left Side - Form */}
+          <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-6 lg:border-r border-dark-200 dark:border-dark-600 overflow-y-auto max-h-[75vh]">
           {/* Basic Info */}
           <div className="grid md:grid-cols-2 gap-6">
             <div>
@@ -635,59 +703,57 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
             </div>
           </div>
 
-          {/* Invoice Template Selection */}
+          {/* Notes */}
           <div>
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary-500" />
-              Invoice Template
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              {INVOICE_TEMPLATES.map(template => (
+            <label className="block text-sm font-medium mb-2">Notes (visible to client)</label>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
+              placeholder="Any additional notes..."
+              rows={2}
+              className="input"
+            />
+          </div>
+
+          {/* Ultra-Premium Terms & Conditions */}
+          <div className="p-5 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-amber-900/20 dark:via-orange-900/20 dark:to-yellow-900/20 rounded-xl border-2 border-amber-200 dark:border-amber-700">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h4 className="font-bold text-amber-800 dark:text-amber-200">Terms & Conditions</h4>
+                <p className="text-xs text-amber-600 dark:text-amber-400">Select a template or customize</p>
+              </div>
+            </div>
+            
+            {/* Terms Templates */}
+            <div className="grid grid-cols-4 gap-2 mb-4">
+              {TERMS_TEMPLATES.map(template => (
                 <button
                   key={template.id}
                   type="button"
-                  onClick={() => setForm(prev => ({ ...prev, template: template.id }))}
+                  onClick={() => setForm(prev => ({ ...prev, terms: template.terms }))}
                   className={clsx(
-                    "p-4 rounded-xl border-2 transition-all text-left",
-                    form.template === template.id
-                      ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                      : "border-dark-200 dark:border-dark-600 hover:border-primary-300"
+                    "p-2 rounded-lg border-2 transition-all text-center hover:scale-105",
+                    form.terms === template.terms
+                      ? "border-amber-500 bg-amber-100 dark:bg-amber-900/40"
+                      : "border-amber-200 dark:border-amber-700 hover:border-amber-400"
                   )}
                 >
-                  <div className={clsx(
-                    "w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center mb-2",
-                    template.gradient
-                  )}>
-                    <template.icon className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="font-medium text-sm">{template.name}</p>
-                  <p className="text-xs text-dark-500 mt-1">{template.preview}</p>
+                  <template.icon className="w-4 h-4 mx-auto mb-1 text-amber-600" />
+                  <span className="text-xs font-medium text-amber-800 dark:text-amber-200">{template.name}</span>
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* Notes & Terms */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-2">Notes (visible to client)</label>
-              <textarea
-                value={form.notes}
-                onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Any additional notes..."
-                rows={3}
-                className="input"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Terms & Conditions</label>
-              <textarea
-                value={form.terms}
-                onChange={(e) => setForm(prev => ({ ...prev, terms: e.target.value }))}
-                rows={3}
-                className="input"
-              />
-            </div>
+            <textarea
+              value={form.terms}
+              onChange={(e) => setForm(prev => ({ ...prev, terms: e.target.value }))}
+              rows={4}
+              className="w-full p-3 bg-white dark:bg-dark-700 rounded-lg border border-amber-300 dark:border-amber-600 text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+              placeholder="Enter terms and conditions..."
+            />
           </div>
 
           {/* Actions */}
@@ -701,6 +767,143 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
             </button>
           </div>
         </form>
+
+          {/* Right Side - Live Invoice Preview */}
+          <div className="w-full lg:w-[420px] p-6 bg-dark-50 dark:bg-dark-900 overflow-y-auto max-h-[75vh]">
+            <div className="sticky top-0">
+              <div className="flex items-center gap-2 mb-4">
+                <Eye className="w-5 h-5 text-primary-500" />
+                <h3 className="font-bold text-lg">Live Preview</h3>
+              </div>
+
+              {/* Invoice Preview Card */}
+              <div className={clsx(
+                "rounded-xl overflow-hidden shadow-2xl border-2 transition-all duration-300",
+                selectedTemplate.accentColor
+              )}>
+                {/* Invoice Header */}
+                <div className={clsx("p-4", selectedTemplate.headerBg)}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-white font-bold text-lg">PROPOSAL</h4>
+                      <p className="text-white/70 text-xs">#{form.title ? 'PROP-XXXX' : '---'}</p>
+                    </div>
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                      <selectedTemplate.icon className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Invoice Body */}
+                <div className={clsx(
+                  "p-4 space-y-4",
+                  selectedTemplate.id === 'tech' || selectedTemplate.id === 'elegant' 
+                    ? 'bg-gray-900 text-white' 
+                    : 'bg-white text-dark-800'
+                )}>
+                  {/* Title & Client */}
+                  <div className="border-b pb-3 border-current/10">
+                    <h5 className="font-bold text-sm truncate">{form.title || 'Proposal Title'}</h5>
+                    <p className="text-xs opacity-60 mt-1">
+                      To: {selectedUser ? `${selectedUser.first_name} ${selectedUser.last_name}` : 'Select a client'}
+                    </p>
+                    <p className="text-xs opacity-60">
+                      Valid Until: {form.valid_until || '---'}
+                    </p>
+                  </div>
+
+                  {/* Items Preview */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold opacity-70 uppercase">Items</p>
+                    {form.items.filter(i => i.name).length > 0 ? (
+                      form.items.filter(i => i.name).slice(0, 3).map((item, idx) => (
+                        <div key={idx} className="flex justify-between text-xs">
+                          <span className="truncate flex-1">{item.name}</span>
+                          <span className="font-medium ml-2">${(item.quantity * item.price).toFixed(2)}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs opacity-50 italic">No items added</p>
+                    )}
+                    {form.items.filter(i => i.name).length > 3 && (
+                      <p className="text-xs opacity-50">+{form.items.filter(i => i.name).length - 3} more items...</p>
+                    )}
+                  </div>
+
+                  {/* Totals */}
+                  <div className="pt-3 border-t border-current/10 space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span className="opacity-60">Subtotal</span>
+                      <span>${calculateSubtotal().toFixed(2)}</span>
+                    </div>
+                    {form.discount > 0 && (
+                      <div className="flex justify-between text-xs text-red-500">
+                        <span>Discount</span>
+                        <span>-${calculateDiscount().toFixed(2)}</span>
+                      </div>
+                    )}
+                    {form.tax > 0 && (
+                      <div className="flex justify-between text-xs">
+                        <span className="opacity-60">Tax ({form.tax}%)</span>
+                        <span>${calculateTax().toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-bold text-base pt-2 border-t border-current/10">
+                      <span>Total</span>
+                      <span className="text-emerald-500">${calculateTotal().toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                  {/* Terms Preview */}
+                  {form.terms && (
+                    <div className="pt-3 border-t border-current/10">
+                      <p className="text-xs font-semibold opacity-70 uppercase mb-1">Terms</p>
+                      <p className="text-xs opacity-60 line-clamp-3">{form.terms}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Invoice Footer */}
+                <div className={clsx(
+                  "px-4 py-3 text-center text-xs",
+                  selectedTemplate.id === 'tech' || selectedTemplate.id === 'elegant' 
+                    ? 'bg-gray-800 text-gray-400' 
+                    : 'bg-gray-100 text-gray-500'
+                )}>
+                  Powered by Magnetic Clouds
+                </div>
+              </div>
+
+              {/* Template Selection Below Preview */}
+              <div className="mt-4">
+                <p className="text-xs font-medium text-dark-500 mb-2">Select Template Style</p>
+                <div className="flex gap-2">
+                  {INVOICE_TEMPLATES.map(template => (
+                    <button
+                      key={template.id}
+                      type="button"
+                      onClick={() => setForm(prev => ({ ...prev, template: template.id }))}
+                      className={clsx(
+                        "flex-1 p-2 rounded-lg border-2 transition-all hover:scale-105",
+                        form.template === template.id
+                          ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
+                          : "border-dark-200 dark:border-dark-600"
+                      )}
+                    >
+                      <div className={clsx(
+                        "w-6 h-6 rounded-md bg-gradient-to-br flex items-center justify-center mx-auto",
+                        template.gradient
+                      )}>
+                        <template.icon className="w-3 h-3 text-white" />
+                      </div>
+                      <p className="text-xs mt-1 font-medium truncate">{template.name.split(' ')[0]}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </motion.div>
     </div>
   )
