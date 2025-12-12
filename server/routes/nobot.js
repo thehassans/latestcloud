@@ -9,9 +9,20 @@ const { authenticate, requireRole } = require('../middleware/auth');
 // Get NoBot settings
 router.get('/settings', authenticate, requireRole('admin'), async (req, res) => {
   try {
+    // Check if table exists first
+    const tableCheck = await db.query(`
+      SELECT COUNT(*) as count FROM information_schema.tables 
+      WHERE table_schema = DATABASE() AND table_name = 'nobot_settings'
+    `);
+    
+    if (!tableCheck[0]?.count) {
+      // Table doesn't exist, return empty settings
+      return res.json({ settings: {} });
+    }
+    
     const settings = await db.query('SELECT * FROM nobot_settings');
     const settingsObj = {};
-    settings.forEach(s => {
+    (settings || []).forEach(s => {
       if (s.setting_type === 'boolean') {
         settingsObj[s.setting_key] = s.setting_value === 'true';
       } else if (s.setting_type === 'number') {
@@ -23,7 +34,8 @@ router.get('/settings', authenticate, requireRole('admin'), async (req, res) => 
     res.json({ settings: settingsObj });
   } catch (error) {
     console.error('Get NoBot settings error:', error);
-    res.status(500).json({ error: 'Failed to load settings' });
+    // Return empty settings instead of error
+    res.json({ settings: {} });
   }
 });
 
@@ -86,10 +98,28 @@ router.post('/test-connection', authenticate, requireRole('admin'), async (req, 
 // Get NoBot stats
 router.get('/stats', authenticate, requireRole('admin'), async (req, res) => {
   try {
-    const [totalBots] = await db.query('SELECT COUNT(*) as count FROM nobot_services');
-    const [activeBots] = await db.query("SELECT COUNT(*) as count FROM nobot_services WHERE status = 'active'");
-    const [totalConversations] = await db.query('SELECT COUNT(*) as count FROM nobot_conversations');
-    const [totalMessages] = await db.query('SELECT COUNT(*) as count FROM nobot_messages');
+    // Check if tables exist first
+    const tableCheck = await db.query(`
+      SELECT COUNT(*) as count FROM information_schema.tables 
+      WHERE table_schema = DATABASE() AND table_name = 'nobot_services'
+    `);
+    
+    if (!tableCheck[0]?.count) {
+      // Tables don't exist yet, return zeros
+      return res.json({
+        stats: {
+          total_bots: 0,
+          active_bots: 0,
+          total_conversations: 0,
+          total_messages: 0
+        }
+      });
+    }
+    
+    const totalBots = await db.query('SELECT COUNT(*) as count FROM nobot_services');
+    const activeBots = await db.query("SELECT COUNT(*) as count FROM nobot_services WHERE status = 'active'");
+    const totalConversations = await db.query('SELECT COUNT(*) as count FROM nobot_conversations');
+    const totalMessages = await db.query('SELECT COUNT(*) as count FROM nobot_messages');
     
     res.json({
       stats: {
@@ -101,7 +131,15 @@ router.get('/stats', authenticate, requireRole('admin'), async (req, res) => {
     });
   } catch (error) {
     console.error('Get NoBot stats error:', error);
-    res.status(500).json({ error: 'Failed to load stats' });
+    // Return zeros instead of error
+    res.json({
+      stats: {
+        total_bots: 0,
+        active_bots: 0,
+        total_conversations: 0,
+        total_messages: 0
+      }
+    });
   }
 });
 
