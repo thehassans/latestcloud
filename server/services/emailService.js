@@ -655,6 +655,7 @@ class EmailService {
       throw new Error('Mailgun not configured');
     }
 
+    const emailUuid = uuidv4();
     const settings = await this.getSettings();
     const template = templates.test_email;
     const variables = {
@@ -666,14 +667,33 @@ class EmailService {
     const subject = this.replaceVariables(template.subject, variables);
     const html = this.replaceVariables(template.html, variables);
 
-    const result = await this.mg.messages.create(this.settings.mailgun_domain, {
-      from: `${this.settings.mailgun_from_name} <${this.settings.mailgun_from_email}>`,
-      to: [to],
-      subject: subject,
-      html: html
+    // Log before sending
+    await this.logEmail({
+      uuid: emailUuid,
+      user_id: null,
+      recipient_email: to,
+      recipient_name: null,
+      subject,
+      template: 'test_email',
+      html_content: html,
+      status: 'pending',
+      metadata: JSON.stringify(variables)
     });
 
-    return result;
+    try {
+      const result = await this.mg.messages.create(this.settings.mailgun_domain, {
+        from: `${this.settings.mailgun_from_name} <${this.settings.mailgun_from_email}>`,
+        to: [to],
+        subject: subject,
+        html: html
+      });
+
+      await this.updateEmailLog(emailUuid, 'sent');
+      return result;
+    } catch (error) {
+      await this.updateEmailLog(emailUuid, 'failed', error.message);
+      throw error;
+    }
   }
 
   // Admin notifications
