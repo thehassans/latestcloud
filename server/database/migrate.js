@@ -549,6 +549,31 @@ const migrations = [
     setting_type VARCHAR(50) DEFAULT 'string',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  )`,
+
+  // Email Logs
+  `CREATE TABLE IF NOT EXISTS email_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    uuid VARCHAR(36) UNIQUE NOT NULL,
+    user_id INT,
+    recipient_email VARCHAR(255) NOT NULL,
+    recipient_name VARCHAR(255),
+    subject VARCHAR(500) NOT NULL,
+    template VARCHAR(100),
+    html_content LONGTEXT NOT NULL,
+    text_content TEXT,
+    status ENUM('pending', 'sent', 'failed', 'bounced') DEFAULT 'pending',
+    error_message TEXT,
+    opened_at DATETIME,
+    clicked_at DATETIME,
+    metadata JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sent_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_recipient (recipient_email),
+    INDEX idx_status (status),
+    INDEX idx_created (created_at),
+    INDEX idx_user (user_id)
   )`
 ];
 

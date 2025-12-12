@@ -95,6 +95,7 @@ const AdminEmailSettings = lazy(() => import('./pages/admin/AdminEmailSettings')
 const AdminProposals = lazy(() => import('./pages/admin/AdminProposals'))
 const AdminInvoices = lazy(() => import('./pages/admin/AdminInvoices'))
 const AdminNoBotServices = lazy(() => import('./pages/admin/AdminNoBotServices'))
+const AdminEmailLogs = lazy(() => import('./pages/admin/AdminEmailLogs'))
 
 // Public pages
 const ProposalView = lazy(() => import('./pages/ProposalView'))
@@ -270,6 +271,7 @@ function App() {
           <Route path="proposals" element={<AdminProposals />} />
           <Route path="invoices" element={<AdminInvoices />} />
           <Route path="nobot-services" element={<AdminNoBotServices />} />
+          <Route path="email-logs" element={<AdminEmailLogs />} />
         </Route>
 
         {/* 404 */}

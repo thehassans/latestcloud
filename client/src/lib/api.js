@@ -221,6 +221,10 @@ export const adminAPI = {
   getNoBotStats: () => api.get('/admin/nobot/stats'),
   getNoBotServices: (params) => api.get('/admin/nobot/services', { params }),
   getNoBotService: (uuid) => api.get(`/admin/nobot/services/${uuid}`),
+  
+  // Email Logs
+  getEmailLogs: (params) => api.get('/admin/email-logs', { params }),
+  getEmailLog: (uuid) => api.get(`/admin/email-logs/${uuid}`),
 }
 
 // User NoBot API

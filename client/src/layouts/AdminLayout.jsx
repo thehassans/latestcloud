@@ -29,6 +29,7 @@ const sidebarLinks = [
   { to: '/admin/ai-chats', icon: MessageSquare, label: 'Chat History' },
   { to: '/admin/nobot-services', icon: Bot, label: 'NoBot Services' },
   { to: '/admin/email-settings', icon: Mail, label: 'Email Settings' },
+  { to: '/admin/email-logs', icon: Mail, label: 'Email Logs' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
 

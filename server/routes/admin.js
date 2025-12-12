@@ -718,4 +718,102 @@ router.get('/activity', async (req, res) => {
   }
 });
 
+// Email logs
+router.get('/email-logs', async (req, res) => {
+  try {
+    const { page = 1, limit = 20, search, status } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    // Check if table exists
+    const tableCheck = await db.query(`
+      SELECT COUNT(*) as count FROM information_schema.tables 
+      WHERE table_schema = DATABASE() AND table_name = 'email_logs'
+    `);
+    
+    if (!tableCheck[0]?.count) {
+      return res.json({ 
+        logs: [], 
+        total: 0, 
+        stats: { total: 0, sent: 0, failed: 0, pending: 0 } 
+      });
+    }
+
+    let whereClause = '';
+    const params = [];
+
+    if (search) {
+      whereClause = "WHERE (recipient_email LIKE ? OR subject LIKE ? OR recipient_name LIKE ?)";
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    if (status) {
+      whereClause = whereClause ? `${whereClause} AND status = ?` : 'WHERE status = ?';
+      params.push(status);
+    }
+
+    // Get stats
+    const statsResult = await db.query(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) as sent,
+        SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed,
+        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+      FROM email_logs
+    `);
+
+    // Get total count
+    const countResult = await db.query(
+      `SELECT COUNT(*) as count FROM email_logs ${whereClause}`,
+      params
+    );
+
+    // Get logs
+    const logs = await db.query(`
+      SELECT el.*, u.email as user_email, u.first_name, u.last_name
+      FROM email_logs el
+      LEFT JOIN users u ON el.user_id = u.id
+      ${whereClause}
+      ORDER BY el.created_at DESC
+      LIMIT ? OFFSET ?
+    `, [...params, parseInt(limit), offset]);
+
+    res.json({
+      logs,
+      total: Number(countResult[0]?.count || 0),
+      stats: {
+        total: Number(statsResult[0]?.total || 0),
+        sent: Number(statsResult[0]?.sent || 0),
+        failed: Number(statsResult[0]?.failed || 0),
+        pending: Number(statsResult[0]?.pending || 0)
+      }
+    });
+  } catch (error) {
+    console.error('Get email logs error:', error);
+    res.json({ 
+      logs: [], 
+      total: 0, 
+      stats: { total: 0, sent: 0, failed: 0, pending: 0 } 
+    });
+  }
+});
+
+// Get single email log
+router.get('/email-logs/:uuid', async (req, res) => {
+  try {
+    const logs = await db.query(
+      'SELECT * FROM email_logs WHERE uuid = ?',
+      [req.params.uuid]
+    );
+
+    if (!logs.length) {
+      return res.status(404).json({ error: 'Email not found' });
+    }
+
+    res.json({ log: logs[0] });
+  } catch (error) {
+    console.error('Get email log error:', error);
+    res.status(500).json({ error: 'Failed to load email' });
+  }
+});
+
 module.exports = router;
