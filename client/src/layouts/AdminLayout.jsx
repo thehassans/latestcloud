@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { 
   LayoutDashboard, Users, Package, ShoppingCart, Ticket, 
   Globe, Settings, FileText, Image, LogOut, Menu, X,
-  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare, DollarSign, CreditCard, Sliders, Mail, Send
+  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare, DollarSign, CreditCard, Sliders, Mail, Send, Receipt
 } from 'lucide-react'
 import { useAuthStore, useThemeStore } from '../store/useStore'
 import { settingsAPI } from '../lib/api'
@@ -19,6 +19,7 @@ const sidebarLinks = [
   { to: '/admin/payment-gateway', icon: CreditCard, label: 'Payment Gateway' },
   { to: '/admin/customize-plans', icon: Sliders, label: 'Customize Plans' },
   { to: '/admin/proposals', icon: Send, label: 'Proposals' },
+  { to: '/admin/invoices', icon: Receipt, label: 'Invoices' },
   { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
   { to: '/admin/tickets', icon: Ticket, label: 'Tickets' },
   { to: '/admin/domains', icon: Globe, label: 'Domain TLDs' },

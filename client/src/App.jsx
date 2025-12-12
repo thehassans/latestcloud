@@ -92,6 +92,7 @@ const AdminPaymentGateway = lazy(() => import('./pages/admin/AdminPaymentGateway
 const AdminCustomizePlans = lazy(() => import('./pages/admin/AdminCustomizePlans'))
 const AdminEmailSettings = lazy(() => import('./pages/admin/AdminEmailSettings'))
 const AdminProposals = lazy(() => import('./pages/admin/AdminProposals'))
+const AdminInvoices = lazy(() => import('./pages/admin/AdminInvoices'))
 
 // Public pages
 const ProposalView = lazy(() => import('./pages/ProposalView'))
@@ -263,6 +264,7 @@ function App() {
           <Route path="customize-plans" element={<AdminCustomizePlans />} />
           <Route path="email-settings" element={<AdminEmailSettings />} />
           <Route path="proposals" element={<AdminProposals />} />
+          <Route path="invoices" element={<AdminInvoices />} />
         </Route>
 
         {/* 404 */}

@@ -118,13 +118,14 @@ router.get('/users/:uuid', async (req, res) => {
     const user = users[0];
     delete user.password;
 
-    const [orders, services, tickets] = await Promise.all([
+    const [orders, services, tickets, invoices] = await Promise.all([
       db.query('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', [user.id]),
       db.query('SELECT * FROM services WHERE user_id = ? ORDER BY created_at DESC', [user.id]),
-      db.query('SELECT * FROM tickets WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', [user.id])
+      db.query('SELECT * FROM tickets WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', [user.id]),
+      db.query('SELECT * FROM invoices WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', [user.id])
     ]);
 
-    res.json({ user, orders, services, tickets });
+    res.json({ user, orders, services, tickets, invoices });
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ error: 'Failed to load user' });
@@ -144,6 +145,127 @@ router.put('/users/:uuid', async (req, res) => {
   } catch (error) {
     console.error('Update user error:', error);
     res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// Login as user (admin impersonation)
+router.post('/users/:uuid/login-as', async (req, res) => {
+  try {
+    const users = await db.query('SELECT * FROM users WHERE uuid = ?', [req.params.uuid]);
+    if (!users.length) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = users[0];
+    if (user.role === 'admin') {
+      return res.status(403).json({ error: 'Cannot impersonate admin users' });
+    }
+
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { id: user.id, uuid: user.uuid, email: user.email, role: user.role, impersonated: true },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    delete user.password;
+    res.json({ user, token });
+  } catch (error) {
+    console.error('Login as user error:', error);
+    res.status(500).json({ error: 'Failed to login as user' });
+  }
+});
+
+// Invoices management
+router.get('/invoices', async (req, res) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+    
+    let query = `
+      SELECT i.*, u.email, u.first_name, u.last_name, p.title as proposal_title
+      FROM invoices i
+      JOIN users u ON i.user_id = u.id
+      LEFT JOIN proposals p ON i.proposal_id = p.id
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (status) {
+      query += ' AND i.status = ?';
+      params.push(status);
+    }
+
+    query += ' ORDER BY i.created_at DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), parseInt(offset));
+
+    const invoices = await db.query(query, params);
+    const countResult = await db.query('SELECT COUNT(*) as total FROM invoices');
+
+    res.json({
+      invoices,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: Number(countResult[0].total)
+      }
+    });
+  } catch (error) {
+    console.error('Get invoices error:', error);
+    res.status(500).json({ error: 'Failed to load invoices' });
+  }
+});
+
+router.get('/invoices/:uuid', async (req, res) => {
+  try {
+    const invoices = await db.query(`
+      SELECT i.*, u.email, u.first_name, u.last_name, u.phone, u.company, u.address,
+             p.title as proposal_title, p.items as proposal_items
+      FROM invoices i
+      JOIN users u ON i.user_id = u.id
+      LEFT JOIN proposals p ON i.proposal_id = p.id
+      WHERE i.uuid = ?
+    `, [req.params.uuid]);
+    
+    if (!invoices.length) {
+      return res.status(404).json({ error: 'Invoice not found' });
+    }
+
+    const invoice = invoices[0];
+    if (invoice.proposal_items) {
+      try {
+        invoice.items = JSON.parse(invoice.proposal_items);
+      } catch (e) {
+        invoice.items = [];
+      }
+    }
+
+    res.json({ invoice });
+  } catch (error) {
+    console.error('Get invoice error:', error);
+    res.status(500).json({ error: 'Failed to load invoice' });
+  }
+});
+
+router.put('/invoices/:uuid/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    const validStatuses = ['draft', 'unpaid', 'paid', 'cancelled', 'refunded'];
+    
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const paidDate = status === 'paid' ? 'NOW()' : 'NULL';
+    await db.query(`
+      UPDATE invoices SET status = ?, paid_date = ${status === 'paid' ? 'NOW()' : 'paid_date'}
+      WHERE uuid = ?
+    `, [status, req.params.uuid]);
+
+    res.json({ message: 'Invoice status updated' });
+  } catch (error) {
+    console.error('Update invoice status error:', error);
+    res.status(500).json({ error: 'Failed to update invoice status' });
   }
 });
 

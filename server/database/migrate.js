@@ -235,6 +235,7 @@ const migrations = [
     uuid VARCHAR(36) UNIQUE NOT NULL,
     user_id INT NOT NULL,
     order_id INT,
+    proposal_id INT,
     invoice_number VARCHAR(50) UNIQUE NOT NULL,
     status ENUM('draft', 'unpaid', 'paid', 'cancelled', 'refunded') DEFAULT 'unpaid',
     due_date DATE NOT NULL,
@@ -248,7 +249,8 @@ const migrations = [
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
+    FOREIGN KEY (proposal_id) REFERENCES proposals(id) ON DELETE SET NULL
   )`,
   
   // Transactions
