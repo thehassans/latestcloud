@@ -234,16 +234,18 @@ router.post('/guest-checkout', [
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ error: 'Please fill in all required fields correctly', errors: errors.array() });
     }
 
     const { email, first_name, last_name, address, city, country } = req.body;
 
     // Check if email exists
     const existing = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (existing.length) {
+    const existingUsers = Array.isArray(existing) ? existing.filter(row => row.email) : [];
+    
+    if (existingUsers.length > 0) {
       // User exists - return existing user with token
-      const user = existing[0];
+      const user = existingUsers[0];
       const token = generateToken({ uuid: user.uuid, email: user.email, role: user.role });
       
       res.cookie('token', token, {
@@ -279,8 +281,17 @@ router.post('/guest-checkout', [
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
-    // TODO: Send email with password via Mailgun
-    // For now, log the password (remove in production)
+    // Send welcome email with password
+    try {
+      const emailService = require('../services/emailService');
+      await emailService.send(email, 'welcome_email', {
+        user_name: first_name,
+        temp_password: randomPassword
+      });
+    } catch (emailErr) {
+      console.error('Failed to send welcome email:', emailErr);
+    }
+
     console.log(`Guest checkout - Email: ${email}, Password: ${randomPassword}`);
 
     res.status(201).json({
@@ -292,9 +303,9 @@ router.post('/guest-checkout', [
     console.error('Guest checkout error:', error);
     // Check for duplicate email error
     if (error.code === 'ER_DUP_ENTRY' || error.message?.includes('Duplicate')) {
-      return res.status(400).json({ error: 'Email already exists' });
+      return res.status(400).json({ error: 'Email already exists. Please login instead.' });
     }
-    res.status(500).json({ error: error.message || 'Guest checkout failed' });
+    res.status(500).json({ error: error.message || 'Failed to create account. Please try again.' });
   }
 });
 
