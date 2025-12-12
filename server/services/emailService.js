@@ -1,6 +1,7 @@
 const FormData = require('form-data');
 const Mailgun = require('mailgun.js');
 const db = require('../database/connection');
+const { v4: uuidv4 } = require('uuid');
 
 // Email templates
 const templates = {
@@ -467,7 +468,11 @@ class EmailService {
     return result;
   }
 
-  async send(to, templateName, variables = {}) {
+  async send(to, templateName, variables = {}, userId = null) {
+    const emailUuid = uuidv4();
+    let subject = '';
+    let html = '';
+    
     try {
       // Check if enabled
       if (!await this.isEnabled(templateName)) {
@@ -499,8 +504,21 @@ class EmailService {
         ...variables
       };
 
-      const subject = this.replaceVariables(template.subject, allVariables);
-      const html = this.replaceVariables(template.html, allVariables);
+      subject = this.replaceVariables(template.subject, allVariables);
+      html = this.replaceVariables(template.html, allVariables);
+
+      // Log email before sending
+      await this.logEmail({
+        uuid: emailUuid,
+        user_id: userId,
+        recipient_email: to,
+        recipient_name: variables.user_name || null,
+        subject,
+        template: templateName,
+        html_content: html,
+        status: 'pending',
+        metadata: JSON.stringify(variables)
+      });
 
       const result = await this.mg.messages.create(this.settings.mailgun_domain, {
         from: `${this.settings.mailgun_from_name} <${this.settings.mailgun_from_email}>`,
@@ -509,11 +527,47 @@ class EmailService {
         html: html
       });
 
+      // Update log to sent
+      await this.updateEmailLog(emailUuid, 'sent');
+
       console.log(`Email sent: ${templateName} to ${to}`, result.id);
       return true;
     } catch (error) {
       console.error('Email send error:', error);
+      // Update log to failed
+      await this.updateEmailLog(emailUuid, 'failed', error.message);
       return false;
+    }
+  }
+
+  async logEmail({ uuid, user_id, recipient_email, recipient_name, subject, template, html_content, status, metadata }) {
+    try {
+      await db.query(`
+        INSERT INTO email_logs (uuid, user_id, recipient_email, recipient_name, subject, template, html_content, status, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [uuid, user_id, recipient_email, recipient_name, subject, template, html_content, status, metadata]);
+    } catch (error) {
+      // Silently fail if table doesn't exist
+      console.error('Email log error:', error.message);
+    }
+  }
+
+  async updateEmailLog(uuid, status, errorMessage = null) {
+    try {
+      if (status === 'sent') {
+        await db.query(
+          'UPDATE email_logs SET status = ?, sent_at = NOW() WHERE uuid = ?',
+          [status, uuid]
+        );
+      } else {
+        await db.query(
+          'UPDATE email_logs SET status = ?, error_message = ? WHERE uuid = ?',
+          [status, errorMessage, uuid]
+        );
+      }
+    } catch (error) {
+      // Silently fail if table doesn't exist
+      console.error('Email log update error:', error.message);
     }
   }
 
