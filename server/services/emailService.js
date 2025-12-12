@@ -575,14 +575,14 @@ class EmailService {
   async sendWelcome(user) {
     return this.send(user.email, 'welcome_email', {
       user_name: user.first_name || user.email
-    });
+    }, user.id);
   }
 
   async sendPasswordReset(user, resetLink) {
     return this.send(user.email, 'password_reset', {
       user_name: user.first_name || user.email,
       reset_link: resetLink
-    });
+    }, user.id);
   }
 
   async sendOrderPlaced(order, user) {
@@ -597,7 +597,7 @@ class EmailService {
       order_total: `$${order.total?.toFixed(2) || '0.00'}`,
       payment_status: order.payment_status || 'Pending',
       order_items: itemsHtml
-    });
+    }, user.id);
   }
 
   async sendOrderConfirmed(order, user) {
@@ -605,21 +605,21 @@ class EmailService {
       user_name: user.first_name || user.email,
       order_id: order.uuid || order.id,
       order_total: `$${order.total?.toFixed(2) || '0.00'}`
-    });
+    }, user.id);
   }
 
   async sendOrderCompleted(order, user) {
     return this.send(user.email, 'order_completed', {
       user_name: user.first_name || user.email,
       order_id: order.uuid || order.id
-    });
+    }, user.id);
   }
 
   async sendOrderCancelled(order, user) {
     return this.send(user.email, 'order_cancelled', {
       user_name: user.first_name || user.email,
       order_id: order.uuid || order.id
-    });
+    }, user.id);
   }
 
   async sendTicketCreated(ticket, user) {
@@ -628,7 +628,7 @@ class EmailService {
       ticket_id: ticket.id,
       ticket_subject: ticket.subject,
       ticket_priority: ticket.priority
-    });
+    }, user.id);
   }
 
   async sendTicketReplied(ticket, user, reply, replyFrom) {
@@ -638,14 +638,14 @@ class EmailService {
       ticket_subject: ticket.subject,
       reply_from: replyFrom,
       reply_message: reply.message?.substring(0, 500) || ''
-    });
+    }, user.id);
   }
 
   async sendTicketClosed(ticket, user) {
     return this.send(user.email, 'ticket_closed', {
       user_name: user.first_name || user.email,
       ticket_id: ticket.id
-    });
+    }, user.id);
   }
 
   async sendTestEmail(to) {

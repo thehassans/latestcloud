@@ -240,7 +240,7 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
       sessionStorage.removeItem('guestEmail')
       
       toast.success('🎉 Order placed successfully! Check your email for login details.')
-      navigate('/dashboard/orders')
+      navigate('/dashboard')
     } catch (err) {
       toast.error(err.response?.data?.error || 'Checkout failed')
     } finally {

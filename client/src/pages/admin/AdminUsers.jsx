@@ -57,7 +57,8 @@ export default function AdminUsers() {
       toast.success(`Logged in as ${res.data.user.first_name}`)
       navigate('/dashboard')
     } catch (err) {
-      toast.error('Failed to login as user')
+      console.error('Login as user error:', err)
+      toast.error(err.response?.data?.error || 'Failed to login as user')
     } finally {
       setLoggingIn(false)
     }
