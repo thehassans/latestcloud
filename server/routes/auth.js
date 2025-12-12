@@ -10,6 +10,11 @@ const { authenticate, generateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Generate 6-digit user ID
+function generate6DigitId() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 // Passport serialization
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -51,8 +56,21 @@ async function findOrCreateOAuthUser(profile, provider) {
       return users[0];
     }
 
-    // Create new user
-    const uuid = uuidv4();
+    // Create new user with 6-digit ID
+    let uuid = generate6DigitId();
+    let idExists = true;
+    let attempts = 0;
+    while (idExists && attempts < 10) {
+      const check = await db.query('SELECT id FROM users WHERE uuid = ?', [uuid]);
+      const checkFiltered = Array.isArray(check) ? check.filter(row => row.id) : [];
+      if (checkFiltered.length === 0) {
+        idExists = false;
+      } else {
+        uuid = generate6DigitId();
+        attempts++;
+      }
+    }
+    
     const firstName = profile.name?.givenName || profile.displayName?.split(' ')[0] || 'User';
     const lastName = profile.name?.familyName || profile.displayName?.split(' ').slice(1).join(' ') || '';
     const avatar = profile.photos?.[0]?.value || null;
@@ -198,7 +216,21 @@ router.post('/register', [
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const uuid = uuidv4();
+    
+    // Generate unique 6-digit ID
+    let uuid = generate6DigitId();
+    let idExists = true;
+    let attempts = 0;
+    while (idExists && attempts < 10) {
+      const check = await db.query('SELECT id FROM users WHERE uuid = ?', [uuid]);
+      const checkFiltered = Array.isArray(check) ? check.filter(row => row.id) : [];
+      if (checkFiltered.length === 0) {
+        idExists = false;
+      } else {
+        uuid = generate6DigitId();
+        attempts++;
+      }
+    }
 
     await db.query(`
       INSERT INTO users (uuid, email, password, first_name, last_name, phone, company, role, status)
@@ -262,10 +294,24 @@ router.post('/guest-checkout', [
       });
     }
 
-    // Generate random password
+    // Generate random password and 6-digit user ID
     const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8).toUpperCase() + '!';
     const hashedPassword = await bcrypt.hash(randomPassword, 12);
-    const uuid = uuidv4();
+    
+    // Generate unique 6-digit ID
+    let uuid = generate6DigitId();
+    let idExists = true;
+    let attempts = 0;
+    while (idExists && attempts < 10) {
+      const check = await db.query('SELECT id FROM users WHERE uuid = ?', [uuid]);
+      const checkFiltered = Array.isArray(check) ? check.filter(row => row.id) : [];
+      if (checkFiltered.length === 0) {
+        idExists = false;
+      } else {
+        uuid = generate6DigitId();
+        attempts++;
+      }
+    }
 
     await db.query(`
       INSERT INTO users (uuid, email, password, first_name, last_name, address, city, country, role, status)
