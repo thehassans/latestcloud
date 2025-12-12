@@ -170,11 +170,15 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
           // Auto login
           login(createdUser, userToken)
         } catch (regErr) {
-          // If user exists, continue with order
-          if (!regErr.response?.data?.error?.includes('exists')) {
-            toast.error(regErr.response?.data?.error || 'Failed to create account')
+          // If user exists, try to login instead
+          if (regErr.response?.data?.error?.includes('exists')) {
+            toast.error('An account with this email already exists. Please login first.')
+            setLoading(false)
             return
           }
+          toast.error(regErr.response?.data?.error || 'Failed to create account')
+          setLoading(false)
+          return
         }
       }
 

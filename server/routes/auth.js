@@ -290,7 +290,11 @@ router.post('/guest-checkout', [
     });
   } catch (error) {
     console.error('Guest checkout error:', error);
-    res.status(500).json({ error: 'Guest checkout failed' });
+    // Check for duplicate email error
+    if (error.code === 'ER_DUP_ENTRY' || error.message?.includes('Duplicate')) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+    res.status(500).json({ error: error.message || 'Guest checkout failed' });
   }
 });
 
