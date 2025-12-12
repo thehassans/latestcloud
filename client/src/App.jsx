@@ -96,6 +96,7 @@ const AdminProposals = lazy(() => import('./pages/admin/AdminProposals'))
 const AdminInvoices = lazy(() => import('./pages/admin/AdminInvoices'))
 const AdminNoBotServices = lazy(() => import('./pages/admin/AdminNoBotServices'))
 const AdminEmailLogs = lazy(() => import('./pages/admin/AdminEmailLogs'))
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
 
 // Public pages
 const ProposalView = lazy(() => import('./pages/ProposalView'))
@@ -105,11 +106,18 @@ function ProtectedRoute({ children, adminOnly = false }) {
   const { isAuthenticated, user } = useAuthStore()
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Redirect to appropriate login page
+    return <Navigate to={adminOnly ? "/admin/login" : "/login"} replace />
   }
   
   if (adminOnly && user?.role !== 'admin') {
+    // Non-admin trying to access admin area
     return <Navigate to="/dashboard" replace />
+  }
+  
+  // Regular users shouldn't access admin panel
+  if (!adminOnly && user?.role === 'admin') {
+    return <Navigate to="/admin" replace />
   }
   
   return children
@@ -226,6 +234,9 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/proposal/:uuid" element={<ProposalView />} />
         </Route>
+
+        {/* Admin Login - separate from main layout */}
+        <Route path="/admin/login" element={<AdminLogin />} />
 
         {/* Dashboard routes */}
         <Route path="/dashboard" element={

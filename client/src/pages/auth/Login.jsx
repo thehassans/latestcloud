@@ -38,15 +38,16 @@ export default function Login() {
         password: form.password
       })
 
+      // Only allow regular users - admins must use /admin/login
+      if (response.data.user.role === 'admin') {
+        setError('Admin users must login at /admin/login')
+        setLoading(false)
+        return
+      }
+
       setUser(response.data.user, response.data.token)
       toast.success(t('auth.loginSuccess'))
-      
-      // Redirect admin to admin panel, users to dashboard
-      if (response.data.user.role === 'admin') {
-        navigate('/admin')
-      } else {
-        navigate(from, { replace: true })
-      }
+      navigate(from, { replace: true })
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please try again.')
     } finally {
