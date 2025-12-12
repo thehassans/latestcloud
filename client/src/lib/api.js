@@ -107,7 +107,10 @@ export const settingsAPI = {
   updateCustomVPSPricing: (pricing) => api.put('/settings/custom-vps-pricing', pricing),
   getEmailSettings: () => api.get('/settings/email'),
   updateEmailSettings: (settings) => api.put('/settings/email', settings),
-  testEmail: (email) => api.post('/settings/email/test', { email })
+  testEmail: (email) => api.post('/settings/email/test', { email }),
+  // Page visibility
+  updatePageVisibility: (key, visible) => api.put('/settings/page-visibility', { key, visible }),
+  updateBulkSettings: (settings) => api.put('/settings/bulk', { settings })
 }
 
 // Payments API

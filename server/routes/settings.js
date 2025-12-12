@@ -645,4 +645,72 @@ router.get('/stripe-key', async (req, res) => {
   }
 });
 
+// Update page visibility (admin only)
+router.put('/page-visibility', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { key, visible } = req.body;
+    
+    if (!key) {
+      return res.status(400).json({ error: 'Key is required' });
+    }
+    
+    const dbValue = visible ? 'true' : 'false';
+    
+    // Check if setting exists
+    const existing = await db.query('SELECT id FROM settings WHERE setting_key = ?', [key]);
+    
+    if (existing && existing.length > 0) {
+      await db.query(
+        'UPDATE settings SET setting_value = ?, setting_type = ?, is_public = TRUE WHERE setting_key = ?',
+        [dbValue, 'boolean', key]
+      );
+    } else {
+      await db.query(
+        'INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public) VALUES (?, ?, ?, ?, TRUE)',
+        [key, dbValue, 'boolean', 'pages']
+      );
+    }
+    
+    res.json({ message: 'Page visibility updated' });
+  } catch (error) {
+    console.error('Update page visibility error:', error);
+    res.status(500).json({ error: 'Failed to update page visibility' });
+  }
+});
+
+// Bulk update settings (admin only)
+router.put('/bulk', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { settings } = req.body;
+    
+    if (!settings || typeof settings !== 'object') {
+      return res.status(400).json({ error: 'Settings object is required' });
+    }
+    
+    for (const [key, value] of Object.entries(settings)) {
+      const settingType = typeof value === 'boolean' ? 'boolean' : 'string';
+      const dbValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : String(value);
+      
+      const existing = await db.query('SELECT id FROM settings WHERE setting_key = ?', [key]);
+      
+      if (existing && existing.length > 0) {
+        await db.query(
+          'UPDATE settings SET setting_value = ?, setting_type = ?, is_public = TRUE WHERE setting_key = ?',
+          [dbValue, settingType, key]
+        );
+      } else {
+        await db.query(
+          'INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public) VALUES (?, ?, ?, ?, TRUE)',
+          [key, dbValue, settingType, 'pages']
+        );
+      }
+    }
+    
+    res.json({ message: 'Settings updated' });
+  } catch (error) {
+    console.error('Bulk update settings error:', error);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
 module.exports = router;
