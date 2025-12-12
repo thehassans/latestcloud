@@ -212,7 +212,35 @@ export const adminAPI = {
     })
   },
   getMedia: (params) => api.get('/upload', { params }),
-  deleteMedia: (uuid) => api.delete(`/upload/${uuid}`)
+  deleteMedia: (uuid) => api.delete(`/upload/${uuid}`),
+  
+  // NoBot Services
+  getNoBotSettings: () => api.get('/admin/nobot/settings'),
+  updateNoBotSettings: (settings) => api.put('/admin/nobot/settings', settings),
+  testNoBotConnection: (type, data) => api.post('/admin/nobot/test-connection', { type, ...data }),
+  getNoBotStats: () => api.get('/admin/nobot/stats'),
+  getNoBotServices: (params) => api.get('/admin/nobot/services', { params }),
+  getNoBotService: (uuid) => api.get(`/admin/nobot/services/${uuid}`),
+}
+
+// User NoBot API
+export const nobotAPI = {
+  getMyBots: () => api.get('/nobot/my-bots'),
+  getBot: (uuid) => api.get(`/nobot/${uuid}`),
+  setupBot: (uuid, data) => api.post(`/nobot/${uuid}/setup`, data),
+  trainBot: (uuid, data) => api.post(`/nobot/${uuid}/train`, data),
+  trainBotFromFile: (uuid, file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post(`/nobot/${uuid}/train-file`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+  verifyWidget: (uuid, platform) => api.post(`/nobot/${uuid}/verify-widget`, { platform }),
+  updateBotSettings: (uuid, settings) => api.put(`/nobot/${uuid}/settings`, settings),
+  getConversations: (uuid, params) => api.get(`/nobot/${uuid}/conversations`, { params }),
+  getConversation: (uuid, conversationId) => api.get(`/nobot/${uuid}/conversations/${conversationId}`),
+  sendMessage: (uuid, conversationId, message) => api.post(`/nobot/${uuid}/conversations/${conversationId}/message`, { message }),
 }
 
 export default api

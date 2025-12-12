@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { DollarSign, Plus, Trash2, Save, Server, Shield, Cloud, HardDrive } from 'lucide-react'
+import { DollarSign, Plus, Trash2, Save, Server, Shield, Cloud, HardDrive, Bot, MessageCircle } from 'lucide-react'
 import { settingsAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
 
@@ -9,6 +9,7 @@ const categories = [
   { id: 'ssl', name: 'SSL Certificates', icon: Shield },
   { id: 'vps', name: 'VPS Servers', icon: Cloud },
   { id: 'dedicated', name: 'Dedicated Servers', icon: HardDrive },
+  { id: 'nobot', name: 'NoBot AI', icon: Bot },
 ]
 
 const defaultPlans = {
@@ -23,6 +24,12 @@ const defaultPlans = {
   ],
   dedicated: [
     { name: 'Entry Server', price: 79.99, cpu: 'Intel Xeon E3', ram: '16 GB DDR4', storage: '500 GB SSD', bandwidth: '10 TB', color: 'from-blue-500 to-cyan-500' }
+  ],
+  nobot: [
+    { name: 'WhatsApp Bot', description: 'AI chatbot for WhatsApp Business', price: 29.99, bot_type: 'whatsapp', features: ['Unlimited Messages', 'AI-Powered Responses', '24/7 Availability', 'Multi-language Support'], color: 'from-green-500 to-emerald-500' },
+    { name: 'Messenger Bot', description: 'AI chatbot for Facebook Messenger', price: 29.99, bot_type: 'messenger', features: ['Unlimited Messages', 'AI-Powered Responses', 'Lead Generation', 'Auto Replies'], color: 'from-blue-500 to-indigo-500' },
+    { name: 'Instagram Bot', description: 'AI chatbot for Instagram DMs', price: 29.99, bot_type: 'instagram', features: ['Unlimited Messages', 'Story Replies', 'Comment Automation', 'DM Management'], color: 'from-pink-500 to-purple-500' },
+    { name: 'All-in-One Bot', description: 'Complete AI chatbot solution', price: 79.99, bot_type: 'all', features: ['WhatsApp + Messenger + Instagram', 'Unified Dashboard', 'Cross-platform Analytics', 'Priority Support', 'Custom Training'], color: 'from-primary-500 to-secondary-500', popular: true }
   ]
 }
 
@@ -46,6 +53,7 @@ export default function AdminPricing() {
         ssl: data.ssl || defaultPlans.ssl,
         vps: data.vps || defaultPlans.vps,
         dedicated: data.dedicated || defaultPlans.dedicated,
+        nobot: data.nobot || defaultPlans.nobot,
       })
     } catch (err) {
       console.error('Failed to load pricing:', err)
@@ -56,6 +64,7 @@ export default function AdminPricing() {
         ssl: defaultPlans.ssl,
         vps: defaultPlans.vps,
         dedicated: defaultPlans.dedicated,
+        nobot: defaultPlans.nobot,
       })
     } finally {
       setLoading(false)
@@ -76,9 +85,14 @@ export default function AdminPricing() {
   }
 
   const addPlan = () => {
-    const newPlan = activeCategory === 'hosting' || activeCategory === 'ssl' 
-      ? { name: 'New Plan', price: 0, features: [], color: 'from-blue-500 to-cyan-500' }
-      : { name: 'New Plan', price: 0, cpu: '', ram: '', storage: '', bandwidth: '', color: 'from-blue-500 to-cyan-500' }
+    let newPlan;
+    if (activeCategory === 'nobot') {
+      newPlan = { name: 'New Bot', description: '', price: 0, bot_type: 'whatsapp', features: [], color: 'from-blue-500 to-cyan-500' }
+    } else if (activeCategory === 'hosting' || activeCategory === 'ssl') {
+      newPlan = { name: 'New Plan', price: 0, features: [], color: 'from-blue-500 to-cyan-500' }
+    } else {
+      newPlan = { name: 'New Plan', price: 0, cpu: '', ram: '', storage: '', bandwidth: '', color: 'from-blue-500 to-cyan-500' }
+    }
     
     if (activeCategory === 'ssl') {
       newPlan.description = ''
@@ -273,8 +287,8 @@ export default function AdminPricing() {
               </div>
             )}
 
-            {/* SSL description */}
-            {activeCategory === 'ssl' && (
+            {/* SSL/NoBot description */}
+            {(activeCategory === 'ssl' || activeCategory === 'nobot') && (
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Description</label>
                 <input
@@ -287,8 +301,25 @@ export default function AdminPricing() {
               </div>
             )}
 
-            {/* Features (for hosting and SSL) */}
-            {(activeCategory === 'hosting' || activeCategory === 'ssl') && (
+            {/* NoBot specific fields */}
+            {activeCategory === 'nobot' && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Bot Type</label>
+                <select
+                  value={plan.bot_type || 'whatsapp'}
+                  onChange={(e) => updatePlan(index, 'bot_type', e.target.value)}
+                  className="input"
+                >
+                  <option value="whatsapp">WhatsApp Bot</option>
+                  <option value="messenger">Messenger Bot</option>
+                  <option value="instagram">Instagram Bot</option>
+                  <option value="all">All-in-One (All Platforms)</option>
+                </select>
+              </div>
+            )}
+
+            {/* Features (for hosting, SSL, and NoBot) */}
+            {(activeCategory === 'hosting' || activeCategory === 'ssl' || activeCategory === 'nobot') && (
               <div>
                 <label className="block text-sm font-medium mb-2">Features</label>
                 <div className="space-y-2">

@@ -23,6 +23,7 @@ const pageRoutes = require('./routes/pages');
 const aiAgentRoutes = require('./routes/ai-agent');
 const paymentRoutes = require('./routes/payments');
 const proposalRoutes = require('./routes/proposals');
+const nobotRoutes = require('./routes/nobot');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -84,6 +85,8 @@ app.use('/api/pages', pageRoutes);
 app.use('/api/ai-agent', aiAgentRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api', proposalRoutes);
+app.use('/api/nobot', nobotRoutes);
+app.use('/api/admin/nobot', nobotRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

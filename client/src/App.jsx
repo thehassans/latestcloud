@@ -74,6 +74,7 @@ const TicketDetail = lazy(() => import('./pages/dashboard/TicketDetail'))
 const NewTicket = lazy(() => import('./pages/dashboard/NewTicket'))
 const Profile = lazy(() => import('./pages/dashboard/Profile'))
 const Orders = lazy(() => import('./pages/dashboard/Orders'))
+const NoBotSetup = lazy(() => import('./pages/dashboard/NoBotSetup'))
 
 // Admin pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
@@ -93,6 +94,7 @@ const AdminCustomizePlans = lazy(() => import('./pages/admin/AdminCustomizePlans
 const AdminEmailSettings = lazy(() => import('./pages/admin/AdminEmailSettings'))
 const AdminProposals = lazy(() => import('./pages/admin/AdminProposals'))
 const AdminInvoices = lazy(() => import('./pages/admin/AdminInvoices'))
+const AdminNoBotServices = lazy(() => import('./pages/admin/AdminNoBotServices'))
 
 // Public pages
 const ProposalView = lazy(() => import('./pages/ProposalView'))
@@ -240,6 +242,8 @@ function App() {
           <Route path="tickets/new" element={<NewTicket />} />
           <Route path="tickets/:uuid" element={<TicketDetail />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="nobot/:uuid" element={<NoBotSetup />} />
+          <Route path="nobot/:uuid/inbox" element={<NoBotSetup />} />
         </Route>
 
         {/* Admin routes */}
@@ -265,6 +269,7 @@ function App() {
           <Route path="email-settings" element={<AdminEmailSettings />} />
           <Route path="proposals" element={<AdminProposals />} />
           <Route path="invoices" element={<AdminInvoices />} />
+          <Route path="nobot-services" element={<AdminNoBotServices />} />
         </Route>
 
         {/* 404 */}
