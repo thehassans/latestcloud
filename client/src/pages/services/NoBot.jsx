@@ -1,15 +1,17 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
-import { Bot, MessageSquare, Brain, Zap, Shield, Users, Clock, CheckCircle, ArrowRight, Sparkles, Heart, Globe } from 'lucide-react'
+import { Bot, MessageSquare, Brain, Zap, Shield, Users, Clock, CheckCircle, ArrowRight, Sparkles, Heart, Globe, Phone, Instagram, Facebook } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const plans = [
-  { name: 'Starter', price: 29, messages: '5,000', languages: 3, training: 'Basic', analytics: false, priority: false },
-  { name: 'Professional', price: 79, messages: '25,000', languages: 10, training: 'Advanced', analytics: true, priority: true, popular: true },
-  { name: 'Enterprise', price: 199, messages: 'Unlimited', languages: 'All', training: 'Custom', analytics: true, priority: true, dedicated: true },
+const defaultPlans = [
+  { name: 'Starter', price: 29, channel_limit: 1, messages: '5,000', languages: '3', features: ['1 Channel (Any One)', '5,000 messages/mo', '3 languages', 'Basic training'] },
+  { name: 'Professional', price: 79, channel_limit: 2, messages: '25,000', languages: '10', features: ['2 Channels (Any Two)', '25,000 messages/mo', '10 languages', 'Advanced training', 'Advanced analytics', 'Priority support'], popular: true },
+  { name: 'Enterprise', price: 199, channel_limit: 5, messages: 'Unlimited', languages: 'All', features: ['All Channels', 'Unlimited messages/mo', 'All languages', 'Custom training', 'Advanced analytics', 'Priority support', 'Dedicated manager'] },
 ]
 
 const features = [
@@ -26,6 +28,27 @@ export default function NoBot() {
   const { theme } = useThemeStore()
   const { addItem } = useCartStore()
   const isDark = theme === 'dark'
+  const [plans, setPlans] = useState(defaultPlans)
+
+  useEffect(() => {
+    const loadPricing = async () => {
+      try {
+        const res = await settingsAPI.getPricing()
+        if (res.data?.pricing?.nobot?.length > 0) {
+          setPlans(res.data.pricing.nobot)
+        }
+      } catch (err) {
+        console.error('Failed to load NoBot pricing:', err)
+      }
+    }
+    loadPricing()
+  }, [])
+
+  const getChannelText = (limit) => {
+    if (limit >= 5) return 'All Channels'
+    if (limit === 2) return '2 Channels (Any Two)'
+    return '1 Channel (Any One)'
+  }
 
   const handleAddToCart = (plan) => {
     addItem({
@@ -213,12 +236,12 @@ export default function NoBot() {
                   <span className={isDark ? "text-dark-400" : "text-dark-500"}>/month</span>
                 </div>
                 <ul className="mt-8 space-y-4">
-                  <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-green-500" /><span className={isDark ? "text-dark-300" : "text-dark-600"}>{plan.messages} messages/mo</span></li>
-                  <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-green-500" /><span className={isDark ? "text-dark-300" : "text-dark-600"}>{plan.languages} languages</span></li>
-                  <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-green-500" /><span className={isDark ? "text-dark-300" : "text-dark-600"}>{plan.training} training</span></li>
-                  {plan.analytics && <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-green-500" /><span className={isDark ? "text-dark-300" : "text-dark-600"}>Advanced analytics</span></li>}
-                  {plan.priority && <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-green-500" /><span className={isDark ? "text-dark-300" : "text-dark-600"}>Priority support</span></li>}
-                  {plan.dedicated && <li className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-green-500" /><span className={isDark ? "text-dark-300" : "text-dark-600"}>Dedicated manager</span></li>}
+                  {(plan.features || []).map((feature, fi) => (
+                    <li key={fi} className="flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className={isDark ? "text-dark-300" : "text-dark-600"}>{feature}</span>
+                    </li>
+                  ))}
                 </ul>
                 <button
                   onClick={() => handleAddToCart(plan)}

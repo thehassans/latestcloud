@@ -26,10 +26,9 @@ const defaultPlans = {
     { name: 'Entry Server', price: 79.99, cpu: 'Intel Xeon E3', ram: '16 GB DDR4', storage: '500 GB SSD', bandwidth: '10 TB', color: 'from-blue-500 to-cyan-500' }
   ],
   nobot: [
-    { name: 'WhatsApp Bot', description: 'AI chatbot for WhatsApp Business', price: 29.99, bot_type: 'whatsapp', features: ['Unlimited Messages', 'AI-Powered Responses', '24/7 Availability', 'Multi-language Support'], color: 'from-green-500 to-emerald-500' },
-    { name: 'Messenger Bot', description: 'AI chatbot for Facebook Messenger', price: 29.99, bot_type: 'messenger', features: ['Unlimited Messages', 'AI-Powered Responses', 'Lead Generation', 'Auto Replies'], color: 'from-blue-500 to-indigo-500' },
-    { name: 'Instagram Bot', description: 'AI chatbot for Instagram DMs', price: 29.99, bot_type: 'instagram', features: ['Unlimited Messages', 'Story Replies', 'Comment Automation', 'DM Management'], color: 'from-pink-500 to-purple-500' },
-    { name: 'All-in-One Bot', description: 'Complete AI chatbot solution', price: 79.99, bot_type: 'all', features: ['WhatsApp + Messenger + Instagram', 'Unified Dashboard', 'Cross-platform Analytics', 'Priority Support', 'Custom Training'], color: 'from-primary-500 to-secondary-500', popular: true }
+    { name: 'Starter', description: 'Perfect for small businesses', price: 29, channel_limit: 1, messages: '5,000', languages: '3', features: ['1 Channel (Any One)', '5,000 messages/mo', '3 languages', 'Basic training'], color: 'from-blue-500 to-cyan-500' },
+    { name: 'Professional', description: 'Best for growing teams', price: 79, channel_limit: 2, messages: '25,000', languages: '10', features: ['2 Channels (Any Two)', '25,000 messages/mo', '10 languages', 'Advanced training', 'Advanced analytics', 'Priority support'], color: 'from-purple-500 to-pink-500', popular: true },
+    { name: 'Enterprise', description: 'Complete AI solution', price: 199, channel_limit: 5, messages: 'Unlimited', languages: 'All', features: ['All Channels', 'Unlimited messages/mo', 'All languages', 'Custom training', 'Advanced analytics', 'Priority support', 'Dedicated manager'], color: 'from-primary-500 to-secondary-500' }
   ]
 }
 
@@ -87,7 +86,7 @@ export default function AdminPricing() {
   const addPlan = () => {
     let newPlan;
     if (activeCategory === 'nobot') {
-      newPlan = { name: 'New Bot', description: '', price: 0, bot_type: 'whatsapp', features: [], color: 'from-blue-500 to-cyan-500' }
+      newPlan = { name: 'New Plan', description: '', price: 0, channel_limit: 1, messages: '5,000', languages: '3', features: [], color: 'from-blue-500 to-cyan-500' }
     } else if (activeCategory === 'hosting' || activeCategory === 'ssl') {
       newPlan = { name: 'New Plan', price: 0, features: [], color: 'from-blue-500 to-cyan-500' }
     } else {
@@ -303,18 +302,40 @@ export default function AdminPricing() {
 
             {/* NoBot specific fields */}
             {activeCategory === 'nobot' && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Bot Type</label>
-                <select
-                  value={plan.bot_type || 'whatsapp'}
-                  onChange={(e) => updatePlan(index, 'bot_type', e.target.value)}
-                  className="input"
-                >
-                  <option value="whatsapp">WhatsApp Bot</option>
-                  <option value="messenger">Messenger Bot</option>
-                  <option value="instagram">Instagram Bot</option>
-                  <option value="all">All-in-One (All Platforms)</option>
-                </select>
+              <div className="grid md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Channel Limit</label>
+                  <select
+                    value={plan.channel_limit || 1}
+                    onChange={(e) => updatePlan(index, 'channel_limit', parseInt(e.target.value))}
+                    className="input"
+                  >
+                    <option value={1}>1 Channel (Any One)</option>
+                    <option value={2}>2 Channels (Any Two)</option>
+                    <option value={3}>3 Channels</option>
+                    <option value={5}>All Channels (Unlimited)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Messages/month</label>
+                  <input
+                    type="text"
+                    value={plan.messages || '5,000'}
+                    onChange={(e) => updatePlan(index, 'messages', e.target.value)}
+                    className="input"
+                    placeholder="e.g., 5,000 or Unlimited"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Languages</label>
+                  <input
+                    type="text"
+                    value={plan.languages || '3'}
+                    onChange={(e) => updatePlan(index, 'languages', e.target.value)}
+                    className="input"
+                    placeholder="e.g., 3 or All"
+                  />
+                </div>
               </div>
             )}
 
