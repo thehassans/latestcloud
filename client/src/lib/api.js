@@ -229,8 +229,10 @@ export const adminAPI = {
 
 // User NoBot API
 export const nobotAPI = {
+  getBots: () => api.get('/nobot/my-bots'),
   getMyBots: () => api.get('/nobot/my-bots'),
   getBot: (uuid) => api.get(`/nobot/${uuid}`),
+  createBot: (data) => api.post('/nobot/create', data),
   setupBot: (uuid, data) => api.post(`/nobot/${uuid}/setup`, data),
   trainBot: (uuid, data) => api.post(`/nobot/${uuid}/train`, data),
   trainBotFromFile: (uuid, file) => {

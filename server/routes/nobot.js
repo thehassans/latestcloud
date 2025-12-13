@@ -161,6 +161,28 @@ router.get('/services', authenticate, requireRole('admin'), async (req, res) => 
 
 // User Routes
 
+// Create a new bot
+router.post('/create', authenticate, async (req, res) => {
+  try {
+    const { name, bot_type, service_id } = req.body;
+    const { v4: uuidv4 } = require('uuid');
+    const botUuid = uuidv4();
+    
+    await db.query(`
+      INSERT INTO nobot_services (uuid, user_id, name, bot_type, service_id, status, setup_step)
+      VALUES (?, ?, ?, ?, ?, 'pending', 1)
+    `, [botUuid, req.user.id, name || 'NoBot AI', bot_type || 'website', service_id || null]);
+    
+    res.status(201).json({ 
+      message: 'Bot created successfully',
+      uuid: botUuid 
+    });
+  } catch (error) {
+    console.error('Create bot error:', error);
+    res.status(500).json({ error: 'Failed to create bot' });
+  }
+});
+
 // Get user's bots
 router.get('/my-bots', authenticate, async (req, res) => {
   try {

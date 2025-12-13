@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -9,7 +9,7 @@ import {
   Settings, MessageCircle, Inbox, ExternalLink, RefreshCw,
   Zap, Database, Brain, Wand2
 } from 'lucide-react'
-import { nobotAPI } from '../../lib/api'
+import { nobotAPI, userAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
@@ -29,10 +29,13 @@ const PLATFORMS = [
 ]
 
 export default function NoBotSetup() {
-  const { uuid } = useParams()
+  const { uuid: paramUuid } = useParams()
+  const [searchParams] = useSearchParams()
+  const serviceUuid = searchParams.get('service')
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   
+  const [botUuid, setBotUuid] = useState(paramUuid || null)
   const [currentStep, setCurrentStep] = useState(1)
   const [domain, setDomain] = useState('')
   const [websiteUrl, setWebsiteUrl] = useState('')
@@ -44,11 +47,57 @@ export default function NoBotSetup() {
   const [selectedPlatform, setSelectedPlatform] = useState(null)
   const [isVerifying, setIsVerifying] = useState(false)
   const [verified, setVerified] = useState(false)
+  const [isCreatingBot, setIsCreatingBot] = useState(false)
+  const [serviceName, setServiceName] = useState('NoBot AI')
+
+  // Load service data if coming from services page
+  const { data: serviceData } = useQuery({
+    queryKey: ['service', serviceUuid],
+    queryFn: () => userAPI.getService(serviceUuid).then(res => res.data),
+    enabled: !!serviceUuid && !botUuid
+  })
+
+  // Load user's existing bots to check if one exists for this service
+  const { data: userBots, isLoading: loadingBots } = useQuery({
+    queryKey: ['nobots'],
+    queryFn: () => nobotAPI.getBots().then(res => res.data),
+    enabled: !!serviceUuid && !botUuid
+  })
+
+  // Auto-create or find bot for this service
+  useEffect(() => {
+    if (serviceUuid && userBots?.bots && !botUuid && !isCreatingBot) {
+      // Check if bot already exists for this service
+      const existingBot = userBots.bots.find(b => b.service_id === serviceUuid)
+      if (existingBot) {
+        setBotUuid(existingBot.uuid)
+      } else if (serviceData?.service) {
+        // Create new bot for this service
+        setIsCreatingBot(true)
+        setServiceName(serviceData.service.name || 'NoBot AI')
+        nobotAPI.createBot({ 
+          name: serviceData.service.name || 'NoBot AI',
+          bot_type: 'website',
+          service_id: serviceUuid
+        })
+          .then(res => {
+            setBotUuid(res.data.uuid)
+            setIsCreatingBot(false)
+            toast.success('NoBot service initialized!')
+          })
+          .catch(() => {
+            setIsCreatingBot(false)
+            toast.error('Failed to initialize NoBot service')
+          })
+      }
+    }
+  }, [serviceUuid, userBots, serviceData, botUuid, isCreatingBot])
 
   // Load bot data
   const { data: botData, isLoading } = useQuery({
-    queryKey: ['nobot', uuid],
-    queryFn: () => nobotAPI.getBot(uuid).then(res => res.data)
+    queryKey: ['nobot', botUuid],
+    queryFn: () => nobotAPI.getBot(botUuid).then(res => res.data),
+    enabled: !!botUuid
   })
 
   useEffect(() => {
@@ -57,15 +106,16 @@ export default function NoBotSetup() {
       setDomain(botData.bot.domain || '')
       setWebsiteUrl(botData.bot.website_url || '')
       setVerified(botData.bot.widget_verified || false)
+      setServiceName(botData.bot.name || 'NoBot AI')
     }
   }, [botData])
 
   // Setup mutation
   const setupMutation = useMutation({
-    mutationFn: (data) => nobotAPI.setupBot(uuid, data),
+    mutationFn: (data) => nobotAPI.setupBot(botUuid, data),
     onSuccess: () => {
       setCurrentStep(2)
-      queryClient.invalidateQueries(['nobot', uuid])
+      queryClient.invalidateQueries(['nobot', botUuid])
       toast.success('Configuration saved!')
     },
     onError: () => toast.error('Failed to save configuration')
@@ -73,13 +123,13 @@ export default function NoBotSetup() {
 
   // Train mutation
   const trainMutation = useMutation({
-    mutationFn: (data) => nobotAPI.trainBot(uuid, data),
+    mutationFn: (data) => nobotAPI.trainBot(botUuid, data),
     onSuccess: () => {
       setIsTraining(false)
       setTrainingProgress(100)
       setTimeout(() => {
         setCurrentStep(3)
-        queryClient.invalidateQueries(['nobot', uuid])
+        queryClient.invalidateQueries(['nobot', botUuid])
         toast.success('Training completed!')
       }, 1000)
     },
@@ -91,13 +141,13 @@ export default function NoBotSetup() {
 
   // Train from file mutation
   const trainFileMutation = useMutation({
-    mutationFn: (file) => nobotAPI.trainBotFromFile(uuid, file),
+    mutationFn: (file) => nobotAPI.trainBotFromFile(botUuid, file),
     onSuccess: () => {
       setIsTraining(false)
       setTrainingProgress(100)
       setTimeout(() => {
         setCurrentStep(3)
-        queryClient.invalidateQueries(['nobot', uuid])
+        queryClient.invalidateQueries(['nobot', botUuid])
         toast.success('Training completed!')
       }, 1000)
     },
@@ -109,12 +159,12 @@ export default function NoBotSetup() {
 
   // Verify widget mutation
   const verifyMutation = useMutation({
-    mutationFn: (platform) => nobotAPI.verifyWidget(uuid, platform),
+    mutationFn: (platform) => nobotAPI.verifyWidget(botUuid, platform),
     onSuccess: () => {
       setIsVerifying(false)
       setVerified(true)
       setCurrentStep(4)
-      queryClient.invalidateQueries(['nobot', uuid])
+      queryClient.invalidateQueries(['nobot', botUuid])
       toast.success('Widget verified successfully!')
     },
     onError: () => {
