@@ -141,15 +141,17 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
     setLoading(true)
     try {
       const orderItems = items.map(item => ({
-        type: item.type,
-        product_uuid: item.product_uuid,
+        type: item.type || 'product',
+        product_uuid: item.product_uuid || item.uuid || item.id,
         domain_name: item.domain_name,
         tld: item.tld,
         action: item.action,
         billing_cycle: item.billingCycle,
         product_type: item.product_type,
         years: item.years,
-        quantity: item.quantity || 1
+        quantity: item.quantity || 1,
+        price: item.price,
+        name: item.name
       }))
 
       // For guest checkout, create account first

@@ -439,7 +439,7 @@ router.put('/orders/:uuid/status', async (req, res) => {
     `, [status, payment_status, req.params.uuid]);
 
     // Send email notifications based on status change
-    const user = { email: order.email, first_name: order.first_name, last_name: order.last_name };
+    const user = { email: order.email, first_name: order.first_name, last_name: order.last_name, id: order.user_id };
     const orderData = { uuid: order.uuid, id: order.id, total: order.total };
     
     // Payment confirmed
@@ -449,11 +449,69 @@ router.put('/orders/:uuid/status', async (req, res) => {
       );
     }
     
-    // Order completed/active
-    if (status === 'active' && oldStatus !== 'active') {
-      emailService.sendOrderCompleted(orderData, user).catch(err => 
-        console.error('Failed to send order completed email:', err)
-      );
+    // Order completed/active - CREATE SERVICES for the user
+    const newStatus = status || order.status;
+    const newPaymentStatus = payment_status || order.payment_status;
+    
+    if (newStatus === 'active' && newPaymentStatus === 'paid') {
+      // Check if services already created for this order
+      const existingServices = await db.query('SELECT id FROM services WHERE order_item_id IN (SELECT id FROM order_items WHERE order_id = ?)', [order.id]);
+      const existingFiltered = Array.isArray(existingServices) ? existingServices.filter(s => s.id) : [];
+      
+      if (existingFiltered.length === 0) {
+        // Get order items and create services
+        const orderItems = await db.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+        const itemsFiltered = Array.isArray(orderItems) ? orderItems.filter(i => i.id) : [];
+        
+        for (const item of itemsFiltered) {
+          const serviceUuid = require('uuid').v4();
+          const serviceType = item.product_type || 'hosting';
+          
+          // Calculate next due date based on billing cycle
+          const now = new Date();
+          let nextDueDate = new Date(now);
+          if (item.billing_cycle === 'monthly') {
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+          } else if (item.billing_cycle === 'quarterly') {
+            nextDueDate.setMonth(nextDueDate.getMonth() + 3);
+          } else if (item.billing_cycle === 'semiannual') {
+            nextDueDate.setMonth(nextDueDate.getMonth() + 6);
+          } else if (item.billing_cycle === 'annual' || item.billing_cycle === 'yearly') {
+            nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+          } else if (item.billing_cycle === 'biennial') {
+            nextDueDate.setFullYear(nextDueDate.getFullYear() + 2);
+          } else if (item.billing_cycle === 'triennial') {
+            nextDueDate.setFullYear(nextDueDate.getFullYear() + 3);
+          } else {
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1); // Default monthly
+          }
+          
+          await db.query(`
+            INSERT INTO services (uuid, user_id, order_item_id, product_id, service_type, name, domain_name, status, billing_cycle, amount, next_due_date, registration_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)
+          `, [
+            serviceUuid,
+            order.user_id,
+            item.id,
+            item.product_id,
+            serviceType,
+            item.product_name,
+            item.domain_name,
+            item.billing_cycle,
+            item.total_price,
+            nextDueDate,
+            now
+          ]);
+        }
+        console.log(`Created ${itemsFiltered.length} services for order ${order.order_number}`);
+      }
+      
+      // Send completion email
+      if (oldStatus !== 'active') {
+        emailService.sendOrderCompleted(orderData, user).catch(err => 
+          console.error('Failed to send order completed email:', err)
+        );
+      }
     }
     
     // Order cancelled

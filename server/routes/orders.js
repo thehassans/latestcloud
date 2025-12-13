@@ -141,26 +141,56 @@ router.post('/', authenticate, [
     let subtotal = 0;
     const orderItems = [];
 
+    console.log('Processing order items:', JSON.stringify(items));
+
     for (const item of items) {
-      if (item.type === 'product') {
+      // Handle product items (type === 'product' or has product_uuid)
+      if (item.type === 'product' || item.product_uuid) {
         const products = await db.query('SELECT * FROM products WHERE uuid = ? AND is_active = TRUE', [item.product_uuid]);
-        if (products.length) {
-          const product = products[0];
+        const productsFiltered = Array.isArray(products) ? products.filter(p => p.id) : [];
+        
+        if (productsFiltered.length) {
+          const product = productsFiltered[0];
           const price = item.billing_cycle === 'monthly' ? product.price_monthly :
+                       item.billing_cycle === 'quarterly' ? product.price_quarterly :
+                       item.billing_cycle === 'semiannual' ? product.price_semiannual :
                        item.billing_cycle === 'annual' ? product.price_annual :
+                       item.billing_cycle === 'biennial' ? product.price_biennial :
+                       item.billing_cycle === 'triennial' ? product.price_triennial :
                        product.price_monthly;
+          
+          const unitPrice = parseFloat(price) || 0;
+          const quantity = item.quantity || 1;
           
           orderItems.push({
             product_id: product.id,
             product_name: product.name,
-            product_type: item.product_type || 'hosting',
+            product_type: item.product_type || product.category || 'hosting',
             domain_name: item.domain_name,
-            billing_cycle: item.billing_cycle,
-            quantity: item.quantity || 1,
-            unit_price: parseFloat(price),
-            total_price: parseFloat(price) * (item.quantity || 1)
+            billing_cycle: item.billing_cycle || 'monthly',
+            quantity: quantity,
+            unit_price: unitPrice,
+            total_price: unitPrice * quantity
           });
-          subtotal += parseFloat(price) * (item.quantity || 1);
+          subtotal += unitPrice * quantity;
+          console.log(`Added product: ${product.name}, price: ${unitPrice}, subtotal: ${subtotal}`);
+        } else {
+          console.log(`Product not found: ${item.product_uuid}`);
+          // Still add item with price from cart if product not found
+          if (item.price) {
+            const unitPrice = parseFloat(item.price) || 0;
+            orderItems.push({
+              product_id: null,
+              product_name: item.name || item.product_type || 'Service',
+              product_type: item.product_type || 'hosting',
+              domain_name: item.domain_name,
+              billing_cycle: item.billing_cycle || 'monthly',
+              quantity: item.quantity || 1,
+              unit_price: unitPrice,
+              total_price: unitPrice * (item.quantity || 1)
+            });
+            subtotal += unitPrice * (item.quantity || 1);
+          }
         }
       } else if (item.type === 'domain') {
         const tlds = await db.query('SELECT * FROM domain_tlds WHERE tld = ? AND is_active = TRUE', [item.tld]);
