@@ -638,12 +638,12 @@ export default function NoBotSetup() {
                 </div>
               </div>
 
-              <div className="flex justify-center gap-4">
-                <button onClick={() => setActiveTab('inbox')} className="btn-primary">
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <button onClick={() => setActiveTab('inbox')} className="btn-primary px-8">
                   <Inbox className="w-4 h-4 mr-2" /> Open Inbox
                 </button>
-                <button onClick={() => navigate('/dashboard/services')} className="btn-secondary">
-                  Back to Services
+                <button onClick={() => navigate('/dashboard')} className="btn-secondary px-8">
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
                 </button>
               </div>
             </div>
@@ -836,24 +836,26 @@ export default function NoBotSetup() {
             </div>
           </div>
 
-          {/* Main Tabs */}
-          <div className="flex items-center gap-1 p-1 bg-dark-100 dark:bg-dark-800 rounded-xl">
-            {MAIN_TABS.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setActiveTab(t.id)}
-                className={clsx(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
-                  activeTab === t.id
-                    ? "bg-white dark:bg-dark-700 shadow-sm text-primary-500"
-                    : "text-dark-500 hover:text-dark-900 dark:hover:text-white"
-                )}
-              >
-                <t.icon className="w-4 h-4" />
-                {t.name}
-              </button>
-            ))}
-          </div>
+          {/* Main Tabs - Only show Inbox/Analytics after setup is complete */}
+          {currentStep >= 4 && (
+            <div className="flex items-center gap-1 p-1 bg-dark-100 dark:bg-dark-800 rounded-xl">
+              {MAIN_TABS.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setActiveTab(t.id)}
+                  className={clsx(
+                    "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
+                    activeTab === t.id
+                      ? "bg-white dark:bg-dark-700 shadow-sm text-primary-500"
+                      : "text-dark-500 hover:text-dark-900 dark:hover:text-white"
+                  )}
+                >
+                  <t.icon className="w-4 h-4" />
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Setup Progress (only show during setup) */}
