@@ -465,7 +465,12 @@ router.put('/orders/:uuid/status', async (req, res) => {
         
         for (const item of itemsFiltered) {
           const serviceUuid = require('uuid').v4();
-          const serviceType = item.product_type || 'hosting';
+          // Map product_type to valid service_type enum values
+          const validServiceTypes = ['hosting', 'domain', 'ssl', 'email', 'backup', 'vps', 'dedicated'];
+          let serviceType = (item.product_type || 'hosting').toLowerCase();
+          if (!validServiceTypes.includes(serviceType)) {
+            serviceType = 'hosting'; // Default to hosting for unknown types
+          }
           
           // Calculate next due date based on billing cycle
           const now = new Date();
@@ -525,6 +530,78 @@ router.put('/orders/:uuid/status', async (req, res) => {
   } catch (error) {
     console.error('Update order error:', error);
     res.status(500).json({ error: 'Failed to update order' });
+  }
+});
+
+// Sync services for all active/paid orders that don't have services
+router.post('/orders/sync-services', async (req, res) => {
+  try {
+    // Get all active + paid orders
+    const orders = await db.query(`
+      SELECT o.*, u.email, u.first_name, u.last_name
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      WHERE o.status = 'active' AND o.payment_status = 'paid'
+    `);
+    const ordersFiltered = Array.isArray(orders) ? orders.filter(o => o.id) : [];
+    
+    let servicesCreated = 0;
+    
+    for (const order of ordersFiltered) {
+      // Check if services already exist for this order
+      const existingServices = await db.query('SELECT id FROM services WHERE order_item_id IN (SELECT id FROM order_items WHERE order_id = ?)', [order.id]);
+      const existingFiltered = Array.isArray(existingServices) ? existingServices.filter(s => s.id) : [];
+      
+      if (existingFiltered.length === 0) {
+        // Get order items
+        const orderItems = await db.query('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+        const itemsFiltered = Array.isArray(orderItems) ? orderItems.filter(i => i.id) : [];
+        
+        for (const item of itemsFiltered) {
+          const serviceUuid = require('uuid').v4();
+          const validServiceTypes = ['hosting', 'domain', 'ssl', 'email', 'backup', 'vps', 'dedicated'];
+          let serviceType = (item.product_type || 'hosting').toLowerCase();
+          if (!validServiceTypes.includes(serviceType)) {
+            serviceType = 'hosting';
+          }
+          
+          const now = new Date();
+          let nextDueDate = new Date(now);
+          if (item.billing_cycle === 'monthly') {
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+          } else if (item.billing_cycle === 'quarterly') {
+            nextDueDate.setMonth(nextDueDate.getMonth() + 3);
+          } else if (item.billing_cycle === 'annual' || item.billing_cycle === 'yearly') {
+            nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+          } else {
+            nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+          }
+          
+          await db.query(`
+            INSERT INTO services (uuid, user_id, order_item_id, product_id, service_type, name, domain_name, status, billing_cycle, amount, next_due_date, registration_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)
+          `, [
+            serviceUuid,
+            order.user_id,
+            item.id,
+            item.product_id,
+            serviceType,
+            item.product_name,
+            item.domain_name,
+            item.billing_cycle,
+            item.total_price,
+            nextDueDate,
+            now
+          ]);
+          servicesCreated++;
+        }
+      }
+    }
+    
+    res.json({ message: `Synced ${servicesCreated} services for ${ordersFiltered.length} orders` });
+  } catch (error) {
+    console.error('Sync services error:', error);
+    res.status(500).json({ error: 'Failed to sync services: ' + error.message });
   }
 });
 
