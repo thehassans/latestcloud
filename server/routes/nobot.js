@@ -299,15 +299,15 @@ router.post('/:uuid/train', authenticate, async (req, res) => {
       }
     }
     
-    // Store training data and mark as trained
+    // Store training data and mark as trained - setup complete (step 4)
     await db.query(`
       UPDATE nobot_services 
       SET training_data = ?, training_status = 'completed', trained_at = NOW(), 
-          status = 'trained', setup_step = 3
+          status = 'active', setup_step = 4
       WHERE uuid = ?
     `, [finalTrainingData, req.params.uuid]);
     
-    res.json({ message: 'Training completed', step: 3 });
+    res.json({ message: 'Training completed', step: 4 });
   } catch (error) {
     console.error('Train bot error:', error);
     res.status(500).json({ error: 'Failed to train bot' });
@@ -346,11 +346,11 @@ router.post('/:uuid/train-file', authenticate, async (req, res) => {
       await db.query(`
         UPDATE nobot_services 
         SET training_data = ?, training_method = 'file', training_status = 'completed',
-            trained_at = NOW(), status = 'trained', setup_step = 3
+            trained_at = NOW(), status = 'active', setup_step = 4
         WHERE uuid = ?
       `, [trainingData, req.params.uuid]);
       
-      res.json({ message: 'Training completed from file', step: 3 });
+      res.json({ message: 'Training completed from file', step: 4 });
     });
   } catch (error) {
     console.error('Train from file error:', error);
