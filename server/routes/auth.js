@@ -271,9 +271,19 @@ router.post('/guest-checkout', [
 
     const { email, first_name, last_name, address, city, country } = req.body;
 
+    console.log(`Guest checkout attempt for: ${email}`);
+
     // Check if email exists
     const existing = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-    const existingUsers = Array.isArray(existing) ? existing.filter(row => row.email) : [];
+    console.log('Existing user query result:', JSON.stringify(existing).substring(0, 200));
+    
+    // Filter out MariaDB metadata - only keep actual user rows
+    let existingUsers = [];
+    if (Array.isArray(existing)) {
+      existingUsers = existing.filter(row => row && typeof row === 'object' && row.email);
+    }
+    
+    console.log(`Found ${existingUsers.length} existing users`);
     
     if (existingUsers.length > 0) {
       // User exists - return existing user with token
@@ -346,12 +356,13 @@ router.post('/guest-checkout', [
       token
     });
   } catch (error) {
-    console.error('Guest checkout error:', error);
+    console.error('Guest checkout error:', error.message, error.stack);
     // Check for duplicate email error
     if (error.code === 'ER_DUP_ENTRY' || error.message?.includes('Duplicate')) {
       return res.status(400).json({ error: 'Email already exists. Please login instead.' });
     }
-    res.status(500).json({ error: error.message || 'Failed to create account. Please try again.' });
+    // Return more specific error for debugging
+    res.status(500).json({ error: `Account creation failed: ${error.message}` });
   }
 });
 
