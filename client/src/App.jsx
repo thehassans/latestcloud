@@ -254,6 +254,7 @@ function App() {
           <Route path="tickets/new" element={<NewTicket />} />
           <Route path="tickets/:uuid" element={<TicketDetail />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="nobot" element={<NoBotSetup />} />
           <Route path="nobot/:uuid" element={<NoBotSetup />} />
           <Route path="nobot/:uuid/inbox" element={<NoBotSetup />} />
         </Route>
