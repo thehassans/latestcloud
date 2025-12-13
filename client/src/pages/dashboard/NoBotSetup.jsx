@@ -655,9 +655,9 @@ export default function NoBotSetup() {
     }
   }
 
-  // Render Inbox
+  // Render Inbox - Full page
   const renderInbox = () => (
-    <div className="h-[calc(100vh-200px)] flex rounded-2xl overflow-hidden border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900">
+    <div className="h-[calc(100vh-140px)] flex rounded-2xl overflow-hidden border border-dark-200 dark:border-dark-700 bg-white dark:bg-dark-900 shadow-2xl">
       {/* Conversations Sidebar */}
       <div className="w-80 border-r border-dark-200 dark:border-dark-700 flex flex-col">
         <div className="p-4 border-b border-dark-200 dark:border-dark-700">
@@ -818,9 +818,9 @@ export default function NoBotSetup() {
     <>
       <Helmet><title>{serviceName} - NoBot AI</title></Helmet>
       
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+      <div className={clsx("space-y-4", activeTab === 'inbox' && "space-y-2")}>
+        {/* Header - Compact for inbox */}
+        <div className={clsx("flex items-center justify-between", activeTab === 'inbox' && "pb-2")}>
           <div className="flex items-center gap-4">
             <button onClick={() => navigate('/dashboard/services')} className="p-2 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg transition-colors">
               <ArrowLeft className="w-5 h-5" />
