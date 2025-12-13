@@ -85,7 +85,7 @@ export default function NoBotSetup() {
   // Auto-create or find bot for this service
   useEffect(() => {
     if (serviceUuid && userBots?.bots && !botUuid && !isCreatingBot) {
-      const existingBot = userBots.bots.find(b => b.service_id === serviceUuid)
+      const existingBot = userBots.bots.find(b => b.service_uuid === serviceUuid)
       if (existingBot) {
         setBotUuid(existingBot.uuid)
       } else if (serviceData?.service) {

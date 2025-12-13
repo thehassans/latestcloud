@@ -168,10 +168,22 @@ router.post('/create', authenticate, async (req, res) => {
     const { v4: uuidv4 } = require('uuid');
     const botUuid = uuidv4();
     
+    // Valid bot_type values: 'whatsapp', 'messenger', 'instagram', 'all'
+    const validBotType = ['whatsapp', 'messenger', 'instagram', 'all'].includes(bot_type) ? bot_type : 'all';
+    
+    // Look up service ID from UUID if provided
+    let serviceIdInt = null;
+    if (service_id) {
+      const services = await db.query('SELECT id FROM services WHERE uuid = ?', [service_id]);
+      if (services.length > 0) {
+        serviceIdInt = services[0].id;
+      }
+    }
+    
     await db.query(`
-      INSERT INTO nobot_services (uuid, user_id, name, bot_type, service_id, status, setup_step)
-      VALUES (?, ?, ?, ?, ?, 'pending', 1)
-    `, [botUuid, req.user.id, name || 'NoBot AI', bot_type || 'website', service_id || null]);
+      INSERT INTO nobot_services (uuid, user_id, plan_name, bot_type, service_id, status, setup_step)
+      VALUES (?, ?, ?, ?, ?, 'pending_setup', 1)
+    `, [botUuid, req.user.id, name || 'NoBot AI', validBotType, serviceIdInt]);
     
     res.status(201).json({ 
       message: 'Bot created successfully',
@@ -187,7 +199,11 @@ router.post('/create', authenticate, async (req, res) => {
 router.get('/my-bots', authenticate, async (req, res) => {
   try {
     const bots = await db.query(`
-      SELECT * FROM nobot_services WHERE user_id = ? ORDER BY created_at DESC
+      SELECT ns.*, s.uuid as service_uuid 
+      FROM nobot_services ns 
+      LEFT JOIN services s ON ns.service_id = s.id 
+      WHERE ns.user_id = ? 
+      ORDER BY ns.created_at DESC
     `, [req.user.id]);
     res.json({ bots });
   } catch (error) {
