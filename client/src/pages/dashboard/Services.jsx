@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useQuery } from '@tanstack/react-query'
-import { Server, Plus, Bot, Globe, Shield, HardDrive, Cloud, Mail, Database } from 'lucide-react'
-import { userAPI } from '../../lib/api'
+import { Server, Plus, Bot, Globe, Shield, HardDrive, Cloud, Mail, Database, Inbox, Settings } from 'lucide-react'
+import { userAPI, nobotAPI } from '../../lib/api'
 import clsx from 'clsx'
 
 const statusColors = {
@@ -47,6 +47,18 @@ export default function Services() {
     queryFn: () => userAPI.getServices().then(res => res.data)
   })
 
+  // Fetch NoBot services to check setup status
+  const { data: nobotData } = useQuery({
+    queryKey: ['nobots'],
+    queryFn: () => nobotAPI.getBots().then(res => res.data)
+  })
+
+  // Check if NoBot setup is complete for a service
+  const getNoBotStatus = (serviceUuid) => {
+    const bot = nobotData?.bots?.find(b => b.service_uuid === serviceUuid)
+    return bot ? { setup_step: bot.setup_step, botUuid: bot.uuid } : null
+  }
+
   return (
     <>
       <Helmet><title>My Services - Magnetic Clouds</title></Helmet>
@@ -67,11 +79,12 @@ export default function Services() {
             const IconComponent = config.icon
             const link = getServiceLink(service)
             const isNoBot = isNoBotService(service)
+            const nobotStatus = isNoBot ? getNoBotStatus(service.uuid) : null
+            const isSetupComplete = nobotStatus?.setup_step >= 4
             
             return (
-              <Link key={service.uuid} to={link}
-                className="group card p-6 flex items-center justify-between hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 border border-dark-200 dark:border-dark-700 hover:border-primary-500/50">
-                <div className="flex items-center gap-4">
+              <div key={service.uuid} className="group card p-6 flex items-center justify-between hover:shadow-xl hover:shadow-primary-500/10 transition-all duration-300 border border-dark-200 dark:border-dark-700 hover:border-primary-500/50">
+                <Link to={link} className="flex items-center gap-4 flex-1">
                   <div className={clsx(
                     "w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br",
                     config.color,
@@ -84,14 +97,38 @@ export default function Services() {
                     <p className="text-sm text-dark-500">
                       {isNoBot ? 'AI Chatbot Service' : (service.domain_name || service.service_type)}
                     </p>
-                    {isNoBot && (
+                    {isNoBot && !isSetupComplete && (
                       <span className="inline-flex items-center gap-1 mt-1 text-xs text-purple-400">
                         <Bot className="w-3 h-3" /> Click to setup or manage
                       </span>
                     )}
+                    {isNoBot && isSetupComplete && (
+                      <span className="inline-flex items-center gap-1 mt-1 text-xs text-emerald-400">
+                        <Bot className="w-3 h-3" /> Setup complete
+                      </span>
+                    )}
                   </div>
-                </div>
+                </Link>
                 <div className="flex items-center gap-4">
+                  {/* NoBot Inbox & Settings buttons when setup is complete */}
+                  {isNoBot && isSetupComplete && (
+                    <div className="flex items-center gap-2 mr-4">
+                      <Link 
+                        to={`/dashboard/nobot?service=${service.uuid}&tab=inbox`}
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Inbox className="w-4 h-4" /> Inbox
+                      </Link>
+                      <Link 
+                        to={`/dashboard/nobot?service=${service.uuid}`}
+                        className="p-2 bg-dark-100 dark:bg-dark-700 rounded-xl hover:bg-dark-200 dark:hover:bg-dark-600 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Settings className="w-4 h-4 text-dark-500" />
+                      </Link>
+                    </div>
+                  )}
                   <span className={clsx("px-3 py-1 rounded-full text-xs font-medium", statusColors[service.status])}>
                     {service.status}
                   </span>
@@ -102,7 +139,7 @@ export default function Services() {
                     </p>
                   </div>
                 </div>
-              </Link>
+              </div>
             )
           })}
         </div>
