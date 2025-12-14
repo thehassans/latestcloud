@@ -438,12 +438,12 @@ router.get('/payment-methods', async (req, res) => {
     }
 
     res.json({
-      stripe_enabled: settings.stripe_enabled || false,
-      paypal_enabled: settings.paypal_enabled || false,
-      bkash_enabled: settings.bkash_enabled || false,
-      rocket_enabled: settings.rocket_enabled || false,
-      bank_transfer_enabled: settings.bank_transfer_enabled !== false,
-      cash_payment_enabled: settings.cash_payment_enabled !== false,
+      stripe_enabled: settings.stripe_enabled === true,
+      paypal_enabled: settings.paypal_enabled === true,
+      bkash_enabled: settings.bkash_enabled === true,
+      rocket_enabled: settings.rocket_enabled === true,
+      bank_transfer_enabled: settings.bank_transfer_enabled === true,
+      cash_payment_enabled: settings.cash_payment_enabled === true,
       bank_details: {
         bank_name: settings.bank_name || '',
         account_number: settings.bank_account_number || '',
@@ -470,8 +470,8 @@ router.get('/payment-methods', async (req, res) => {
       paypal_enabled: false,
       bkash_enabled: false,
       rocket_enabled: false,
-      bank_transfer_enabled: true,
-      cash_payment_enabled: true,
+      bank_transfer_enabled: false,
+      cash_payment_enabled: false,
       bank_details: { bank_name: '', account_number: '', account_holder: '', additional_info: '' },
       bkash_details: { number: '', account_type: 'personal', instructions: '' },
       rocket_details: { number: '', account_type: 'personal', instructions: '' },

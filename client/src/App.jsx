@@ -89,6 +89,7 @@ import AdminPaymentGateway from './pages/admin/AdminPaymentGateway'
 import AdminCustomizePlans from './pages/admin/AdminCustomizePlans'
 import AdminEmailSettings from './pages/admin/AdminEmailSettings'
 import AdminProposals from './pages/admin/AdminProposals'
+import AdminProposalEditor from './pages/admin/AdminProposalEditor'
 import AdminInvoices from './pages/admin/AdminInvoices'
 import AdminNoBotServices from './pages/admin/AdminNoBotServices'
 import AdminEmailLogs from './pages/admin/AdminEmailLogs'
@@ -273,6 +274,8 @@ function App() {
           <Route path="customize-plans" element={<AdminCustomizePlans />} />
           <Route path="email-settings" element={<AdminEmailSettings />} />
           <Route path="proposals" element={<AdminProposals />} />
+          <Route path="proposals/new" element={<AdminProposalEditor />} />
+          <Route path="proposals/:uuid/edit" element={<AdminProposalEditor />} />
           <Route path="invoices" element={<AdminInvoices />} />
           <Route path="nobot-services" element={<AdminNoBotServices />} />
           <Route path="email-logs" element={<AdminEmailLogs />} />

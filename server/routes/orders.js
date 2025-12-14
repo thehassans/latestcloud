@@ -265,7 +265,7 @@ router.post('/', authenticate, [
 
     // Create invoice
     const invoiceUuid = uuidv4();
-    const invoiceNumber = `INV-${orderNumber}`;
+    const invoiceNumber = `INV-${Math.floor(100000 + Math.random() * 900000)}`;
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 7);
 

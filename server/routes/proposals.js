@@ -86,7 +86,7 @@ router.post('/admin/proposals', authenticate, requireRole('admin'), async (req, 
     } = req.body;
     
     const uuid = uuidv4();
-    const proposalNumber = `PROP-${Date.now().toString(36).toUpperCase()}`;
+    const proposalNumber = `PROP-${Math.floor(100000 + Math.random() * 900000)}`;
     
     await db.query(`
       INSERT INTO proposals (
@@ -241,7 +241,7 @@ router.post('/proposals/:uuid/accept', async (req, res) => {
     
     // Create order from proposal
     const orderUuid = uuidv4();
-    const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
+    const orderNumber = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
     
     await db.query(`
       INSERT INTO orders (uuid, order_number, user_id, items, subtotal, discount, tax, total, status, payment_method)

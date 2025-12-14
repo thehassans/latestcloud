@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { 
   Users, ShoppingCart, DollarSign, Ticket, Server, TrendingUp, 
-  ArrowUpRight, ArrowDownRight, Sparkles, Crown, Activity, Clock,
+  ArrowUpRight, ArrowDownRight, Sparkles, Activity, Clock,
   CheckCircle, AlertCircle, Zap
 } from 'lucide-react'
 import { adminAPI } from '../../lib/api'
@@ -45,7 +45,7 @@ export default function AdminDashboard() {
     <>
       <Helmet><title>Admin Dashboard - Magnetic Clouds</title></Helmet>
       
-      {/* Premium Header */}
+      {/* Header */}
       <div className="relative mb-8 overflow-hidden rounded-3xl">
         {/* Animated Background */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900">
@@ -63,11 +63,11 @@ export default function AdminDashboard() {
         <div className="relative p-8 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                <Crown className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center shadow-lg shadow-primary-500/30">
+                <Activity className="w-6 h-6 text-white" />
               </div>
-              <span className="px-3 py-1 bg-gradient-to-r from-amber-400 to-yellow-500 text-dark-900 text-xs font-bold rounded-full uppercase tracking-wider">
-                Premium Dashboard
+              <span className="px-3 py-1 bg-gradient-to-r from-primary-500 to-purple-500 text-white text-xs font-bold rounded-full uppercase tracking-wider">
+                Admin Dashboard
               </span>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">Welcome back, Admin</h1>

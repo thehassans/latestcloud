@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
@@ -989,14 +990,9 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
 
 // Main Admin Proposals Page
 export default function AdminProposals() {
-  const { logo: siteLogo, siteName } = useSiteSettingsStore()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [proposals, setProposals] = useState([])
-  const [products, setProducts] = useState([])
-  const [users, setUsers] = useState([])
-  const [bankSettings, setBankSettings] = useState({})
-  const [showModal, setShowModal] = useState(false)
-  const [editingProposal, setEditingProposal] = useState(null)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [deleteDialog, setDeleteDialog] = useState({ open: false, proposal: null })
@@ -1008,38 +1004,12 @@ export default function AdminProposals() {
 
   const loadData = async () => {
     try {
-      const [proposalsRes, productsRes, usersRes, bankRes] = await Promise.all([
-        adminAPI.getProposals?.() || { data: { proposals: [] } },
-        productsAPI.getAll(),
-        adminAPI.getUsers(),
-        settingsAPI.getPaymentGateway()
-      ])
-      
+      const proposalsRes = await adminAPI.getProposals?.() || { data: { proposals: [] } }
       setProposals(proposalsRes.data?.proposals || [])
-      setProducts(productsRes.data?.products || productsRes.data || [])
-      setUsers(usersRes.data?.users || [])
-      setBankSettings(bankRes.data?.settings || {})
     } catch (err) {
       console.error('Failed to load data:', err)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleSaveProposal = async (data) => {
-    try {
-      if (editingProposal) {
-        await adminAPI.updateProposal(editingProposal.uuid, data)
-        toast.success('Proposal updated!')
-      } else {
-        await adminAPI.createProposal(data)
-        toast.success('Proposal created!')
-      }
-      loadData()
-      setShowModal(false)
-      setEditingProposal(null)
-    } catch (err) {
-      throw err
     }
   }
 
@@ -1132,7 +1102,7 @@ export default function AdminProposals() {
           <p className="text-dark-500 mt-1">Create and manage custom offers for clients</p>
         </div>
         <button
-          onClick={() => { setEditingProposal(null); setShowModal(true) }}
+          onClick={() => navigate('/admin/proposals/new')}
           className="btn-primary"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -1195,7 +1165,7 @@ export default function AdminProposals() {
           <FileText className="w-16 h-16 text-dark-300 mx-auto mb-4" />
           <h3 className="text-lg font-bold mb-2">No proposals yet</h3>
           <p className="text-dark-500 mb-6">Create your first proposal to send custom offers to clients</p>
-          <button onClick={() => setShowModal(true)} className="btn-primary mx-auto">
+          <button onClick={() => navigate('/admin/proposals/new')} className="btn-primary mx-auto">
             <Plus className="w-4 h-4 mr-2" /> Create Proposal
           </button>
         </div>
@@ -1240,7 +1210,7 @@ export default function AdminProposals() {
                     </button>
                   )}
                   <button
-                    onClick={() => { setEditingProposal(proposal); setShowModal(true) }}
+                    onClick={() => navigate(`/admin/proposals/${proposal.uuid}/edit`)}
                     className="p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg"
                   >
                     <Eye className="w-5 h-5" />
@@ -1257,23 +1227,6 @@ export default function AdminProposals() {
           ))}
         </div>
       )}
-
-      {/* Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <ProposalModal
-            isOpen={showModal}
-            onClose={() => { setShowModal(false); setEditingProposal(null) }}
-            proposal={editingProposal}
-            onSave={handleSaveProposal}
-            products={products}
-            users={users}
-            bankSettings={bankSettings}
-            siteLogo={siteLogo}
-            siteName={siteName}
-          />
-        )}
-      </AnimatePresence>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
