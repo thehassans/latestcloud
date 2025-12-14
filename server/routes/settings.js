@@ -905,4 +905,79 @@ router.post('/server-management/test', authenticate, requireRole('admin'), async
   }
 });
 
+// Get header/footer settings (public)
+router.get('/header-footer', async (req, res) => {
+  try {
+    const settings = await db.query(
+      "SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('header_settings', 'footer_settings')"
+    );
+    
+    let headerSettings = null;
+    let footerSettings = null;
+    
+    for (const s of settings) {
+      try {
+        if (s.setting_key === 'header_settings') {
+          headerSettings = JSON.parse(s.setting_value);
+        } else if (s.setting_key === 'footer_settings') {
+          footerSettings = JSON.parse(s.setting_value);
+        }
+      } catch (e) {
+        console.error('Failed to parse setting:', s.setting_key, e);
+      }
+    }
+    
+    res.json({ headerSettings, footerSettings });
+  } catch (error) {
+    console.error('Get header/footer settings error:', error);
+    res.status(500).json({ error: 'Failed to load header/footer settings' });
+  }
+});
+
+// Update header/footer settings (admin only)
+router.put('/header-footer', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { headerSettings, footerSettings } = req.body;
+    
+    if (headerSettings) {
+      const headerValue = JSON.stringify(headerSettings);
+      const existing = await db.query("SELECT id FROM settings WHERE setting_key = 'header_settings'");
+      
+      if (existing && existing.length > 0) {
+        await db.query(
+          "UPDATE settings SET setting_value = ?, setting_type = 'json', is_public = TRUE WHERE setting_key = 'header_settings'",
+          [headerValue]
+        );
+      } else {
+        await db.query(
+          "INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public) VALUES ('header_settings', ?, 'json', 'appearance', TRUE)",
+          [headerValue]
+        );
+      }
+    }
+    
+    if (footerSettings) {
+      const footerValue = JSON.stringify(footerSettings);
+      const existing = await db.query("SELECT id FROM settings WHERE setting_key = 'footer_settings'");
+      
+      if (existing && existing.length > 0) {
+        await db.query(
+          "UPDATE settings SET setting_value = ?, setting_type = 'json', is_public = TRUE WHERE setting_key = 'footer_settings'",
+          [footerValue]
+        );
+      } else {
+        await db.query(
+          "INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public) VALUES ('footer_settings', ?, 'json', 'appearance', TRUE)",
+          [footerValue]
+        );
+      }
+    }
+    
+    res.json({ message: 'Header & footer settings updated successfully' });
+  } catch (error) {
+    console.error('Update header/footer settings error:', error);
+    res.status(500).json({ error: 'Failed to update header/footer settings' });
+  }
+});
+
 module.exports = router;

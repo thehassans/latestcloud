@@ -98,6 +98,7 @@ import AdminServerManagement from './pages/admin/AdminServerManagement'
 import AdminUserDetail from './pages/admin/AdminUserDetail'
 import AdminServiceManage from './pages/admin/AdminServiceManage'
 import AdminUserManage from './pages/admin/AdminUserManage'
+import AdminHeaderFooter from './pages/admin/AdminHeaderFooter'
 import AdminLogin from './pages/admin/AdminLogin'
 import ProposalView from './pages/ProposalView'
 
@@ -274,6 +275,7 @@ function App() {
           <Route path="tickets" element={<AdminTickets />} />
           <Route path="domains" element={<AdminDomains />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="header-footer" element={<AdminHeaderFooter />} />
           <Route path="pages" element={<AdminPages />} />
           <Route path="media" element={<AdminMedia />} />
           <Route path="ai-agent" element={<AdminAIAgent />} />

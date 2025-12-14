@@ -48,12 +48,13 @@ const menuGroups = [
     icon: Settings,
     to: '/admin/settings',
     children: [
+      { to: '/admin/header-footer', icon: FileText, label: 'Header & Footer' },
+      { to: '/admin/pages', icon: FileText, label: 'Pages' },
       { to: '/admin/server-management', icon: Server, label: 'Server Management' },
       { to: '/admin/email-settings', icon: Mail, label: 'Email Settings' },
       { to: '/admin/email-logs', icon: Mail, label: 'Email Logs' },
       { to: '/admin/nobot-services', icon: Bot, label: 'NoBot Services' },
       { to: '/admin/ai-agent', icon: Bot, label: 'AI Agents' },
-      { to: '/admin/pages', icon: FileText, label: 'Pages' },
     ]
   }
 ]
