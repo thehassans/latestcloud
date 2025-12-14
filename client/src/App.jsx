@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from 'react'
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useThemeStore, useAuthStore, useSettingsStore, useSiteSettingsStore } from './store/useStore'
 import { settingsAPI } from './lib/api'
@@ -8,98 +8,93 @@ import MainLayout from './layouts/MainLayout'
 import DashboardLayout from './layouts/DashboardLayout'
 import AdminLayout from './layouts/AdminLayout'
 
-// Loading component
-import LoadingScreen from './components/ui/LoadingScreen'
-
 // AI Agent
 import { AIAgentProvider } from './contexts/AIAgentContext'
 import AIChatWidget from './components/AIChatWidget'
 
-// Public pages (lazy loaded)
-const Home = lazy(() => import('./pages/Home'))
-const Hosting = lazy(() => import('./pages/services/Hosting'))
-const VPS = lazy(() => import('./pages/services/VPS'))
-const Cloud = lazy(() => import('./pages/services/Cloud'))
-const Dedicated = lazy(() => import('./pages/services/Dedicated'))
-const BDServer = lazy(() => import('./pages/services/BDServer'))
-const Domains = lazy(() => import('./pages/Domains'))
-const DomainTransfer = lazy(() => import('./pages/DomainTransfer'))
-const SSL = lazy(() => import('./pages/services/SSL'))
-const Email = lazy(() => import('./pages/services/Email'))
-const Backup = lazy(() => import('./pages/services/Backup'))
-const NoBot = lazy(() => import('./pages/services/NoBot'))
-const WebDevelopment = lazy(() => import('./pages/services/WebDevelopment'))
-const BugSmash = lazy(() => import('./pages/services/BugSmash'))
-const MagneticBuilder = lazy(() => import('./pages/services/MagneticBuilder'))
-const MagneticShieldX = lazy(() => import('./pages/services/MagneticShieldX'))
-const SEOTools = lazy(() => import('./pages/services/SEOTools'))
-const Datacenters = lazy(() => import('./pages/Datacenters'))
-const Pricing = lazy(() => import('./pages/Pricing'))
-const About = lazy(() => import('./pages/About'))
-const Contact = lazy(() => import('./pages/Contact'))
-const Support = lazy(() => import('./pages/Support'))
-const Affiliate = lazy(() => import('./pages/Affiliate'))
-const Coupons = lazy(() => import('./pages/Coupons'))
-const Terms = lazy(() => import('./pages/legal/Terms'))
-const Privacy = lazy(() => import('./pages/legal/Privacy'))
-const Refund = lazy(() => import('./pages/legal/Refund'))
-const SLA = lazy(() => import('./pages/legal/SLA'))
-const AcceptableUse = lazy(() => import('./pages/legal/AcceptableUse'))
+// Public pages
+import Home from './pages/Home'
+import Hosting from './pages/services/Hosting'
+import VPS from './pages/services/VPS'
+import Cloud from './pages/services/Cloud'
+import Dedicated from './pages/services/Dedicated'
+import BDServer from './pages/services/BDServer'
+import Domains from './pages/Domains'
+import DomainTransfer from './pages/DomainTransfer'
+import SSL from './pages/services/SSL'
+import Email from './pages/services/Email'
+import Backup from './pages/services/Backup'
+import NoBot from './pages/services/NoBot'
+import WebDevelopment from './pages/services/WebDevelopment'
+import BugSmash from './pages/services/BugSmash'
+import MagneticBuilder from './pages/services/MagneticBuilder'
+import MagneticShieldX from './pages/services/MagneticShieldX'
+import SEOTools from './pages/services/SEOTools'
+import Datacenters from './pages/Datacenters'
+import Pricing from './pages/Pricing'
+import About from './pages/About'
+import Contact from './pages/Contact'
+import Support from './pages/Support'
+import Affiliate from './pages/Affiliate'
+import Coupons from './pages/Coupons'
+import Terms from './pages/legal/Terms'
+import Privacy from './pages/legal/Privacy'
+import Refund from './pages/legal/Refund'
+import SLA from './pages/legal/SLA'
+import AcceptableUse from './pages/legal/AcceptableUse'
 
 // Company pages
-const Careers = lazy(() => import('./pages/Careers'))
-const Blog = lazy(() => import('./pages/Blog'))
-const Partners = lazy(() => import('./pages/Partners'))
+import Careers from './pages/Careers'
+import Blog from './pages/Blog'
+import Partners from './pages/Partners'
 
 // Support pages
-const KnowledgeBase = lazy(() => import('./pages/KnowledgeBase'))
-const SystemStatus = lazy(() => import('./pages/SystemStatus'))
-const ReportAbuse = lazy(() => import('./pages/ReportAbuse'))
-const Reviews = lazy(() => import('./pages/Reviews'))
-const Login = lazy(() => import('./pages/auth/Login'))
-const Register = lazy(() => import('./pages/auth/Register'))
-const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
-const OAuthCallback = lazy(() => import('./pages/auth/OAuthCallback'))
-const Cart = lazy(() => import('./pages/Cart'))
-const Checkout = lazy(() => import('./pages/Checkout'))
+import KnowledgeBase from './pages/KnowledgeBase'
+import SystemStatus from './pages/SystemStatus'
+import ReportAbuse from './pages/ReportAbuse'
+import Reviews from './pages/Reviews'
+import Login from './pages/auth/Login'
+import Register from './pages/auth/Register'
+import ForgotPassword from './pages/auth/ForgotPassword'
+import OAuthCallback from './pages/auth/OAuthCallback'
+import Cart from './pages/Cart'
+import Checkout from './pages/Checkout'
 
 // Dashboard pages
-const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'))
-const Services = lazy(() => import('./pages/dashboard/Services'))
-const ServiceDetail = lazy(() => import('./pages/dashboard/ServiceDetail'))
-const MyDomains = lazy(() => import('./pages/dashboard/MyDomains'))
-const Invoices = lazy(() => import('./pages/dashboard/Invoices'))
-const Tickets = lazy(() => import('./pages/dashboard/Tickets'))
-const TicketDetail = lazy(() => import('./pages/dashboard/TicketDetail'))
-const NewTicket = lazy(() => import('./pages/dashboard/NewTicket'))
-const Profile = lazy(() => import('./pages/dashboard/Profile'))
-const Orders = lazy(() => import('./pages/dashboard/Orders'))
-const NoBotSetup = lazy(() => import('./pages/dashboard/NoBotSetup'))
+import Dashboard from './pages/dashboard/Dashboard'
+import Services from './pages/dashboard/Services'
+import ServiceDetail from './pages/dashboard/ServiceDetail'
+import MyDomains from './pages/dashboard/MyDomains'
+import Invoices from './pages/dashboard/Invoices'
+import Tickets from './pages/dashboard/Tickets'
+import TicketDetail from './pages/dashboard/TicketDetail'
+import NewTicket from './pages/dashboard/NewTicket'
+import Profile from './pages/dashboard/Profile'
+import Orders from './pages/dashboard/Orders'
+import NoBotSetup from './pages/dashboard/NoBotSetup'
 
 // Admin pages
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
-const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
-const AdminProducts = lazy(() => import('./pages/admin/AdminProducts'))
-const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'))
-const AdminTickets = lazy(() => import('./pages/admin/AdminTickets'))
-const AdminDomains = lazy(() => import('./pages/admin/AdminDomains'))
-const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'))
-const AdminPages = lazy(() => import('./pages/admin/AdminPages'))
-const AdminMedia = lazy(() => import('./pages/admin/AdminMedia'))
-const AdminAIAgent = lazy(() => import('./pages/admin/AdminAIAgent'))
-const AdminAgentChats = lazy(() => import('./pages/admin/AdminAgentChats'))
-const AdminPricing = lazy(() => import('./pages/admin/AdminPricing'))
-const AdminPaymentGateway = lazy(() => import('./pages/admin/AdminPaymentGateway'))
-const AdminCustomizePlans = lazy(() => import('./pages/admin/AdminCustomizePlans'))
-const AdminEmailSettings = lazy(() => import('./pages/admin/AdminEmailSettings'))
-const AdminProposals = lazy(() => import('./pages/admin/AdminProposals'))
-const AdminInvoices = lazy(() => import('./pages/admin/AdminInvoices'))
-const AdminNoBotServices = lazy(() => import('./pages/admin/AdminNoBotServices'))
-const AdminEmailLogs = lazy(() => import('./pages/admin/AdminEmailLogs'))
-const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'))
-
-// Public pages
-const ProposalView = lazy(() => import('./pages/ProposalView'))
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminUsers from './pages/admin/AdminUsers'
+import AdminProducts from './pages/admin/AdminProducts'
+import AdminOrders from './pages/admin/AdminOrders'
+import AdminTickets from './pages/admin/AdminTickets'
+import AdminDomains from './pages/admin/AdminDomains'
+import AdminSettings from './pages/admin/AdminSettings'
+import AdminPages from './pages/admin/AdminPages'
+import AdminMedia from './pages/admin/AdminMedia'
+import AdminAIAgent from './pages/admin/AdminAIAgent'
+import AdminAgentChats from './pages/admin/AdminAgentChats'
+import AdminPricing from './pages/admin/AdminPricing'
+import AdminPaymentGateway from './pages/admin/AdminPaymentGateway'
+import AdminCustomizePlans from './pages/admin/AdminCustomizePlans'
+import AdminEmailSettings from './pages/admin/AdminEmailSettings'
+import AdminProposals from './pages/admin/AdminProposals'
+import AdminInvoices from './pages/admin/AdminInvoices'
+import AdminNoBotServices from './pages/admin/AdminNoBotServices'
+import AdminEmailLogs from './pages/admin/AdminEmailLogs'
+import AdminLogin from './pages/admin/AdminLogin'
+import ProposalView from './pages/ProposalView'
 
 // Protected Route wrapper
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -185,8 +180,7 @@ function App() {
 
   return (
     <AIAgentProvider>
-      <Suspense fallback={<LoadingScreen />}>
-        <AIChatWidget />
+      <AIChatWidget />
         <Routes>
         {/* Public routes */}
         <Route element={<MainLayout />}>
@@ -289,7 +283,6 @@ function App() {
         {/* 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Suspense>
     </AIAgentProvider>
   )
 }
