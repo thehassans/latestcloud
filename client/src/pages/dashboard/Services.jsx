@@ -44,10 +44,16 @@ const getServiceLink = (service) => {
   return `/dashboard/services/${service.uuid}`
 }
 
-// Check if service is a hosting/server type
+// Check if service is a hosting/server type (exclude NoBot)
 const isHostingService = (service) => {
   const type = (service.service_type || '').toLowerCase()
   const name = (service.name || '').toLowerCase()
+  
+  // Exclude NoBot services
+  if (name.includes('nobot') || name.includes('no bot') || name.includes('ai bot') || name.includes('chatbot')) {
+    return false
+  }
+  
   return ['hosting', 'vps', 'dedicated', 'cloud', 'server', 'reseller'].some(t => 
     type.includes(t) || name.includes(t)
   )

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
@@ -7,11 +7,18 @@ import {
   Server, ArrowLeft, Globe, Shield, HardDrive, Cloud, Mail, Database,
   ExternalLink, Cpu, MemoryStick, HardDrive as Storage, Activity, Loader2,
   Copy, Check, MonitorPlay, Lock, Zap, RefreshCw, Settings, Calendar,
-  CreditCard, Clock, ChevronRight, FileText, Power, Pause, Play
+  CreditCard, Clock, ChevronRight, FileText, Power, Pause, Play, Sparkles,
+  Receipt, Headphones, BarChart3, Wifi, Key
 } from 'lucide-react'
 import { userAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
+
+// Format currency
+const formatCurrency = (amount) => {
+  const num = parseFloat(amount) || 0
+  return num.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+}
 
 const statusColors = {
   active: 'bg-green-500/20 text-green-400 border border-green-500/30',
@@ -327,11 +334,14 @@ export default function ServiceManagement() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Service Info */}
-          <div className="card p-6">
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-primary-500" />
-              Service Information
-            </h3>
+          <div className="card overflow-hidden">
+            <div className="px-5 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+              <h3 className="font-bold flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Service Information
+              </h3>
+            </div>
+            <div className="p-5">
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-3 border-b border-dark-100 dark:border-dark-700">
                 <span className="text-dark-500">Service Type</span>
@@ -364,24 +374,33 @@ export default function ServiceManagement() {
                 </span>
               </div>
             </div>
+            </div>
           </div>
 
           {/* Billing */}
-          <div className="card p-6">
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-green-500" />
-              Billing
-            </h3>
-            <div className="p-4 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl mb-4">
-              <p className="text-sm text-dark-500 mb-1">Current Plan</p>
-              <p className="text-2xl font-bold">${service.price || '0.00'}<span className="text-sm font-normal text-dark-500">/{service.billing_cycle || 'mo'}</span></p>
+          <div className="card overflow-hidden">
+            <div className="px-5 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white">
+              <h3 className="font-bold flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Billing
+              </h3>
             </div>
-            <Link 
-              to={`/dashboard/invoices`}
-              className="block w-full text-center py-2 bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 rounded-xl transition-colors font-medium"
-            >
-              View Invoices
-            </Link>
+            <div className="p-5">
+              <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 border border-emerald-500/20 rounded-xl mb-4">
+                <p className="text-xs text-dark-500 uppercase tracking-wider mb-1">Current Plan</p>
+                <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                  {formatCurrency(service.amount || service.price || service.total || 0)}
+                  <span className="text-sm font-normal text-dark-500">/{service.billing_cycle || 'monthly'}</span>
+                </p>
+              </div>
+              <Link 
+                to={`/dashboard/invoices?service=${uuid}`}
+                className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl transition-all font-medium shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
+              >
+                <Receipt className="w-4 h-4" />
+                View Invoices
+              </Link>
+            </div>
           </div>
 
           {/* Need Help */}
