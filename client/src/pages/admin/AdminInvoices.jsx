@@ -4,12 +4,12 @@ import { useQuery } from '@tanstack/react-query'
 import { 
   FileText, Search, Eye, Download, CheckCircle, XCircle, Clock,
   DollarSign, User, Calendar, Loader2, Filter, ExternalLink, X,
-  CreditCard, Building2, Mail, Phone, MapPin, Receipt
+  CreditCard, Building2, Mail, Phone, MapPin, Receipt, Ban, RotateCcw
 } from 'lucide-react'
 import { adminAPI } from '../../lib/api'
-import { useState as useStateHook } from 'react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
+import ConfirmDialog from '../../components/ConfirmDialog'
 
 export default function AdminInvoices() {
   const [statusFilter, setStatusFilter] = useState('')
@@ -17,6 +17,8 @@ export default function AdminInvoices() {
   const [selectedInvoice, setSelectedInvoice] = useState(null)
   const [invoiceDetails, setInvoiceDetails] = useState(null)
   const [loadingDetails, setLoadingDetails] = useState(false)
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, type: '', invoice: null })
+  const [actionLoading, setActionLoading] = useState(false)
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['admin-invoices', statusFilter],
@@ -419,15 +421,15 @@ export default function AdminInvoices() {
                     )}
                     {invoiceDetails.status === 'paid' && (
                       <button 
-                        onClick={() => updateStatus(invoiceDetails.uuid, 'refunded')}
+                        onClick={() => setConfirmDialog({ open: true, type: 'refund', invoice: invoiceDetails })}
                         className="btn-secondary text-amber-600"
                       >
-                        Refund Invoice
+                        <RotateCcw className="w-4 h-4 mr-2" /> Refund Invoice
                       </button>
                     )}
                     {invoiceDetails.status !== 'cancelled' && invoiceDetails.status !== 'paid' && (
                       <button 
-                        onClick={() => updateStatus(invoiceDetails.uuid, 'cancelled')}
+                        onClick={() => setConfirmDialog({ open: true, type: 'cancel', invoice: invoiceDetails })}
                         className="btn-secondary text-red-500"
                       >
                         <XCircle className="w-4 h-4 mr-2" /> Cancel Invoice
@@ -440,6 +442,32 @@ export default function AdminInvoices() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.open}
+        onClose={() => setConfirmDialog({ open: false, type: '', invoice: null })}
+        onConfirm={async () => {
+          setActionLoading(true)
+          try {
+            const newStatus = confirmDialog.type === 'cancel' ? 'cancelled' : 'refunded'
+            await updateStatus(confirmDialog.invoice.uuid, newStatus)
+            setConfirmDialog({ open: false, type: '', invoice: null })
+          } finally {
+            setActionLoading(false)
+          }
+        }}
+        title={confirmDialog.type === 'cancel' ? 'Cancel Invoice?' : 'Refund Invoice?'}
+        message={
+          confirmDialog.type === 'cancel' 
+            ? `Are you sure you want to cancel invoice ${confirmDialog.invoice?.invoice_number}? This action cannot be undone.`
+            : `Are you sure you want to refund invoice ${confirmDialog.invoice?.invoice_number}? The payment will be marked as refunded.`
+        }
+        confirmText={confirmDialog.type === 'cancel' ? 'Yes, Cancel Invoice' : 'Yes, Refund'}
+        type={confirmDialog.type === 'cancel' ? 'danger' : 'warning'}
+        icon={confirmDialog.type === 'cancel' ? Ban : RotateCcw}
+        loading={actionLoading}
+      />
     </>
   )
 }

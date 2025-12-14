@@ -5,11 +5,12 @@ import {
   FileText, Plus, Send, Eye, Trash2, Search, Filter, CheckCircle, XCircle, 
   Clock, User, Mail, Building2, DollarSign, Calendar, ChevronDown, X,
   Sparkles, Crown, Zap, Shield, Star, Package, CreditCard, Loader2,
-  UserPlus, Check
+  UserPlus, Check, AlertTriangle
 } from 'lucide-react'
 import { adminAPI, productsAPI, settingsAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
+import ConfirmDialog from '../../components/ConfirmDialog'
 
 // Predefined Services by Category
 const SERVICE_CATEGORIES = [
@@ -276,20 +277,20 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
   }
 
   const calculateSubtotal = () => {
-    return form.items.reduce((sum, item) => sum + (item.quantity * item.price), 0)
+    return form.items.reduce((sum, item) => sum + (Number(item.quantity || 0) * Number(item.price || 0)), 0)
   }
 
   const calculateDiscount = () => {
     const subtotal = calculateSubtotal()
     if (form.discount_type === 'percentage') {
-      return (subtotal * form.discount) / 100
+      return (subtotal * Number(form.discount || 0)) / 100
     }
-    return form.discount
+    return Number(form.discount || 0)
   }
 
   const calculateTax = () => {
     const afterDiscount = calculateSubtotal() - calculateDiscount()
-    return (afterDiscount * form.tax) / 100
+    return (afterDiscount * Number(form.tax || 0)) / 100
   }
 
   const calculateTotal = () => {
@@ -819,7 +820,7 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
                       form.items.filter(i => i.name).slice(0, 3).map((item, idx) => (
                         <div key={idx} className="flex justify-between text-xs">
                           <span className="truncate flex-1">{item.name}</span>
-                          <span className="font-medium ml-2">${(item.quantity * item.price).toFixed(2)}</span>
+                          <span className="font-medium ml-2">${(Number(item.quantity || 0) * Number(item.price || 0)).toFixed(2)}</span>
                         </div>
                       ))
                     ) : (
@@ -920,6 +921,8 @@ export default function AdminProposals() {
   const [editingProposal, setEditingProposal] = useState(null)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, proposal: null })
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -973,14 +976,21 @@ export default function AdminProposals() {
   }
 
   const handleDeleteProposal = async (proposal) => {
-    if (!confirm('Are you sure you want to delete this proposal?')) return
-    
+    setDeleteDialog({ open: true, proposal })
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteDialog.proposal) return
+    setDeleteLoading(true)
     try {
-      await adminAPI.deleteProposal(proposal.uuid)
+      await adminAPI.deleteProposal(deleteDialog.proposal.uuid)
       toast.success('Proposal deleted')
       loadData()
+      setDeleteDialog({ open: false, proposal: null })
     } catch (err) {
       toast.error('Failed to delete proposal')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -1184,6 +1194,19 @@ export default function AdminProposals() {
           />
         )}
       </AnimatePresence>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, proposal: null })}
+        onConfirm={confirmDelete}
+        title="Delete Proposal?"
+        message={`Are you sure you want to delete the proposal "${deleteDialog.proposal?.title}"? This action cannot be undone.`}
+        confirmText="Yes, Delete"
+        type="danger"
+        icon={Trash2}
+        loading={deleteLoading}
+      />
     </>
   )
 }
