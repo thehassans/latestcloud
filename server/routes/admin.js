@@ -135,12 +135,12 @@ router.get('/users/:uuid', async (req, res) => {
 
 router.put('/users/:uuid', async (req, res) => {
   try {
-    const { first_name, last_name, email, phone, company, role, status } = req.body;
+    const { first_name, last_name, email, phone, company, address, role, status } = req.body;
     
     await db.query(`
-      UPDATE users SET first_name = ?, last_name = ?, email = ?, phone = ?, company = ?, role = ?, status = ?
+      UPDATE users SET first_name = ?, last_name = ?, email = ?, phone = ?, company = ?, address = ?, role = ?, status = ?
       WHERE uuid = ?
-    `, [first_name, last_name, email, phone, company, role, status, req.params.uuid]);
+    `, [first_name, last_name, email, phone, company, address, role, status, req.params.uuid]);
 
     res.json({ message: 'User updated successfully' });
   } catch (error) {
