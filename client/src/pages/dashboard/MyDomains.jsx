@@ -391,33 +391,42 @@ export default function MyDomains() {
 
                     {/* Quick Actions */}
                     <div className="flex flex-wrap gap-3 pt-4 border-t border-dark-100 dark:border-dark-700/50">
-                      <button className={clsx(
-                        "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                        isDark 
-                          ? "bg-dark-700 hover:bg-dark-600 text-white" 
-                          : "bg-dark-100 hover:bg-dark-200 text-dark-700"
-                      )}>
+                      <Link 
+                        to={`/dashboard/services/${domain.uuid}/manage`}
+                        className={clsx(
+                          "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
+                          isDark 
+                            ? "bg-dark-700 hover:bg-dark-600 text-white" 
+                            : "bg-dark-100 hover:bg-dark-200 text-dark-700"
+                        )}
+                      >
                         <Server className="w-4 h-4" />
                         DNS Settings
-                      </button>
-                      <button className={clsx(
-                        "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                        isDark 
-                          ? "bg-dark-700 hover:bg-dark-600 text-white" 
-                          : "bg-dark-100 hover:bg-dark-200 text-dark-700"
-                      )}>
+                      </Link>
+                      <Link 
+                        to={`/dashboard/services/${domain.uuid}/manage`}
+                        className={clsx(
+                          "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
+                          isDark 
+                            ? "bg-dark-700 hover:bg-dark-600 text-white" 
+                            : "bg-dark-100 hover:bg-dark-200 text-dark-700"
+                        )}
+                      >
                         <Mail className="w-4 h-4" />
                         Email Forwarding
-                      </button>
-                      <button className={clsx(
-                        "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
-                        isDark 
-                          ? "bg-dark-700 hover:bg-dark-600 text-white" 
-                          : "bg-dark-100 hover:bg-dark-200 text-dark-700"
-                      )}>
+                      </Link>
+                      <Link 
+                        to={`/dashboard/services/${domain.uuid}/manage`}
+                        className={clsx(
+                          "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
+                          isDark 
+                            ? "bg-dark-700 hover:bg-dark-600 text-white" 
+                            : "bg-dark-100 hover:bg-dark-200 text-dark-700"
+                        )}
+                      >
                         <Settings className="w-4 h-4" />
                         Manage
-                      </button>
+                      </Link>
                       <button className={clsx(
                         "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
                         "bg-primary-500 hover:bg-primary-600 text-white"

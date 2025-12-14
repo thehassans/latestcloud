@@ -8,7 +8,7 @@ import {
   ExternalLink, Cpu, MemoryStick, HardDrive as Storage, Activity, Loader2,
   Copy, Check, MonitorPlay, Lock, Zap, RefreshCw, Settings, Calendar,
   CreditCard, Clock, ChevronRight, FileText, Power, Pause, Play, Sparkles,
-  Receipt, Headphones, BarChart3, Wifi, Key
+  Receipt, Headphones, BarChart3, Wifi, Key, AlertCircle, Edit, Trash2
 } from 'lucide-react'
 import { userAPI } from '../../lib/api'
 import clsx from 'clsx'
@@ -121,6 +121,370 @@ export default function ServiceManagement() {
     )
   }
 
+  // Check if this is a domain service
+  const isDomain = service.service_type === 'domain'
+
+  // Calculate days until expiry for domains
+  const getDaysUntilExpiry = (expiryDate) => {
+    if (!expiryDate) return null
+    const now = new Date()
+    const expiry = new Date(expiryDate)
+    const diffTime = expiry - now
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  }
+
+  const daysUntilExpiry = getDaysUntilExpiry(service.expires_at)
+  const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry <= 30 && daysUntilExpiry > 0
+  const isExpired = daysUntilExpiry !== null && daysUntilExpiry <= 0
+
+  // Domain Management View
+  if (isDomain) {
+    return (
+      <>
+        <Helmet>
+          <title>{service.domain_name || service.name} - Domain Management</title>
+        </Helmet>
+
+        {/* Header */}
+        <div className="mb-8">
+          <Link 
+            to="/dashboard/domains" 
+            className="inline-flex items-center gap-2 text-dark-500 hover:text-primary-500 mb-4 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to My Domains
+          </Link>
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <Globe className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">{service.domain_name || service.name}</h1>
+                <div className="flex items-center gap-3 mt-1">
+                  <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", statusColors[service.status])}>
+                    {service.status}
+                  </span>
+                  <span className="text-dark-500">Domain</span>
+                </div>
+              </div>
+            </div>
+            
+            <a
+              href={`https://${service.domain_name || service.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-indigo-500/30 transition-all"
+            >
+              <ExternalLink className="w-5 h-5" />
+              Visit Website
+            </a>
+          </div>
+        </div>
+
+        {/* Expiring Soon Warning */}
+        {isExpiringSoon && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20"
+          >
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-amber-600 dark:text-amber-400 font-medium">
+                  Domain expires in {daysUntilExpiry} days
+                </p>
+                <p className="text-amber-600/70 dark:text-amber-400/70 text-sm">
+                  Renew now to avoid losing your domain
+                </p>
+              </div>
+              <button className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                Renew Now
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Domain Details Card */}
+            <div className="card overflow-hidden">
+              <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Globe className="w-5 h-5" />
+                  Domain Details
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Domain Name */}
+                  <div className="p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-dark-500 uppercase tracking-wider">Domain Name</span>
+                      <button
+                        onClick={() => copyToClipboard(service.domain_name || service.name, 'domain')}
+                        className="p-1 hover:bg-dark-200 dark:hover:bg-dark-600 rounded transition-colors"
+                      >
+                        {copied === 'domain' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-dark-400" />}
+                      </button>
+                    </div>
+                    <p className="font-medium truncate">{service.domain_name || service.name}</p>
+                  </div>
+                  
+                  {/* Registration Date */}
+                  <div className="p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                    <span className="text-xs text-dark-500 uppercase tracking-wider block mb-1">Registration Date</span>
+                    <p className="font-medium">
+                      {service.registration_date ? new Date(service.registration_date).toLocaleDateString('en-US', {
+                        month: 'long', day: 'numeric', year: 'numeric'
+                      }) : service.created_at ? new Date(service.created_at).toLocaleDateString('en-US', {
+                        month: 'long', day: 'numeric', year: 'numeric'
+                      }) : 'N/A'}
+                    </p>
+                  </div>
+                  
+                  {/* Expiry Date */}
+                  <div className="p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                    <span className="text-xs text-dark-500 uppercase tracking-wider block mb-1">Expiry Date</span>
+                    <p className={clsx(
+                      "font-medium",
+                      isExpired ? "text-red-500" : isExpiringSoon ? "text-amber-500" : ""
+                    )}>
+                      {service.expires_at ? new Date(service.expires_at).toLocaleDateString('en-US', {
+                        month: 'long', day: 'numeric', year: 'numeric'
+                      }) : 'N/A'}
+                    </p>
+                    {daysUntilExpiry !== null && (
+                      <p className={clsx(
+                        "text-xs mt-1",
+                        isExpired ? "text-red-500" : isExpiringSoon ? "text-amber-500" : "text-dark-500"
+                      )}>
+                        {isExpired ? 'Expired' : `${daysUntilExpiry} days remaining`}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* Auto Renew */}
+                  <div className="p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                    <span className="text-xs text-dark-500 uppercase tracking-wider block mb-1">Auto Renewal</span>
+                    <p className={clsx(
+                      "font-medium",
+                      service.auto_renew ? "text-emerald-500" : "text-dark-500"
+                    )}>
+                      {service.auto_renew ? 'Enabled' : 'Disabled'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Domain Protection */}
+            <div className="card overflow-hidden">
+              <div className="px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <Shield className="w-5 h-5" />
+                  Domain Protection
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="p-4 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-emerald-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">WHOIS Privacy</p>
+                        <p className="text-xs text-emerald-500">Enabled</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-dark-500">Your personal information is hidden from public WHOIS lookups</p>
+                  </motion.div>
+                  
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="p-4 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-xl"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <Lock className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Transfer Lock</p>
+                        <p className="text-xs text-blue-500">Locked</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-dark-500">Domain is protected from unauthorized transfers</p>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+
+            {/* Domain Actions */}
+            <div className="card p-6">
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary-500" />
+                Domain Management
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                <button className="p-4 bg-dark-50 dark:bg-dark-700 hover:bg-dark-100 dark:hover:bg-dark-600 rounded-xl transition-colors text-left group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                        <Server className="w-5 h-5 text-indigo-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">DNS Records</p>
+                        <p className="text-xs text-dark-500">Manage A, CNAME, MX records</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
+                  </div>
+                </button>
+                <button className="p-4 bg-dark-50 dark:bg-dark-700 hover:bg-dark-100 dark:hover:bg-dark-600 rounded-xl transition-colors text-left group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-purple-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Nameservers</p>
+                        <p className="text-xs text-dark-500">Update nameserver settings</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
+                  </div>
+                </button>
+                <button className="p-4 bg-dark-50 dark:bg-dark-700 hover:bg-dark-100 dark:hover:bg-dark-600 rounded-xl transition-colors text-left group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <Mail className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Email Forwarding</p>
+                        <p className="text-xs text-dark-500">Setup email redirects</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
+                  </div>
+                </button>
+                <button className="p-4 bg-dark-50 dark:bg-dark-700 hover:bg-dark-100 dark:hover:bg-dark-600 rounded-xl transition-colors text-left group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                        <ExternalLink className="w-5 h-5 text-amber-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">URL Forwarding</p>
+                        <p className="text-xs text-dark-500">Redirect to another URL</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Domain Info */}
+            <div className="card overflow-hidden">
+              <div className="px-5 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                <h3 className="font-bold flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Domain Information
+                </h3>
+              </div>
+              <div className="p-5">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-3 border-b border-dark-100 dark:border-dark-700">
+                    <span className="text-dark-500">Type</span>
+                    <span className="font-medium">Domain Registration</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-dark-100 dark:border-dark-700">
+                    <span className="text-dark-500">Status</span>
+                    <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", statusColors[service.status])}>
+                      {service.status}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-dark-100 dark:border-dark-700">
+                    <span className="text-dark-500">Billing Cycle</span>
+                    <span className="font-medium capitalize">{service.billing_cycle || 'Yearly'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-dark-100 dark:border-dark-700">
+                    <span className="text-dark-500 flex items-center gap-1">
+                      <Calendar className="w-4 h-4" /> Registered
+                    </span>
+                    <span className="font-medium">
+                      {service.registration_date ? new Date(service.registration_date).toLocaleDateString() : 
+                       service.created_at ? new Date(service.created_at).toLocaleDateString() : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-dark-500 flex items-center gap-1">
+                      <Clock className="w-4 h-4" /> Expires
+                    </span>
+                    <span className="font-medium">
+                      {service.expires_at ? new Date(service.expires_at).toLocaleDateString() : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Renewal */}
+            <div className="card overflow-hidden">
+              <div className="px-5 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white">
+                <h3 className="font-bold flex items-center gap-2">
+                  <RefreshCw className="w-5 h-5" />
+                  Renewal
+                </h3>
+              </div>
+              <div className="p-5">
+                <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 border border-emerald-500/20 rounded-xl mb-4">
+                  <p className="text-xs text-dark-500 uppercase tracking-wider mb-1">Renewal Price</p>
+                  <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                    {formatCurrency(service.amount || 12.99)}
+                    <span className="text-sm font-normal text-dark-500">/year</span>
+                  </p>
+                </div>
+                <button className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl transition-all font-medium shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40">
+                  <RefreshCw className="w-4 h-4" />
+                  Renew Domain
+                </button>
+              </div>
+            </div>
+
+            {/* Need Help */}
+            <div className="card p-6 bg-gradient-to-br from-primary-500/10 to-indigo-500/10 border-primary-500/20">
+              <h3 className="font-bold mb-2">Need Help?</h3>
+              <p className="text-sm text-dark-500 mb-4">Our support team is available 24/7 to assist you.</p>
+              <Link 
+                to="/dashboard/tickets"
+                className="block w-full text-center py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-xl transition-colors font-medium"
+              >
+                Open Support Ticket
+              </Link>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  // Hosting/Server Management View (existing code)
   return (
     <>
       <Helmet>
