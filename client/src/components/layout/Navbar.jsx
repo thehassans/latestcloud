@@ -6,15 +6,15 @@ import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSet
 import LanguageSwitcher from '../LanguageSwitcher'
 import clsx from 'clsx'
 
-const navItems = [
+const getNavItems = (t) => [
   {
-    label: 'Hosting',
+    label: t('nav.hosting'),
     children: [
       { to: '/hosting', label: 'VPS Hosting', desc: 'High-performance virtual private servers', icon: Server },
     ]
   },
   {
-    label: 'Servers',
+    label: t('nav.servers'),
     children: [
       { to: '/vps', label: 'VPS Server', desc: 'Scalable virtual private servers', icon: Server },
       { to: '/bd-server', label: 'BD Server', desc: 'Premium Bangladesh datacenter servers', icon: Globe2 },
@@ -23,16 +23,14 @@ const navItems = [
     ]
   },
   {
-    label: 'Security & Tools',
+    label: t('nav.securityTools') || 'Security & Tools',
     megaMenu: true,
     children: [
-      // Left column
       { to: '/ssl', label: 'SSL Certificates', desc: 'Secure your site with SSL', icon: Lock },
       { to: '/backup', label: 'Website Backup', desc: 'Daily automated backups', icon: Archive },
       { to: '/magnetic-shieldx', label: 'Magnetic ShieldX', desc: 'Auto-fix security extension', icon: ShieldCheck, badge: 'Pro' },
       { to: '/web-development', label: 'Web Development', desc: 'Custom website development', icon: Code },
       { to: '/magnetic-builder', label: 'Magnetic Builder', desc: '24-hour site builder', icon: Hammer },
-      // Right column
       { to: '/email', label: 'Professional Email', desc: 'Business email solutions', icon: Mail },
       { to: '/nobot', label: 'NoBot AI', desc: 'Human-like AI chatbot assistant', icon: Bot, badge: 'New' },
       { to: '/seo-tools', label: 'SEO Tools', desc: 'Rank higher on search engines', icon: BarChart3, badge: 'New' },
@@ -40,16 +38,16 @@ const navItems = [
     ]
   },
   {
-    label: 'Domains',
+    label: t('nav.domains'),
     children: [
       { to: '/domains', label: 'Domain Registration', desc: 'Register your perfect domain name', icon: Globe },
       { to: '/domain-transfer', label: 'Domain Transfer', desc: 'Transfer domains to us easily', icon: Globe },
     ]
   },
   {
-    label: 'Company',
+    label: t('nav.company') || 'Company',
     children: [
-      { to: '/about', label: 'About Us', desc: 'Learn about our mission', icon: Building2 },
+      { to: '/about', label: t('nav.about'), desc: 'Learn about our mission', icon: Building2 },
       { to: '/affiliate', label: 'Affiliate Program', desc: 'Earn with our affiliate program', icon: Users },
       { to: '/coupons', label: 'Coupons & Deals', desc: 'Get exclusive discounts', icon: Gift },
     ]
@@ -67,6 +65,8 @@ export default function Navbar() {
   const { currency, setCurrency } = useCurrencyStore()
   const { siteName, logo } = useSiteSettingsStore()
   const navigate = useNavigate()
+  
+  const navItems = getNavItems(t)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
