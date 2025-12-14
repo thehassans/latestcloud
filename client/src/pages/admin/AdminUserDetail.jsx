@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import { 
   User, ArrowLeft, Mail, Phone, Building2, Calendar, MapPin,
-  ShoppingCart, Server, Ticket, FileText, CreditCard, LogIn,
-  Shield, Clock, DollarSign, Package, CheckCircle, AlertCircle,
-  Loader2, ExternalLink, Globe, Activity, Edit3, Ban, Unlock,
-  Settings, X, Save, UserCog
+  ShoppingCart, Server, Ticket, FileText, LogIn,
+  Clock, DollarSign, Package, Loader2, Activity, Edit3, UserCog
 } from 'lucide-react'
 import { adminAPI } from '../../lib/api'
 import { useAuthStore } from '../../store/useStore'
@@ -51,61 +49,15 @@ const getServiceType = (service) => {
 export default function AdminUserDetail() {
   const { uuid } = useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const { login } = useAuthStore()
   const [activeTab, setActiveTab] = useState('overview')
   const [loggingIn, setLoggingIn] = useState(false)
-  const [showManageModal, setShowManageModal] = useState(false)
-  const [editForm, setEditForm] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    company: '',
-    address: '',
-    status: 'active',
-    role: 'user'
-  })
 
-  const { data: userDetails, isLoading, refetch } = useQuery({
+  const { data: userDetails, isLoading } = useQuery({
     queryKey: ['admin-user', uuid],
     queryFn: () => adminAPI.getUser(uuid).then(res => res.data),
     enabled: !!uuid
   })
-
-  // Update user mutation
-  const updateUserMutation = useMutation({
-    mutationFn: (data) => adminAPI.updateUser(uuid, data),
-    onSuccess: () => {
-      toast.success('User updated successfully')
-      queryClient.invalidateQueries(['admin-user', uuid])
-      setShowManageModal(false)
-    },
-    onError: (err) => {
-      toast.error(err.response?.data?.error || 'Failed to update user')
-    }
-  })
-
-  // Initialize form when modal opens
-  useEffect(() => {
-    if (showManageModal && userDetails?.user) {
-      const u = userDetails.user
-      setEditForm({
-        first_name: u.first_name || '',
-        last_name: u.last_name || '',
-        email: u.email || '',
-        phone: u.phone || '',
-        company: u.company || '',
-        address: u.address || '',
-        status: u.status || 'active',
-        role: u.role || 'user'
-      })
-    }
-  }, [showManageModal, userDetails])
-
-  const handleSaveUser = () => {
-    updateUserMutation.mutate(editForm)
-  }
 
   const handleLoginAsUser = async () => {
     if (!userDetails?.user) return
@@ -205,13 +157,13 @@ export default function AdminUserDetail() {
             </div>
             
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowManageModal(true)}
+              <Link
+                to={`/admin/users/${uuid}/manage`}
                 className="flex items-center gap-2 px-5 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl font-medium transition-all"
               >
                 <UserCog className="w-4 h-4" />
                 Manage User
-              </button>
+              </Link>
               <button
                 onClick={handleLoginAsUser}
                 disabled={loggingIn}
@@ -548,201 +500,6 @@ export default function AdminUserDetail() {
           )}
         </div>
       )}
-
-      {/* Manage User Modal */}
-      <AnimatePresence>
-        {showManageModal && (
-          <div className="fixed inset-0 bg-dark-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-dark-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden"
-            >
-              {/* Modal Header */}
-              <div className="px-6 py-4 border-b border-dark-200 dark:border-dark-700 flex items-center justify-between bg-gradient-to-r from-primary-500 to-purple-600 text-white">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                    <UserCog className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold">Manage User</h2>
-                    <p className="text-sm text-white/70">{user.email}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowManageModal(false)}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <div className="p-6 max-h-[70vh] overflow-y-auto">
-                <div className="grid md:grid-cols-2 gap-4">
-                  {/* First Name */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">First Name</label>
-                    <input
-                      type="text"
-                      value={editForm.first_name}
-                      onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                      className="input w-full"
-                    />
-                  </div>
-
-                  {/* Last Name */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Last Name</label>
-                    <input
-                      type="text"
-                      value={editForm.last_name}
-                      onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                      className="input w-full"
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-2">Email</label>
-                    <input
-                      type="email"
-                      value={editForm.email}
-                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                      className="input w-full"
-                    />
-                  </div>
-
-                  {/* Phone */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Phone</label>
-                    <input
-                      type="tel"
-                      value={editForm.phone}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      className="input w-full"
-                      placeholder="Not provided"
-                    />
-                  </div>
-
-                  {/* Company */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Company</label>
-                    <input
-                      type="text"
-                      value={editForm.company}
-                      onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
-                      className="input w-full"
-                      placeholder="Not provided"
-                    />
-                  </div>
-
-                  {/* Address */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-2">Address</label>
-                    <input
-                      type="text"
-                      value={editForm.address}
-                      onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                      className="input w-full"
-                      placeholder="Not provided"
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Account Status</label>
-                    <select
-                      value={editForm.status}
-                      onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                      className="input w-full"
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="suspended">Suspended</option>
-                      <option value="pending">Pending</option>
-                    </select>
-                  </div>
-
-                  {/* Role */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Role</label>
-                    <select
-                      value={editForm.role}
-                      onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                      className="input w-full"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="mt-6 pt-6 border-t border-dark-200 dark:border-dark-700">
-                  <h3 className="text-sm font-medium mb-3">Quick Actions</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setEditForm({ ...editForm, status: 'active' })}
-                      className={clsx(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2",
-                        editForm.status === 'active' 
-                          ? "bg-emerald-500 text-white" 
-                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 hover:bg-emerald-200"
-                      )}
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                      Activate
-                    </button>
-                    <button
-                      onClick={() => setEditForm({ ...editForm, status: 'suspended' })}
-                      className={clsx(
-                        "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2",
-                        editForm.status === 'suspended' 
-                          ? "bg-red-500 text-white" 
-                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200"
-                      )}
-                    >
-                      <Ban className="w-4 h-4" />
-                      Suspend
-                    </button>
-                    <button
-                      onClick={() => setEditForm({ ...editForm, role: editForm.role === 'admin' ? 'user' : 'admin' })}
-                      className="px-4 py-2 rounded-lg text-sm font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 hover:bg-purple-200 transition-colors flex items-center gap-2"
-                    >
-                      <Shield className="w-4 h-4" />
-                      {editForm.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="px-6 py-4 border-t border-dark-200 dark:border-dark-700 flex items-center justify-end gap-3 bg-dark-50 dark:bg-dark-900">
-                <button
-                  onClick={() => setShowManageModal(false)}
-                  className="px-5 py-2.5 text-dark-600 dark:text-dark-400 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-xl font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveUser}
-                  disabled={updateUserMutation.isPending}
-                  className="px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
-                >
-                  {updateUserMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Save className="w-4 h-4" />
-                  )}
-                  Save Changes
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </>
   )
 }

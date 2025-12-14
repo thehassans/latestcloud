@@ -158,6 +158,7 @@ export const adminAPI = {
   getUser: (uuid) => api.get(`/admin/users/${uuid}`),
   updateUser: (uuid, data) => api.put(`/admin/users/${uuid}`, data),
   loginAsUser: (uuid) => api.post(`/admin/users/${uuid}/login-as`),
+  getUserResources: (uuid) => api.get(`/admin/users/${uuid}/resources`),
   
   // Invoices
   getInvoices: (params) => api.get('/admin/invoices', { params }),

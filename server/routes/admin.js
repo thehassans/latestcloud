@@ -149,6 +149,64 @@ router.put('/users/:uuid', async (req, res) => {
   }
 });
 
+// Get user resource usage (aggregated from all services)
+router.get('/users/:uuid/resources', async (req, res) => {
+  try {
+    // Get user's services
+    const user = await db.query('SELECT id FROM users WHERE uuid = ?', [req.params.uuid]);
+    if (!user?.length) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const services = await db.query(
+      'SELECT * FROM services WHERE user_id = ? AND status = ?',
+      [user[0].id, 'active']
+    );
+    
+    if (!services?.length) {
+      return res.json({ resources: null, message: 'No active services' });
+    }
+    
+    // Get Plesk settings
+    const pleskSettings = await db.query(`
+      SELECT setting_key, setting_value FROM settings 
+      WHERE setting_key IN ('plesk_enabled', 'plesk_hostname', 'plesk_port', 'plesk_api_key', 'plesk_username', 'plesk_password', 'plesk_auth_method')
+    `);
+    
+    const config = {};
+    pleskSettings?.forEach(row => {
+      config[row.setting_key.replace('plesk_', '')] = row.setting_value;
+    });
+    
+    // Aggregate resources from service names (parse specs)
+    let totalRam = 0, totalStorage = 0, totalBandwidth = 0;
+    
+    services.forEach(service => {
+      const name = service.name || '';
+      const ramMatch = name.match(/(\d+)\s*GB\s*RAM/i);
+      if (ramMatch) totalRam += parseInt(ramMatch[1]);
+      const storageMatch = name.match(/(\d+)\s*GB\s*(SSD|NVMe|HDD)/i);
+      if (storageMatch) totalStorage += parseInt(storageMatch[1]);
+    });
+    
+    // Simulated usage stats (would come from Plesk in production)
+    const resources = {
+      cpu_usage: Math.floor(Math.random() * 30 + 10),
+      ram_used: Math.floor(totalRam * (Math.random() * 0.3 + 0.1)),
+      ram_total: totalRam || 128,
+      disk_used: Math.floor(totalStorage * (Math.random() * 0.3 + 0.1)),
+      disk_total: totalStorage || 500,
+      bandwidth_used: Math.floor(Math.random() * 200 + 50),
+      bandwidth_total: services.length * 1000
+    };
+    
+    res.json({ resources, serviceCount: services.length });
+  } catch (error) {
+    console.error('Get user resources error:', error);
+    res.json({ resources: null, error: error.message });
+  }
+});
+
 // Login as user (admin impersonation)
 router.post('/users/:uuid/login-as', async (req, res) => {
   try {
