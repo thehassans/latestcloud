@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HelmetProvider } from 'react-helmet-async'
 import { Toaster } from 'react-hot-toast'
 import App from './App'
-import './i18n'
+import './lib/i18n'
 import './index.css'
 
 const queryClient = new QueryClient({

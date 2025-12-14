@@ -3,7 +3,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ChevronDown, Moon, Sun, ShoppingCart, Globe, User, Server, Cloud, Database, HardDrive, Shield, Lock, Mail, Archive, Search, Bug, Zap, Wrench, Building2, Users, Gift, Globe2, Bot, Code, Hammer, ShieldCheck, BarChart3 } from 'lucide-react'
 import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSettingsStore, useLanguageStore } from '../../store/useStore'
-import LanguageSwitcher from '../LanguageSwitcher'
+import LanguageSelector from '../LanguageSelector'
 import clsx from 'clsx'
 
 const getNavItems = (t) => [
@@ -199,7 +199,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {/* Language selector */}
             <div className="hidden md:block">
-              <LanguageSwitcher variant="compact" />
+              <LanguageSelector variant="minimal" />
             </div>
 
             {/* Theme toggle */}

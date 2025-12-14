@@ -647,8 +647,17 @@ export const useLanguageStore = create(
         // Update document direction for RTL languages
         document.documentElement.dir = LANGUAGES[lang]?.dir || 'ltr'
         document.documentElement.lang = lang
+        // Also update i18next if available
+        if (window.i18next) {
+          window.i18next.changeLanguage(lang)
+        }
       },
       t: (key) => {
+        // Try i18next first, then fall back to local translations
+        if (window.i18next && window.i18next.t) {
+          const translated = window.i18next.t(key)
+          if (translated !== key) return translated
+        }
         const state = get()
         return translations[state.language]?.[key] || translations.en[key] || key
       },
