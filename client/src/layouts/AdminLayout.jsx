@@ -331,15 +331,10 @@ export default function AdminLayout() {
 
         {/* Bottom actions */}
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-dark-700">
-          {/* Ultra Premium Collapse Toggle */}
+          {/* Collapse Toggle - Arrow only, centered */}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className={clsx(
-              "hidden lg:flex w-full items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all duration-300 group",
-              "bg-gradient-to-r from-primary-500/10 via-purple-500/10 to-pink-500/10",
-              "hover:from-primary-500/20 hover:via-purple-500/20 hover:to-pink-500/20",
-              "border border-primary-500/20 hover:border-primary-500/40"
-            )}
+            className="hidden lg:flex w-full items-center justify-center p-2 rounded-xl transition-all duration-300 bg-dark-800 hover:bg-dark-700"
           >
             <div className={clsx(
               "w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center shadow-lg shadow-primary-500/30 transition-transform duration-300",
@@ -347,11 +342,6 @@ export default function AdminLayout() {
             )}>
               <ChevronRight className="w-4 h-4 text-white" />
             </div>
-            {!sidebarCollapsed && (
-              <span className="text-sm font-medium bg-gradient-to-r from-primary-400 to-purple-400 bg-clip-text text-transparent">
-                Collapse Menu
-              </span>
-            )}
           </button>
           
           {/* Logout Button */}

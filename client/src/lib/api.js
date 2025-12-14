@@ -80,7 +80,12 @@ export const userAPI = {
   getTransactions: (params) => api.get('/users/transactions', { params }),
   // Plesk integration
   getPleskStatus: () => api.get('/users/plesk/status'),
-  getPleskLoginUrl: (serviceUuid) => api.post(`/users/services/${serviceUuid}/plesk-login`)
+  getPleskLoginUrl: (serviceUuid) => api.post(`/users/services/${serviceUuid}/plesk-login`),
+  // Notifications
+  getNotifications: (params) => api.get('/users/notifications', { params }),
+  getNotificationCount: () => api.get('/users/notifications/count'),
+  markNotificationRead: (uuid) => api.put(`/users/notifications/${uuid}/read`),
+  markAllNotificationsRead: () => api.put('/users/notifications/read-all')
 }
 
 // Tickets API

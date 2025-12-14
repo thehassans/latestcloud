@@ -301,4 +301,77 @@ router.post('/services/:uuid/plesk-login', authenticate, async (req, res) => {
   }
 });
 
+// ==================== USER NOTIFICATIONS ====================
+
+// Get user notifications
+router.get('/notifications', authenticate, async (req, res) => {
+  try {
+    const { limit = 50, unread_only = false } = req.query;
+    
+    let query = `
+      SELECT * FROM user_notifications 
+      WHERE user_id = ?
+    `;
+    
+    if (unread_only === 'true') {
+      query += ' AND is_read = 0';
+    }
+    
+    query += ' ORDER BY created_at DESC LIMIT ?';
+    
+    const notifications = await db.query(query, [req.user.id, parseInt(limit)]);
+    
+    // Get unread count
+    const countResult = await db.query(
+      'SELECT COUNT(*) as count FROM user_notifications WHERE user_id = ? AND is_read = 0',
+      [req.user.id]
+    );
+    const unreadCount = countResult?.[0]?.count || 0;
+    
+    res.json({ notifications: notifications || [], unreadCount });
+  } catch (error) {
+    console.error('Get user notifications error:', error);
+    res.json({ notifications: [], unreadCount: 0 });
+  }
+});
+
+// Get unread count only
+router.get('/notifications/count', authenticate, async (req, res) => {
+  try {
+    const result = await db.query(
+      'SELECT COUNT(*) as count FROM user_notifications WHERE user_id = ? AND is_read = 0',
+      [req.user.id]
+    );
+    res.json({ count: result?.[0]?.count || 0 });
+  } catch (error) {
+    res.json({ count: 0 });
+  }
+});
+
+// Mark notification as read
+router.put('/notifications/:uuid/read', authenticate, async (req, res) => {
+  try {
+    await db.query(
+      'UPDATE user_notifications SET is_read = 1 WHERE uuid = ? AND user_id = ?',
+      [req.params.uuid, req.user.id]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to mark as read' });
+  }
+});
+
+// Mark all notifications as read
+router.put('/notifications/read-all', authenticate, async (req, res) => {
+  try {
+    await db.query(
+      'UPDATE user_notifications SET is_read = 1 WHERE user_id = ?',
+      [req.user.id]
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to mark all as read' });
+  }
+});
+
 module.exports = router;
