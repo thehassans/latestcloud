@@ -119,14 +119,24 @@ router.get('/users/:uuid', async (req, res) => {
     const user = users[0];
     delete user.password;
 
-    const [orders, services, tickets, invoices] = await Promise.all([
+    const [orders, services, tickets, invoices, orderStats, serviceStats, ticketStats] = await Promise.all([
       db.query('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', [user.id]),
       db.query('SELECT * FROM services WHERE user_id = ? ORDER BY created_at DESC', [user.id]),
       db.query('SELECT * FROM tickets WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', [user.id]),
-      db.query('SELECT * FROM invoices WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', [user.id])
+      db.query('SELECT * FROM invoices WHERE user_id = ? ORDER BY created_at DESC LIMIT 10', [user.id]),
+      db.query('SELECT COUNT(*) as total, COALESCE(SUM(total), 0) as spent FROM orders WHERE user_id = ?', [user.id]),
+      db.query('SELECT COUNT(*) as total FROM services WHERE user_id = ? AND status = ?', [user.id, 'active']),
+      db.query('SELECT COUNT(*) as total FROM tickets WHERE user_id = ?', [user.id])
     ]);
 
-    res.json({ user, orders, services, tickets, invoices });
+    const stats = {
+      totalOrders: Number(orderStats?.[0]?.total || 0),
+      activeServices: Number(serviceStats?.[0]?.total || 0),
+      supportTickets: Number(ticketStats?.[0]?.total || 0),
+      totalSpent: Number(orderStats?.[0]?.spent || 0)
+    };
+
+    res.json({ user, orders, services, tickets, invoices, stats });
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ error: 'Failed to load user' });
