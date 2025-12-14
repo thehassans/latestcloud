@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
+import { Link } from 'react-router-dom'
 import { 
   FileText, Eye, EyeOff, Save, Search, CheckCircle, Settings, 
   Home, Server, Globe, Shield, Mail, Cloud, Database, Lock, Archive,
   Building2, Users, Gift, MessageSquare, HelpCircle, BookOpen, Briefcase,
   Scale, FileCheck, AlertTriangle, RotateCcw, Bot, Code, Bug, Hammer,
   ShieldCheck, TrendingUp, MapPin, Star, Loader2, ChevronDown, ChevronUp,
-  ExternalLink
+  ExternalLink, Edit3
 } from 'lucide-react'
 import { settingsAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
@@ -331,7 +332,14 @@ export default function AdminPages() {
                         </code>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <Link
+                        to={`/admin/pages/edit/${encodeURIComponent(page.slug)}`}
+                        className="p-2 hover:bg-primary-100 dark:hover:bg-primary-900/30 text-primary-500 rounded-lg transition-colors"
+                        title="Edit Content"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </Link>
                       <span className={clsx(
                         "text-sm font-medium",
                         pageSettings[page.slug] ? "text-emerald-500" : "text-dark-400"

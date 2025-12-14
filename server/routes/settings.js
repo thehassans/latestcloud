@@ -905,6 +905,62 @@ router.post('/server-management/test', authenticate, requireRole('admin'), async
   }
 });
 
+// Get page content (public)
+router.get('/page-content/:slug', async (req, res) => {
+  try {
+    const slug = decodeURIComponent(req.params.slug);
+    const key = `page_content_${slug.replace(/\//g, '_')}`;
+    
+    const result = await db.query(
+      "SELECT setting_value FROM settings WHERE setting_key = ?",
+      [key]
+    );
+    
+    if (result && result.length > 0) {
+      try {
+        const pageData = JSON.parse(result[0].setting_value);
+        res.json({ pageData });
+      } catch (e) {
+        res.json({ pageData: null });
+      }
+    } else {
+      res.json({ pageData: null });
+    }
+  } catch (error) {
+    console.error('Get page content error:', error);
+    res.status(500).json({ error: 'Failed to load page content' });
+  }
+});
+
+// Update page content (admin only)
+router.put('/page-content/:slug', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const slug = decodeURIComponent(req.params.slug);
+    const { pageData } = req.body;
+    const key = `page_content_${slug.replace(/\//g, '_')}`;
+    const value = JSON.stringify(pageData);
+    
+    const existing = await db.query("SELECT id FROM settings WHERE setting_key = ?", [key]);
+    
+    if (existing && existing.length > 0) {
+      await db.query(
+        "UPDATE settings SET setting_value = ?, setting_type = 'json', is_public = TRUE WHERE setting_key = ?",
+        [value, key]
+      );
+    } else {
+      await db.query(
+        "INSERT INTO settings (setting_key, setting_value, setting_type, category, is_public) VALUES (?, ?, 'json', 'pages', TRUE)",
+        [key, value]
+      );
+    }
+    
+    res.json({ message: 'Page content saved successfully' });
+  } catch (error) {
+    console.error('Update page content error:', error);
+    res.status(500).json({ error: 'Failed to save page content' });
+  }
+});
+
 // Get header/footer settings (public)
 router.get('/header-footer', async (req, res) => {
   try {

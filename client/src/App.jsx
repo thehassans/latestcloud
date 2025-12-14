@@ -99,6 +99,7 @@ import AdminUserDetail from './pages/admin/AdminUserDetail'
 import AdminServiceManage from './pages/admin/AdminServiceManage'
 import AdminUserManage from './pages/admin/AdminUserManage'
 import AdminHeaderFooter from './pages/admin/AdminHeaderFooter'
+import AdminPageEditor from './pages/admin/AdminPageEditor'
 import AdminLogin from './pages/admin/AdminLogin'
 import ProposalView from './pages/ProposalView'
 
@@ -277,6 +278,7 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
           <Route path="header-footer" element={<AdminHeaderFooter />} />
           <Route path="pages" element={<AdminPages />} />
+          <Route path="pages/edit/:slug" element={<AdminPageEditor />} />
           <Route path="media" element={<AdminMedia />} />
           <Route path="ai-agent" element={<AdminAIAgent />} />
           <Route path="ai-chats" element={<AdminAgentChats />} />
