@@ -165,7 +165,7 @@ export default function Footer() {
 
           {/* Services */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Services</h4>
+            <h4 className="font-semibold text-lg mb-4">{t('footer.services')}</h4>
             <ul className="space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.to}>
@@ -183,7 +183,7 @@ export default function Footer() {
 
           {/* Tools */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Tools</h4>
+            <h4 className="font-semibold text-lg mb-4">{t('footer.tools')}</h4>
             <ul className="space-y-3">
               {footerLinks.tools.map((link) => (
                 <li key={link.to}>
@@ -201,7 +201,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Company</h4>
+            <h4 className="font-semibold text-lg mb-4">{t('footer.company')}</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.to}>
@@ -219,7 +219,7 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Support</h4>
+            <h4 className="font-semibold text-lg mb-4">{t('footer.support')}</h4>
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.to}>
@@ -237,7 +237,7 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Legal</h4>
+            <h4 className="font-semibold text-lg mb-4">{t('footer.legal')}</h4>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.to}>

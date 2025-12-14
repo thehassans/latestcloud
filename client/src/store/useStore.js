@@ -254,6 +254,8 @@ const translations = {
     'domains.whoisInfo': 'View WHOIS Info',
     // Footer
     'footer.description': 'Premium cloud hosting solutions with 24/7 expert support and industry-leading uptime guarantee.',
+    'footer.services': 'Services',
+    'footer.tools': 'Tools',
     'footer.products': 'Products',
     'footer.company': 'Company',
     'footer.support': 'Support',
@@ -338,6 +340,8 @@ const translations = {
     'domains.whoisInfo': 'Ver Info WHOIS',
     // Footer
     'footer.description': 'Soluciones premium de hosting en la nube con soporte experto 24/7 y garantía de tiempo activo líder en la industria.',
+    'footer.services': 'Servicios',
+    'footer.tools': 'Herramientas',
     'footer.products': 'Productos',
     'footer.company': 'Empresa',
     'footer.support': 'Soporte',
@@ -422,6 +426,8 @@ const translations = {
     'domains.whoisInfo': 'Voir Info WHOIS',
     // Footer
     'footer.description': "Solutions d'hébergement cloud premium avec support expert 24/7 et garantie de disponibilité de premier plan.",
+    'footer.services': 'Services',
+    'footer.tools': 'Outils',
     'footer.products': 'Produits',
     'footer.company': 'Entreprise',
     'footer.support': 'Support',
@@ -506,6 +512,8 @@ const translations = {
     'domains.whoisInfo': 'WHOIS-Info Anzeigen',
     // Footer
     'footer.description': 'Premium Cloud-Hosting-Lösungen mit 24/7 Experten-Support und branchenführender Verfügbarkeitsgarantie.',
+    'footer.services': 'Dienste',
+    'footer.tools': 'Werkzeuge',
     'footer.products': 'Produkte',
     'footer.company': 'Unternehmen',
     'footer.support': 'Support',
@@ -590,6 +598,8 @@ const translations = {
     'domains.whoisInfo': 'عرض معلومات WHOIS',
     // Footer
     'footer.description': 'حلول استضافة سحابية متميزة مع دعم خبراء على مدار الساعة وضمان وقت تشغيل رائد في الصناعة.',
+    'footer.services': 'الخدمات',
+    'footer.tools': 'الأدوات',
     'footer.products': 'المنتجات',
     'footer.company': 'الشركة',
     'footer.support': 'الدعم',
