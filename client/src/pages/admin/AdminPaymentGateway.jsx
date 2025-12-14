@@ -67,12 +67,12 @@ export default function AdminPaymentGateway() {
     rocket_account_type: 'personal',
     rocket_instructions: '',
     // Bank & Cash
-    bank_transfer_enabled: true,
+    bank_transfer_enabled: false,
     bank_name: '',
     bank_account_number: '',
     bank_account_holder: '',
     bank_additional_info: '',
-    cash_payment_enabled: true,
+    cash_payment_enabled: false,
     cash_payment_instructions: '',
   })
 
@@ -84,7 +84,18 @@ export default function AdminPaymentGateway() {
     try {
       const res = await settingsAPI.getPaymentGateway()
       if (res.data.settings) {
-        setSettings(prev => ({ ...prev, ...res.data.settings }))
+        // Ensure boolean values are properly parsed
+        const loadedSettings = { ...res.data.settings }
+        const booleanKeys = [
+          'stripe_enabled', 'paypal_enabled', 'bkash_enabled', 
+          'rocket_enabled', 'bank_transfer_enabled', 'cash_payment_enabled'
+        ]
+        booleanKeys.forEach(key => {
+          if (key in loadedSettings) {
+            loadedSettings[key] = loadedSettings[key] === true || loadedSettings[key] === 'true'
+          }
+        })
+        setSettings(prev => ({ ...prev, ...loadedSettings }))
       }
     } catch (err) {
       console.error('Failed to load payment settings:', err)
@@ -96,7 +107,17 @@ export default function AdminPaymentGateway() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await settingsAPI.updatePaymentGateway(settings)
+      // Ensure boolean values are explicitly boolean type
+      const settingsToSave = { ...settings }
+      const booleanKeys = [
+        'stripe_enabled', 'paypal_enabled', 'bkash_enabled', 
+        'rocket_enabled', 'bank_transfer_enabled', 'cash_payment_enabled'
+      ]
+      booleanKeys.forEach(key => {
+        settingsToSave[key] = Boolean(settingsToSave[key])
+      })
+      
+      await settingsAPI.updatePaymentGateway(settingsToSave)
       toast.success('Payment gateway settings saved!')
     } catch (err) {
       toast.error('Failed to save settings')
