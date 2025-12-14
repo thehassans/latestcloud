@@ -1144,7 +1144,7 @@ export default function AdminProposals() {
                     </span>
                     <span className="flex items-center gap-1">
                       <DollarSign className="w-4 h-4" />
-                      ${proposal.total?.toFixed(2) || '0.00'}
+                      ${Number(proposal.total || 0).toFixed(2)}
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
