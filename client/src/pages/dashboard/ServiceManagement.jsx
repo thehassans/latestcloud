@@ -20,6 +20,49 @@ const formatCurrency = (amount) => {
   return num.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
 }
 
+// Parse specs from service name like "Custom VPS (32 vCPU, 128GB RAM, 2000GB SSD)"
+const parseServiceSpecs = (service) => {
+  const name = service.name || ''
+  const specs = { cpu: null, ram: null, storage: null, bandwidth: null, type: null }
+  
+  // Detect service type
+  const nameLower = name.toLowerCase()
+  if (nameLower.includes('vps')) specs.type = 'VPS'
+  else if (nameLower.includes('dedicated')) specs.type = 'Dedicated Server'
+  else if (nameLower.includes('cloud')) specs.type = 'Cloud Server'
+  else if (nameLower.includes('reseller')) specs.type = 'Reseller Hosting'
+  else if (nameLower.includes('hosting')) specs.type = 'Hosting'
+  else specs.type = service.service_type || 'Hosting'
+  
+  // Parse CPU - look for patterns like "32 vCPU", "8 CPU", "4 Core"
+  const cpuMatch = name.match(/(\d+)\s*(vcpu|cpu|core)/i)
+  if (cpuMatch) specs.cpu = cpuMatch[1]
+  
+  // Parse RAM - look for patterns like "128GB RAM", "4GB RAM", "8 GB RAM"
+  const ramMatch = name.match(/(\d+)\s*GB\s*RAM/i)
+  if (ramMatch) specs.ram = ramMatch[1]
+  
+  // Parse Storage - look for patterns like "2000GB SSD", "500GB NVMe", "100 GB"
+  const storageMatch = name.match(/(\d+)\s*GB\s*(SSD|NVMe|HDD|Storage)?/i)
+  if (storageMatch && !name.toLowerCase().includes(storageMatch[0].toLowerCase() + ' ram')) {
+    // Make sure it's not the RAM value
+    const fullMatch = storageMatch[0]
+    if (!fullMatch.toLowerCase().includes('ram')) {
+      specs.storage = storageMatch[1]
+    }
+  }
+  
+  // Better storage parsing - find storage after RAM or at end
+  const storageBetterMatch = name.match(/,\s*(\d+)\s*GB\s*(SSD|NVMe|HDD)?/i)
+  if (storageBetterMatch) specs.storage = storageBetterMatch[1]
+  
+  // Parse Bandwidth if present
+  const bwMatch = name.match(/(\d+)\s*(TB|GB)\s*(Bandwidth|BW)?/i)
+  if (bwMatch) specs.bandwidth = bwMatch[1] + (bwMatch[2] === 'GB' ? ' GB' : ' TB')
+  
+  return specs
+}
+
 const statusColors = {
   active: 'bg-green-500/20 text-green-400 border border-green-500/30',
   pending: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
@@ -42,6 +85,9 @@ export default function ServiceManagement() {
     queryKey: ['plesk-config'],
     queryFn: () => userAPI.getPleskStatus().then(res => res.data).catch(() => ({ enabled: false }))
   })
+
+  // Parse specs from service name
+  const specs = service ? parseServiceSpecs(service) : {}
 
   const copyToClipboard = (text, field) => {
     navigator.clipboard.writeText(text)
@@ -112,12 +158,12 @@ export default function ServiceManagement() {
                 <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", statusColors[service.status])}>
                   {service.status}
                 </span>
-                <span className="text-dark-500 capitalize">{service.service_type || 'Hosting'}</span>
+                <span className="text-dark-500 capitalize">{specs.type || service.service_type || 'Hosting'}</span>
               </div>
             </div>
           </div>
           
-          {pleskConfig?.enabled && service.status === 'active' && (
+          {service.status === 'active' && (
             <button
               onClick={handlePleskLogin}
               disabled={pleskLoading}
@@ -128,7 +174,7 @@ export default function ServiceManagement() {
               ) : (
                 <>
                   <ExternalLink className="w-5 h-5" />
-                  Login to Plesk
+                  Login to Panel
                 </>
               )}
             </button>
@@ -236,8 +282,8 @@ export default function ServiceManagement() {
                   className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl text-center"
                 >
                   <Cpu className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                  <p className="text-2xl font-bold">{service.cpu_cores || '1'}</p>
-                  <p className="text-xs text-dark-500">CPU Cores</p>
+                  <p className="text-2xl font-bold">{specs.cpu || service.cpu_cores || '1'}</p>
+                  <p className="text-xs text-dark-500">vCPU</p>
                 </motion.div>
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
@@ -246,7 +292,7 @@ export default function ServiceManagement() {
                   className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl text-center"
                 >
                   <MemoryStick className="w-8 h-8 mx-auto mb-2 text-purple-500" />
-                  <p className="text-2xl font-bold">{service.ram || '1'} GB</p>
+                  <p className="text-2xl font-bold">{specs.ram || service.ram || '1'} GB</p>
                   <p className="text-xs text-dark-500">RAM</p>
                 </motion.div>
                 <motion.div 
@@ -256,7 +302,7 @@ export default function ServiceManagement() {
                   className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 border border-emerald-500/20 rounded-xl text-center"
                 >
                   <Storage className="w-8 h-8 mx-auto mb-2 text-emerald-500" />
-                  <p className="text-2xl font-bold">{service.storage || '20'} GB</p>
+                  <p className="text-2xl font-bold">{specs.storage || service.storage || '20'} GB</p>
                   <p className="text-xs text-dark-500">Storage</p>
                 </motion.div>
                 <motion.div 
@@ -265,8 +311,8 @@ export default function ServiceManagement() {
                   transition={{ delay: 0.4 }}
                   className="p-4 bg-gradient-to-br from-rose-500/10 to-red-500/10 border border-rose-500/20 rounded-xl text-center"
                 >
-                  <Globe className="w-8 h-8 mx-auto mb-2 text-rose-500" />
-                  <p className="text-2xl font-bold">{service.bandwidth || '1'} TB</p>
+                  <Wifi className="w-8 h-8 mx-auto mb-2 text-rose-500" />
+                  <p className="text-2xl font-bold">{specs.bandwidth || service.bandwidth || '1 TB'}</p>
                   <p className="text-xs text-dark-500">Bandwidth</p>
                 </motion.div>
               </div>
@@ -345,7 +391,7 @@ export default function ServiceManagement() {
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-3 border-b border-dark-100 dark:border-dark-700">
                 <span className="text-dark-500">Service Type</span>
-                <span className="font-medium capitalize">{service.service_type || 'Hosting'}</span>
+                <span className="font-medium capitalize">{specs.type || service.service_type || 'Hosting'}</span>
               </div>
               <div className="flex justify-between items-center pb-3 border-b border-dark-100 dark:border-dark-700">
                 <span className="text-dark-500">Status</span>
