@@ -76,7 +76,6 @@ import NoBotSetup from './pages/dashboard/NoBotSetup'
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminUsers from './pages/admin/AdminUsers'
-import AdminProducts from './pages/admin/AdminProducts'
 import AdminOrders from './pages/admin/AdminOrders'
 import AdminTickets from './pages/admin/AdminTickets'
 import AdminDomains from './pages/admin/AdminDomains'
@@ -261,7 +260,6 @@ function App() {
         }>
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
-          <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="tickets" element={<AdminTickets />} />
           <Route path="domains" element={<AdminDomains />} />

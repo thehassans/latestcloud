@@ -1,37 +1,63 @@
 import { useState, useEffect, useRef } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { 
   LayoutDashboard, Users, Package, ShoppingCart, Ticket, 
   Globe, Settings, FileText, Image, LogOut, Menu, X,
-  Moon, Sun, Bell, ChevronDown, Bot, MessageSquare, DollarSign, CreditCard, Sliders, Mail, Send, Receipt,
+  Moon, Sun, Bell, ChevronDown, ChevronRight, Bot, MessageSquare, DollarSign, CreditCard, Sliders, Mail, Send, Receipt,
   Check, CheckCheck, ShoppingBag, CreditCard as PaymentIcon, AlertCircle, User, Server
 } from 'lucide-react'
 import { useAuthStore, useThemeStore } from '../store/useStore'
 import { settingsAPI, adminAPI } from '../lib/api'
 import clsx from 'clsx'
 
-const sidebarLinks = [
+// Simple links (no submenu)
+const simpleLinks = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-  { to: '/admin/users', icon: Users, label: 'Users' },
-  { to: '/admin/products', icon: Package, label: 'Products' },
-  { to: '/admin/pricing', icon: DollarSign, label: 'Pricing' },
-  { to: '/admin/payment-gateway', icon: CreditCard, label: 'Payment Gateway' },
-  { to: '/admin/customize-plans', icon: Sliders, label: 'Customize Plans' },
-  { to: '/admin/proposals', icon: Send, label: 'Proposals' },
-  { to: '/admin/invoices', icon: Receipt, label: 'Invoices' },
-  { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
+]
+
+// Collapsible menu groups
+const menuGroups = [
+  {
+    id: 'users',
+    label: 'Users',
+    icon: Users,
+    children: [
+      { to: '/admin/users', icon: Users, label: 'All Users' },
+      { to: '/admin/proposals', icon: Send, label: 'Proposals' },
+      { to: '/admin/invoices', icon: Receipt, label: 'Invoices' },
+      { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
+    ]
+  },
+  {
+    id: 'pricing',
+    label: 'Pricing',
+    icon: DollarSign,
+    children: [
+      { to: '/admin/payment-gateway', icon: CreditCard, label: 'Payment Gateways' },
+      { to: '/admin/customize-plans', icon: Sliders, label: 'Customize Plans' },
+      { to: '/admin/domains', icon: Globe, label: 'Domain TLDs' },
+    ]
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: Settings,
+    children: [
+      { to: '/admin/email-settings', icon: Mail, label: 'Email Settings' },
+      { to: '/admin/email-logs', icon: Mail, label: 'Email Logs' },
+      { to: '/admin/nobot-services', icon: Bot, label: 'NoBot Services' },
+      { to: '/admin/ai-agent', icon: Bot, label: 'AI Agents' },
+    ]
+  }
+]
+
+// Bottom links (after groups)
+const bottomLinks = [
   { to: '/admin/tickets', icon: Ticket, label: 'Tickets' },
-  { to: '/admin/domains', icon: Globe, label: 'Domain TLDs' },
   { to: '/admin/pages', icon: FileText, label: 'Pages' },
-  { to: '/admin/media', icon: Image, label: 'Media Library' },
-  { to: '/admin/ai-agent', icon: Bot, label: 'AI Agent' },
   { to: '/admin/ai-chats', icon: MessageSquare, label: 'Chat History' },
-  { to: '/admin/nobot-services', icon: Bot, label: 'NoBot Services' },
-  { to: '/admin/email-settings', icon: Mail, label: 'Email Settings' },
-  { to: '/admin/email-logs', icon: Mail, label: 'Email Logs' },
-  { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
 
 const NOTIFICATION_ICONS = {
@@ -55,11 +81,27 @@ const NOTIFICATION_COLORS = {
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [expandedMenus, setExpandedMenus] = useState(['users', 'pricing', 'settings'])
   const notificationRef = useRef(null)
   const { user, logout } = useAuthStore()
   const { theme, toggleTheme } = useThemeStore()
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
+
+  // Toggle menu expansion
+  const toggleMenu = (menuId) => {
+    setExpandedMenus(prev => 
+      prev.includes(menuId) 
+        ? prev.filter(id => id !== menuId)
+        : [...prev, menuId]
+    )
+  }
+
+  // Check if a menu group has an active child
+  const isMenuActive = (group) => {
+    return group.children.some(child => location.pathname === child.to || location.pathname.startsWith(child.to + '/'))
+  }
   
   const { data: settingsData } = useQuery({
     queryKey: ['publicSettings'],
@@ -161,11 +203,95 @@ export default function AdminLayout() {
 
         {/* Navigation */}
         <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-140px)]">
-          {sidebarLinks.map((link) => (
+          {/* Simple Links */}
+          {simpleLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               end={link.exact}
+              onClick={() => setSidebarOpen(false)}
+              className={({ isActive }) => clsx(
+                "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
+                isActive 
+                  ? "bg-primary-500 text-white shadow-lg" 
+                  : "text-dark-300 hover:bg-dark-800 hover:text-white"
+              )}
+            >
+              <link.icon className="w-5 h-5" />
+              <span>{link.label}</span>
+            </NavLink>
+          ))}
+
+          {/* Collapsible Menu Groups */}
+          {menuGroups.map((group) => {
+            const isExpanded = expandedMenus.includes(group.id)
+            const hasActiveChild = isMenuActive(group)
+            
+            return (
+              <div key={group.id} className="mt-2">
+                {/* Group Header */}
+                <button
+                  onClick={() => toggleMenu(group.id)}
+                  className={clsx(
+                    "w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all duration-200",
+                    hasActiveChild
+                      ? "bg-primary-500/20 text-primary-400"
+                      : "text-dark-300 hover:bg-dark-800 hover:text-white"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <group.icon className="w-5 h-5" />
+                    <span>{group.label}</span>
+                  </div>
+                  <ChevronDown className={clsx(
+                    "w-4 h-4 transition-transform duration-200",
+                    isExpanded && "rotate-180"
+                  )} />
+                </button>
+
+                {/* Submenu */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pl-4 mt-1 space-y-1">
+                        {group.children.map((child) => (
+                          <NavLink
+                            key={child.to}
+                            to={child.to}
+                            onClick={() => setSidebarOpen(false)}
+                            className={({ isActive }) => clsx(
+                              "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                              isActive 
+                                ? "bg-primary-500 text-white shadow-lg" 
+                                : "text-dark-400 hover:bg-dark-800 hover:text-white"
+                            )}
+                          >
+                            <child.icon className="w-4 h-4" />
+                            <span>{child.label}</span>
+                          </NavLink>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )
+          })}
+
+          {/* Divider */}
+          <div className="my-4 border-t border-dark-700" />
+
+          {/* Bottom Links */}
+          {bottomLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => clsx(
                 "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
