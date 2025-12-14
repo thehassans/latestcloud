@@ -72,6 +72,7 @@ import NewTicket from './pages/dashboard/NewTicket'
 import Profile from './pages/dashboard/Profile'
 import Orders from './pages/dashboard/Orders'
 import NoBotSetup from './pages/dashboard/NoBotSetup'
+import ServiceManagement from './pages/dashboard/ServiceManagement'
 
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -242,6 +243,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="services" element={<Services />} />
           <Route path="services/:uuid" element={<ServiceDetail />} />
+          <Route path="services/:uuid/manage" element={<ServiceManagement />} />
           <Route path="domains" element={<MyDomains />} />
           <Route path="invoices" element={<Invoices />} />
           <Route path="orders" element={<Orders />} />
