@@ -82,8 +82,9 @@ const NOTIFICATION_COLORS = {
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [expandedMenus, setExpandedMenus] = useState(['users', 'pricing', 'settings'])
+  const [expandedMenus, setExpandedMenus] = useState([])
   const notificationRef = useRef(null)
   const { user, logout } = useAuthStore()
   const { theme, toggleTheme } = useThemeStore()
@@ -178,22 +179,25 @@ export default function AdminLayout() {
 
       {/* Sidebar */}
       <aside className={clsx(
-        "fixed top-0 left-0 z-50 h-full w-72 bg-dark-900 text-white transform transition-transform duration-300 lg:translate-x-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed top-0 left-0 z-50 h-full bg-dark-900 text-white transform transition-all duration-300",
+        sidebarCollapsed ? "w-20" : "w-72",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-dark-700">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-dark-700">
           <NavLink to="/admin" className="flex items-center gap-3">
             {logo && logo.startsWith('data:image') ? (
               <img src={logo} alt="Logo" className="h-10 w-auto object-contain" />
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center font-bold">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center font-bold flex-shrink-0">
                 MC
               </div>
             )}
-            <div>
-              <span className="font-display font-bold text-lg">Admin Panel</span>
-            </div>
+            {!sidebarCollapsed && (
+              <div>
+                <span className="font-display font-bold text-lg">Admin Panel</span>
+              </div>
+            )}
           </NavLink>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -204,7 +208,7 @@ export default function AdminLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-140px)]">
+        <nav className={clsx("p-2 space-y-1 overflow-y-auto h-[calc(100vh-140px)]", sidebarCollapsed && "px-2")}>
           {/* Simple Links */}
           {simpleLinks.map((link) => (
             <NavLink
@@ -214,13 +218,15 @@ export default function AdminLayout() {
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => clsx(
                 "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
+                sidebarCollapsed && "justify-center px-2",
                 isActive 
                   ? "bg-primary-500 text-white shadow-lg" 
                   : "text-dark-300 hover:bg-dark-800 hover:text-white"
               )}
+              title={sidebarCollapsed ? link.label : undefined}
             >
-              <link.icon className="w-5 h-5" />
-              <span>{link.label}</span>
+              <link.icon className="w-5 h-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span>{link.label}</span>}
             </NavLink>
           ))}
 
@@ -242,53 +248,58 @@ export default function AdminLayout() {
                   <NavLink
                     to={group.to}
                     onClick={() => setSidebarOpen(false)}
-                    className="flex-1 flex items-center gap-3 px-4 py-3"
+                    className={clsx("flex-1 flex items-center gap-3 px-4 py-3", sidebarCollapsed && "justify-center px-2")}
+                    title={sidebarCollapsed ? group.label : undefined}
                   >
-                    <group.icon className="w-5 h-5" />
-                    <span>{group.label}</span>
+                    <group.icon className="w-5 h-5 flex-shrink-0" />
+                    {!sidebarCollapsed && <span>{group.label}</span>}
                   </NavLink>
-                  <button
-                    onClick={() => toggleMenu(group.id)}
-                    className="p-3 hover:bg-dark-700 rounded-r-xl transition-colors"
-                  >
-                    <ChevronDown className={clsx(
-                      "w-4 h-4 transition-transform duration-200",
-                      isExpanded && "rotate-180"
-                    )} />
-                  </button>
+                  {!sidebarCollapsed && (
+                    <button
+                      onClick={() => toggleMenu(group.id)}
+                      className="p-3 hover:bg-dark-700 rounded-r-xl transition-colors"
+                    >
+                      <ChevronDown className={clsx(
+                        "w-4 h-4 transition-transform duration-200",
+                        isExpanded && "rotate-180"
+                      )} />
+                    </button>
+                  )}
                 </div>
 
                 {/* Submenu */}
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pl-4 mt-1 space-y-1">
-                        {group.children.map((child) => (
-                          <NavLink
-                            key={child.to}
-                            to={child.to}
-                            onClick={() => setSidebarOpen(false)}
-                            className={({ isActive }) => clsx(
-                              "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                              isActive 
-                                ? "bg-primary-500 text-white shadow-lg" 
-                                : "text-dark-400 hover:bg-dark-800 hover:text-white"
-                            )}
-                          >
-                            <child.icon className="w-4 h-4" />
-                            <span>{child.label}</span>
-                          </NavLink>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {!sidebarCollapsed && (
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pl-4 mt-1 space-y-1">
+                          {group.children.map((child) => (
+                            <NavLink
+                              key={child.to}
+                              to={child.to}
+                              onClick={() => setSidebarOpen(false)}
+                              className={({ isActive }) => clsx(
+                                "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
+                                isActive 
+                                  ? "bg-primary-500 text-white shadow-lg" 
+                                  : "text-dark-400 hover:bg-dark-800 hover:text-white"
+                              )}
+                            >
+                              <child.icon className="w-4 h-4" />
+                              <span>{child.label}</span>
+                            </NavLink>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
               </div>
             )
           })}
@@ -304,38 +315,54 @@ export default function AdminLayout() {
               onClick={() => setSidebarOpen(false)}
               className={({ isActive }) => clsx(
                 "flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200",
+                sidebarCollapsed && "justify-center px-2",
                 isActive 
                   ? "bg-primary-500 text-white shadow-lg" 
                   : "text-dark-300 hover:bg-dark-800 hover:text-white"
               )}
+              title={sidebarCollapsed ? link.label : undefined}
             >
-              <link.icon className="w-5 h-5" />
-              <span>{link.label}</span>
+              <link.icon className="w-5 h-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span>{link.label}</span>}
             </NavLink>
           ))}
         </nav>
 
         {/* Bottom actions */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-dark-700">
-          <div className="flex gap-2">
+        <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-dark-700">
+          <div className={clsx("flex gap-2", sidebarCollapsed && "flex-col")}>
             <NavLink
               to="/dashboard"
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-dark-800 hover:bg-dark-700 rounded-xl transition-colors text-sm"
+              className={clsx(
+                "flex items-center justify-center gap-2 px-4 py-2 bg-dark-800 hover:bg-dark-700 rounded-xl transition-colors text-sm",
+                !sidebarCollapsed && "flex-1"
+              )}
+              title={sidebarCollapsed ? "User Panel" : undefined}
             >
-              User Panel
+              <User className="w-4 h-4" />
+              {!sidebarCollapsed && "User Panel"}
             </NavLink>
             <button
               onClick={handleLogout}
               className="flex items-center justify-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-xl transition-colors"
+              title="Logout"
             >
               <LogOut className="w-4 h-4" />
             </button>
           </div>
+          {/* Collapse Toggle Button */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex w-full mt-2 items-center justify-center gap-2 px-4 py-2 bg-dark-800 hover:bg-dark-700 rounded-xl transition-colors text-sm text-dark-400"
+          >
+            <ChevronRight className={clsx("w-4 h-4 transition-transform", sidebarCollapsed && "rotate-180")} />
+            {!sidebarCollapsed && "Collapse"}
+          </button>
         </div>
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-72">
+      <div className={clsx("transition-all duration-300", sidebarCollapsed ? "lg:pl-20" : "lg:pl-72")}>
         {/* Top header */}
         <header className="sticky top-0 z-30 h-16 bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl border-b border-dark-200 dark:border-dark-800">
           <div className="h-full px-4 lg:px-8 flex items-center justify-between">
@@ -346,9 +373,12 @@ export default function AdminLayout() {
               >
                 <Menu className="w-6 h-6" />
               </button>
-              {logo && logo.startsWith('data:image') && (
-                <img src={logo} alt="" className="h-8 w-auto object-contain" />
-              )}
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="hidden lg:flex p-2 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
               <h1 className="text-lg font-semibold">Admin Dashboard</h1>
             </div>
 
