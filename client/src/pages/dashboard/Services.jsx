@@ -1,9 +1,16 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { Server, Plus, Bot, Globe, Shield, HardDrive, Cloud, Mail, Database, Inbox, Settings } from 'lucide-react'
-import { userAPI, nobotAPI } from '../../lib/api'
+import { 
+  Server, Plus, Bot, Globe, Shield, HardDrive, Cloud, Mail, Database, Inbox, Settings,
+  ExternalLink, X, Cpu, MemoryStick, HardDrive as Storage, Activity, Loader2,
+  Copy, Check, MonitorPlay, Lock, Zap, RefreshCw
+} from 'lucide-react'
+import { userAPI, nobotAPI, settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
+import toast from 'react-hot-toast'
 
 const statusColors = {
   active: 'bg-green-500/20 text-green-400 border border-green-500/30',
@@ -41,10 +48,29 @@ const getServiceLink = (service) => {
   return `/dashboard/services/${service.uuid}`
 }
 
+// Check if service is a hosting/server type
+const isHostingService = (service) => {
+  const type = (service.service_type || '').toLowerCase()
+  const name = (service.name || '').toLowerCase()
+  return ['hosting', 'vps', 'dedicated', 'cloud', 'server', 'reseller'].some(t => 
+    type.includes(t) || name.includes(t)
+  )
+}
+
 export default function Services() {
+  const [manageModal, setManageModal] = useState({ open: false, service: null })
+  const [copied, setCopied] = useState(null)
+  const [pleskLoading, setPleskLoading] = useState(false)
+  
   const { data, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: () => userAPI.getServices().then(res => res.data)
+  })
+  
+  // Fetch Plesk config to check if enabled
+  const { data: pleskConfig } = useQuery({
+    queryKey: ['plesk-config'],
+    queryFn: () => userAPI.getPleskStatus().then(res => res.data).catch(() => ({ enabled: false }))
   })
 
   // Fetch NoBot services to check setup status
@@ -57,6 +83,29 @@ export default function Services() {
   const getNoBotStatus = (serviceUuid) => {
     const bot = nobotData?.bots?.find(b => b.service_uuid === serviceUuid)
     return bot ? { setup_step: bot.setup_step, botUuid: bot.uuid } : null
+  }
+
+  const copyToClipboard = (text, field) => {
+    navigator.clipboard.writeText(text)
+    setCopied(field)
+    toast.success('Copied to clipboard')
+    setTimeout(() => setCopied(null), 2000)
+  }
+
+  const handlePleskLogin = async (service) => {
+    setPleskLoading(true)
+    try {
+      const res = await userAPI.getPleskLoginUrl(service.uuid)
+      if (res.data?.url) {
+        window.open(res.data.url, '_blank')
+      } else {
+        toast.error('Could not generate Plesk login URL')
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to connect to Plesk')
+    } finally {
+      setPleskLoading(false)
+    }
   }
 
   return (
@@ -110,6 +159,15 @@ export default function Services() {
                   </div>
                 </Link>
                 <div className="flex items-center gap-4">
+                  {/* Manage button for hosting/server services */}
+                  {isHostingService(service) && service.status === 'active' && (
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setManageModal({ open: true, service }) }}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl text-sm font-medium hover:shadow-lg hover:shadow-blue-500/30 transition-all mr-4"
+                    >
+                      <MonitorPlay className="w-4 h-4" /> Manage
+                    </button>
+                  )}
                   {/* NoBot Inbox & Settings buttons when setup is complete */}
                   {isNoBot && isSetupComplete && (
                     <div className="flex items-center gap-2 mr-4">
@@ -153,6 +211,190 @@ export default function Services() {
           <Link to="/hosting" className="btn-primary">Browse Hosting Plans</Link>
         </div>
       )}
+
+      {/* Server Management Modal */}
+      <AnimatePresence>
+        {manageModal.open && manageModal.service && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setManageModal({ open: false, service: null })}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="relative bg-white dark:bg-dark-800 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Gradient Header */}
+              <div className="relative px-6 py-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                  <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                </div>
+                <button
+                  onClick={() => setManageModal({ open: false, service: null })}
+                  className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="relative flex items-center gap-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                    <Server className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">{manageModal.service.name}</h2>
+                    <p className="text-white/70">Server Management</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Server Details */}
+                <div className="space-y-4">
+                  <h3 className="font-bold flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-primary-500" />
+                    Server Details
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Hostname */}
+                    <div className="p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-dark-500 uppercase tracking-wider">Hostname</span>
+                        <button
+                          onClick={() => copyToClipboard(manageModal.service.hostname || manageModal.service.domain_name || 'N/A', 'hostname')}
+                          className="p-1 hover:bg-dark-200 dark:hover:bg-dark-600 rounded"
+                        >
+                          {copied === 'hostname' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-dark-400" />}
+                        </button>
+                      </div>
+                      <p className="font-medium truncate">{manageModal.service.hostname || manageModal.service.domain_name || 'N/A'}</p>
+                    </div>
+                    
+                    {/* IP Address */}
+                    <div className="p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-dark-500 uppercase tracking-wider">IP Address</span>
+                        <button
+                          onClick={() => copyToClipboard(manageModal.service.ip_address || 'N/A', 'ip')}
+                          className="p-1 hover:bg-dark-200 dark:hover:bg-dark-600 rounded"
+                        >
+                          {copied === 'ip' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-dark-400" />}
+                        </button>
+                      </div>
+                      <p className="font-medium">{manageModal.service.ip_address || 'Pending'}</p>
+                    </div>
+                    
+                    {/* Username */}
+                    <div className="p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-dark-500 uppercase tracking-wider">Username</span>
+                        <button
+                          onClick={() => copyToClipboard(manageModal.service.username || 'N/A', 'username')}
+                          className="p-1 hover:bg-dark-200 dark:hover:bg-dark-600 rounded"
+                        >
+                          {copied === 'username' ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3 text-dark-400" />}
+                        </button>
+                      </div>
+                      <p className="font-medium">{manageModal.service.username || 'N/A'}</p>
+                    </div>
+                    
+                    {/* Password */}
+                    <div className="p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-dark-500 uppercase tracking-wider">Password</span>
+                        <Lock className="w-3 h-3 text-dark-400" />
+                      </div>
+                      <p className="font-medium">••••••••</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Resources */}
+                <div className="space-y-4">
+                  <h3 className="font-bold flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-amber-500" />
+                    Resources
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="p-4 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl text-center">
+                      <Cpu className="w-6 h-6 mx-auto mb-2 text-blue-500" />
+                      <p className="text-2xl font-bold">{manageModal.service.cpu_cores || '1'}</p>
+                      <p className="text-xs text-dark-500">CPU Cores</p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl text-center">
+                      <MemoryStick className="w-6 h-6 mx-auto mb-2 text-purple-500" />
+                      <p className="text-2xl font-bold">{manageModal.service.ram || '1'} GB</p>
+                      <p className="text-xs text-dark-500">RAM</p>
+                    </div>
+                    <div className="p-4 bg-gradient-to-br from-emerald-500/10 to-green-500/10 border border-emerald-500/20 rounded-xl text-center">
+                      <Storage className="w-6 h-6 mx-auto mb-2 text-emerald-500" />
+                      <p className="text-2xl font-bold">{manageModal.service.storage || '20'} GB</p>
+                      <p className="text-xs text-dark-500">Storage</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Service Info */}
+                <div className="space-y-3 p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                  <div className="flex justify-between items-center">
+                    <span className="text-dark-500">Service Type</span>
+                    <span className="font-medium capitalize">{manageModal.service.service_type || 'Hosting'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-dark-500">Status</span>
+                    <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", statusColors[manageModal.service.status])}>
+                      {manageModal.service.status}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-dark-500">Billing Cycle</span>
+                    <span className="font-medium capitalize">{manageModal.service.billing_cycle || 'Monthly'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-dark-500">Next Due Date</span>
+                    <span className="font-medium">
+                      {manageModal.service.next_due_date 
+                        ? new Date(manageModal.service.next_due_date).toLocaleDateString() 
+                        : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  {pleskConfig?.enabled && (
+                    <button
+                      onClick={() => handlePleskLogin(manageModal.service)}
+                      disabled={pleskLoading}
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-indigo-500/30 transition-all disabled:opacity-50"
+                    >
+                      {pleskLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <ExternalLink className="w-5 h-5" />
+                          Login to Plesk
+                        </>
+                      )}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setManageModal({ open: false, service: null })}
+                    className="flex-1 px-6 py-3 bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 rounded-xl font-medium transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

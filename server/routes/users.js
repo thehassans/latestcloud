@@ -191,4 +191,114 @@ router.get('/transactions', authenticate, async (req, res) => {
   }
 });
 
+// Get Plesk status (check if enabled)
+router.get('/plesk/status', authenticate, async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT setting_value FROM settings WHERE setting_key = 'plesk_enabled'"
+    );
+    const enabled = result?.[0]?.setting_value === 'true';
+    res.json({ enabled });
+  } catch (error) {
+    console.error('Get Plesk status error:', error);
+    res.json({ enabled: false });
+  }
+});
+
+// Get Plesk login URL for a service
+router.post('/services/:uuid/plesk-login', authenticate, async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    
+    // Get the service and verify ownership
+    const services = await db.query(
+      'SELECT * FROM services WHERE uuid = ? AND user_id = ?',
+      [uuid, req.user.id]
+    );
+    
+    if (!services || services.length === 0) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+    
+    const service = services[0];
+    
+    if (service.status !== 'active') {
+      return res.status(400).json({ error: 'Service is not active' });
+    }
+    
+    // Get Plesk settings
+    const pleskSettings = await db.query(
+      `SELECT setting_key, setting_value FROM settings WHERE setting_key IN (
+        'plesk_enabled', 'plesk_hostname', 'plesk_port', 'plesk_username', 
+        'plesk_password', 'plesk_api_key', 'plesk_auth_method'
+      )`
+    );
+    
+    const config = {};
+    pleskSettings.forEach(row => {
+      config[row.setting_key.replace('plesk_', '')] = row.setting_value;
+    });
+    
+    if (config.enabled !== 'true' || !config.hostname) {
+      return res.status(400).json({ error: 'Plesk integration is not configured' });
+    }
+    
+    // Build Plesk SSO URL or direct login URL
+    const https = require('https');
+    const fetch = require('node-fetch');
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    if (config.auth_method === 'api_key' && config.api_key) {
+      headers['X-API-Key'] = config.api_key;
+    } else if (config.username && config.password) {
+      const auth = Buffer.from(`${config.username}:${config.password}`).toString('base64');
+      headers['Authorization'] = `Basic ${auth}`;
+    }
+    
+    const agent = new https.Agent({ rejectUnauthorized: false });
+    
+    // Try to create SSO session for the user's domain
+    const domain = service.domain_name || service.hostname;
+    
+    if (domain) {
+      try {
+        // Create one-time login link via Plesk API
+        const ssoResponse = await fetch(
+          `https://${config.hostname}:${config.port || 8443}/api/v2/cli/server/request-login-link`,
+          {
+            method: 'POST',
+            headers,
+            agent,
+            body: JSON.stringify({
+              login: service.username || 'admin',
+              ip: req.ip
+            })
+          }
+        );
+        
+        if (ssoResponse.ok) {
+          const ssoData = await ssoResponse.json();
+          if (ssoData.login_link) {
+            return res.json({ url: ssoData.login_link });
+          }
+        }
+      } catch (ssoError) {
+        console.log('SSO login not available, using direct URL');
+      }
+    }
+    
+    // Fallback to direct Plesk URL
+    const pleskUrl = `https://${config.hostname}:${config.port || 8443}`;
+    res.json({ url: pleskUrl });
+    
+  } catch (error) {
+    console.error('Plesk login error:', error);
+    res.status(500).json({ error: 'Failed to generate Plesk login URL' });
+  }
+});
+
 module.exports = router;

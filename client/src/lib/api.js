@@ -77,7 +77,10 @@ export const userAPI = {
   getService: (uuid) => api.get(`/users/services/${uuid}`),
   getInvoices: (params) => api.get('/users/invoices', { params }),
   getInvoice: (uuid) => api.get(`/users/invoices/${uuid}`),
-  getTransactions: (params) => api.get('/users/transactions', { params })
+  getTransactions: (params) => api.get('/users/transactions', { params }),
+  // Plesk integration
+  getPleskStatus: () => api.get('/users/plesk/status'),
+  getPleskLoginUrl: (serviceUuid) => api.post(`/users/services/${serviceUuid}/plesk-login`)
 }
 
 // Tickets API
