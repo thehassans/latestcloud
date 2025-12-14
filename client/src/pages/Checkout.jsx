@@ -660,6 +660,9 @@ export default function Checkout() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Scroll to top on mount
+    window.scrollTo(0, 0)
+    
     // Check if cart is empty
     if (items.length === 0) {
       navigate('/cart')

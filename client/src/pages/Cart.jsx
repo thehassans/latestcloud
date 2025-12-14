@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { ShoppingCart, Trash2, ArrowRight, Tag, Lock, Shield } from 'lucide-react'
@@ -6,9 +6,15 @@ import { useCartStore, useCurrencyStore } from '../store/useStore'
 import { useState } from 'react'
 
 export default function Cart() {
+  const navigate = useNavigate()
   const { items, removeItem, coupon, setCoupon, removeCoupon, getTotal, clearCart } = useCartStore()
   const { format } = useCurrencyStore()
   const [couponCode, setCouponCode] = useState('')
+  
+  const handleCheckout = () => {
+    window.scrollTo(0, 0)
+    navigate('/checkout')
+  }
   const { subtotal, discount, total } = getTotal()
 
   const handleApplyCoupon = () => {
@@ -94,9 +100,9 @@ export default function Cart() {
                   </div>
                 )}
 
-                <Link to="/checkout" className="btn-primary w-full justify-center">
+                <button onClick={handleCheckout} className="btn-primary w-full justify-center">
                   Proceed to Checkout <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
+                </button>
                 
                 <div className="mt-4 flex items-center justify-center gap-2 text-xs text-dark-500">
                   <Lock className="w-4 h-4" />
