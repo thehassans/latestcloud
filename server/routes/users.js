@@ -148,16 +148,38 @@ router.get('/invoices', authenticate, async (req, res) => {
   }
 });
 
-// Get invoice details
+// Get invoice details with order information
 router.get('/invoices/:uuid', authenticate, async (req, res) => {
   try {
-    const invoices = await db.query('SELECT * FROM invoices WHERE uuid = ? AND user_id = ?', [req.params.uuid, req.user.id]);
+    const invoices = await db.query(`
+      SELECT i.*, 
+             o.uuid as order_uuid, o.order_number, o.status as order_status, o.items as order_items,
+             o.subtotal as order_subtotal, o.discount as order_discount, o.total as order_total,
+             o.payment_method, o.notes as order_notes, o.created_at as order_date,
+             s.uuid as service_uuid, s.name as service_name, s.service_type, s.status as service_status,
+             s.billing_cycle, s.next_due_date
+      FROM invoices i
+      LEFT JOIN orders o ON i.order_id = o.id
+      LEFT JOIN services s ON i.service_id = s.id
+      WHERE i.uuid = ? AND i.user_id = ?
+    `, [req.params.uuid, req.user.id]);
 
     if (!invoices.length) {
       return res.status(404).json({ error: 'Invoice not found' });
     }
 
-    res.json({ invoice: invoices[0] });
+    const invoice = invoices[0];
+    
+    // Parse order items if exists
+    if (invoice.order_items) {
+      try {
+        invoice.order_items = JSON.parse(invoice.order_items);
+      } catch (e) {
+        invoice.order_items = [];
+      }
+    }
+
+    res.json({ invoice });
   } catch (error) {
     console.error('Get invoice error:', error);
     res.status(500).json({ error: 'Failed to load invoice' });

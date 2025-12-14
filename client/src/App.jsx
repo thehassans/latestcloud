@@ -66,6 +66,7 @@ import Services from './pages/dashboard/Services'
 import ServiceDetail from './pages/dashboard/ServiceDetail'
 import MyDomains from './pages/dashboard/MyDomains'
 import Invoices from './pages/dashboard/Invoices'
+import InvoiceDetail from './pages/dashboard/InvoiceDetail'
 import Tickets from './pages/dashboard/Tickets'
 import TicketDetail from './pages/dashboard/TicketDetail'
 import NewTicket from './pages/dashboard/NewTicket'
@@ -251,6 +252,7 @@ function App() {
           <Route path="services/:uuid/manage" element={<ServiceManagement />} />
           <Route path="domains" element={<MyDomains />} />
           <Route path="invoices" element={<Invoices />} />
+          <Route path="invoices/:uuid" element={<InvoiceDetail />} />
           <Route path="orders" element={<Orders />} />
           <Route path="tickets" element={<Tickets />} />
           <Route path="tickets/new" element={<NewTicket />} />
