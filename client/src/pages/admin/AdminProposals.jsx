@@ -5,12 +5,13 @@ import {
   FileText, Plus, Send, Eye, Trash2, Search, Filter, CheckCircle, XCircle, 
   Clock, User, Mail, Building2, DollarSign, Calendar, ChevronDown, X,
   Sparkles, Crown, Zap, Shield, Star, Package, CreditCard, Loader2,
-  UserPlus, Check, AlertTriangle
+  UserPlus, Check, AlertTriangle, Globe, Phone, MapPin, Gem
 } from 'lucide-react'
 import { adminAPI, productsAPI, settingsAPI } from '../../lib/api'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import ConfirmDialog from '../../components/ConfirmDialog'
+import { useSiteSettingsStore } from '../../store/useStore'
 
 // Predefined Services by Category
 const SERVICE_CATEGORIES = [
@@ -188,7 +189,7 @@ const TERMS_TEMPLATES = [
 ]
 
 // Create/Edit Proposal Modal
-function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, bankSettings }) {
+function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, bankSettings, siteLogo, siteName }) {
   const [loading, setLoading] = useState(false)
   const [showNewUser, setShowNewUser] = useState(false)
   const [form, setForm] = useState({
@@ -371,23 +372,51 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         className="relative w-full max-w-[1400px] bg-white dark:bg-dark-800 rounded-2xl shadow-2xl my-8"
       >
-        {/* Header */}
-        <div className="sticky top-0 z-10 bg-gradient-to-r from-primary-600 to-purple-600 rounded-t-2xl p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">
-                  {proposal ? 'Edit Proposal' : 'Create New Proposal'}
-                </h2>
-                <p className="text-white/70 text-sm">Design a custom offer for your client</p>
-              </div>
+        {/* Ultra Premium Header */}
+        <div className="sticky top-0 z-10 relative overflow-hidden rounded-t-2xl">
+          {/* Animated Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900">
+            <div className="absolute inset-0 opacity-30">
+              <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500 rounded-full blur-3xl animate-pulse delay-1000" />
+              <div className="absolute top-1/2 right-0 w-48 h-48 bg-pink-500 rounded-full blur-3xl animate-pulse delay-500" />
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
-              <X className="w-6 h-6 text-white" />
-            </button>
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 opacity-10" style={{
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+              backgroundSize: '20px 20px'
+            }} />
+          </div>
+          
+          <div className="relative p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {/* Logo */}
+                {siteLogo ? (
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm p-2 border border-white/20 shadow-xl">
+                    <img src={siteLogo} alt={siteName} className="w-full h-full object-contain" />
+                  </div>
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl shadow-purple-500/30">
+                    <Gem className="w-7 h-7 text-white" />
+                  </div>
+                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-2xl font-bold text-white">
+                      {proposal ? 'Edit Proposal' : 'Create New Proposal'}
+                    </h2>
+                    <span className="px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 text-xs font-bold rounded-full uppercase tracking-wide">
+                      Premium
+                    </span>
+                  </div>
+                  <p className="text-white/60 text-sm mt-1">Design a custom offer for your client</p>
+                </div>
+              </div>
+              <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-xl transition-all border border-white/10 backdrop-blur-sm">
+                <X className="w-6 h-6 text-white" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -769,135 +798,183 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
           </div>
         </form>
 
-          {/* Right Side - Live Invoice Preview */}
-          <div className="w-full lg:w-[420px] p-6 bg-dark-50 dark:bg-dark-900 overflow-y-auto max-h-[75vh]">
+          {/* Right Side - Ultra Premium Live Preview */}
+          <div className="w-full lg:w-[450px] p-6 bg-gradient-to-br from-slate-100 via-purple-50 to-slate-100 dark:from-dark-900 dark:via-purple-900/10 dark:to-dark-900 overflow-y-auto max-h-[75vh]">
             <div className="sticky top-0">
-              <div className="flex items-center gap-2 mb-4">
-                <Eye className="w-5 h-5 text-primary-500" />
-                <h3 className="font-bold text-lg">Live Preview</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <Eye className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="font-bold text-lg">Live Preview</h3>
+                </div>
+                <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 text-xs font-medium rounded-full">
+                  Real-time
+                </span>
               </div>
 
-              {/* Invoice Preview Card */}
-              <div className={clsx(
-                "rounded-xl overflow-hidden shadow-2xl border-2 transition-all duration-300",
-                selectedTemplate.accentColor
-              )}>
-                {/* Invoice Header */}
-                <div className={clsx("p-4", selectedTemplate.headerBg)}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-white font-bold text-lg">PROPOSAL</h4>
-                      <p className="text-white/70 text-xs">#{form.title ? 'PROP-XXXX' : '---'}</p>
-                    </div>
-                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                      <selectedTemplate.icon className="w-5 h-5 text-white" />
+              {/* Ultra Premium Invoice Preview Card */}
+              <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/50 dark:border-dark-600 bg-white transform hover:scale-[1.02] transition-all duration-300">
+                {/* Premium Invoice Header with Logo */}
+                <div className="relative overflow-hidden">
+                  <div className={clsx("absolute inset-0", selectedTemplate.headerBg)} />
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-2xl transform -translate-x-1/2 translate-y-1/2" />
+                  </div>
+                  <div className="relative p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        {/* Logo in Preview */}
+                        {siteLogo ? (
+                          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm p-1.5 border border-white/30">
+                            <img src={siteLogo} alt={siteName} className="w-full h-full object-contain" />
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                            <Gem className="w-6 h-6 text-white" />
+                          </div>
+                        )}
+                        <div>
+                          <h4 className="text-white font-bold text-lg tracking-wide">PROPOSAL</h4>
+                          <p className="text-white/60 text-xs font-mono">#{form.title ? 'PROP-XXXX' : '---'}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/30">
+                          <selectedTemplate.icon className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Invoice Body */}
+                {/* Invoice Body - Premium Design */}
                 <div className={clsx(
-                  "p-4 space-y-4",
+                  "p-5 space-y-5",
                   selectedTemplate.id === 'tech' || selectedTemplate.id === 'elegant' 
-                    ? 'bg-gray-900 text-white' 
-                    : 'bg-white text-dark-800'
+                    ? 'bg-gradient-to-b from-gray-900 to-gray-950 text-white' 
+                    : 'bg-gradient-to-b from-white to-slate-50 text-slate-800'
                 )}>
-                  {/* Title & Client */}
-                  <div className="border-b pb-3 border-current/10">
-                    <h5 className="font-bold text-sm truncate">{form.title || 'Proposal Title'}</h5>
-                    <p className="text-xs opacity-60 mt-1">
-                      To: {selectedUser ? `${selectedUser.first_name} ${selectedUser.last_name}` : 'Select a client'}
-                    </p>
-                    <p className="text-xs opacity-60">
-                      Valid Until: {form.valid_until || '---'}
-                    </p>
+                  {/* Title & Client with Premium Styling */}
+                  <div className="pb-4 border-b-2 border-dashed border-current/10">
+                    <h5 className="font-bold text-base">{form.title || 'Proposal Title'}</h5>
+                    <div className="flex items-center gap-4 mt-2 text-xs">
+                      <span className="flex items-center gap-1 opacity-60">
+                        <User className="w-3 h-3" />
+                        {selectedUser ? `${selectedUser.first_name} ${selectedUser.last_name}` : 'Select a client'}
+                      </span>
+                      <span className="flex items-center gap-1 opacity-60">
+                        <Calendar className="w-3 h-3" />
+                        {form.valid_until || '---'}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Items Preview */}
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold opacity-70 uppercase">Items</p>
+                  {/* Items Preview - Enhanced */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-bold uppercase tracking-wider opacity-50">Services & Items</p>
                     {form.items.filter(i => i.name).length > 0 ? (
-                      form.items.filter(i => i.name).slice(0, 3).map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-xs">
-                          <span className="truncate flex-1">{item.name}</span>
-                          <span className="font-medium ml-2">${(Number(item.quantity || 0) * Number(item.price || 0)).toFixed(2)}</span>
-                        </div>
-                      ))
+                      <div className="space-y-2">
+                        {form.items.filter(i => i.name).slice(0, 3).map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2 rounded-lg bg-current/5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                                <Package className="w-3 h-3 text-white" />
+                              </div>
+                              <span className="text-xs font-medium truncate max-w-[150px]">{item.name}</span>
+                            </div>
+                            <span className="text-xs font-bold">${(Number(item.quantity || 0) * Number(item.price || 0)).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
-                      <p className="text-xs opacity-50 italic">No items added</p>
+                      <div className="p-3 rounded-lg bg-current/5 text-center">
+                        <p className="text-xs opacity-50 italic">No items added yet</p>
+                      </div>
                     )}
                     {form.items.filter(i => i.name).length > 3 && (
-                      <p className="text-xs opacity-50">+{form.items.filter(i => i.name).length - 3} more items...</p>
+                      <p className="text-xs opacity-50 text-center">+{form.items.filter(i => i.name).length - 3} more items...</p>
                     )}
                   </div>
 
-                  {/* Totals */}
-                  <div className="pt-3 border-t border-current/10 space-y-1">
+                  {/* Premium Totals Section */}
+                  <div className="pt-4 border-t-2 border-dashed border-current/10 space-y-2">
                     <div className="flex justify-between text-xs">
                       <span className="opacity-60">Subtotal</span>
-                      <span>${calculateSubtotal().toFixed(2)}</span>
+                      <span className="font-medium">${calculateSubtotal().toFixed(2)}</span>
                     </div>
                     {form.discount > 0 && (
-                      <div className="flex justify-between text-xs text-red-500">
+                      <div className="flex justify-between text-xs text-emerald-500">
                         <span>Discount</span>
-                        <span>-${calculateDiscount().toFixed(2)}</span>
+                        <span className="font-medium">-${calculateDiscount().toFixed(2)}</span>
                       </div>
                     )}
                     {form.tax > 0 && (
                       <div className="flex justify-between text-xs">
                         <span className="opacity-60">Tax ({form.tax}%)</span>
-                        <span>${calculateTax().toFixed(2)}</span>
+                        <span className="font-medium">${calculateTax().toFixed(2)}</span>
                       </div>
                     )}
-                    <div className="flex justify-between font-bold text-base pt-2 border-t border-current/10">
-                      <span>Total</span>
-                      <span className="text-emerald-500">${calculateTotal().toFixed(2)}</span>
+                    <div className="flex justify-between items-center pt-3 mt-2 border-t-2 border-current/10">
+                      <span className="font-bold">Total Due</span>
+                      <span className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-green-500 bg-clip-text text-transparent">
+                        ${calculateTotal().toFixed(2)}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Terms Preview */}
+                  {/* Terms Preview - Compact */}
                   {form.terms && (
                     <div className="pt-3 border-t border-current/10">
-                      <p className="text-xs font-semibold opacity-70 uppercase mb-1">Terms</p>
-                      <p className="text-xs opacity-60 line-clamp-3">{form.terms}</p>
+                      <p className="text-xs font-bold uppercase tracking-wider opacity-50 mb-2">Terms & Conditions</p>
+                      <p className="text-xs opacity-60 line-clamp-2">{form.terms}</p>
                     </div>
                   )}
                 </div>
 
-                {/* Invoice Footer */}
+                {/* Premium Invoice Footer with Branding */}
                 <div className={clsx(
-                  "px-4 py-3 text-center text-xs",
+                  "px-5 py-4 flex items-center justify-between",
                   selectedTemplate.id === 'tech' || selectedTemplate.id === 'elegant' 
-                    ? 'bg-gray-800 text-gray-400' 
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-gray-800' 
+                    : 'bg-slate-100'
                 )}>
-                  Powered by Magnetic Clouds
+                  <div className="flex items-center gap-2">
+                    {siteLogo ? (
+                      <img src={siteLogo} alt="" className="w-5 h-5 object-contain opacity-50" />
+                    ) : (
+                      <Gem className="w-4 h-4 opacity-50" />
+                    )}
+                    <span className="text-xs opacity-50">{siteName || 'Magnetic Clouds'}</span>
+                  </div>
+                  <span className="text-xs opacity-30">Premium Proposal</span>
                 </div>
               </div>
 
-              {/* Template Selection Below Preview */}
-              <div className="mt-4">
-                <p className="text-xs font-medium text-dark-500 mb-2">Select Template Style</p>
-                <div className="flex gap-2">
+              {/* Template Selection - Premium Cards */}
+              <div className="mt-6">
+                <p className="text-xs font-bold uppercase tracking-wider text-dark-500 mb-3">Select Template Style</p>
+                <div className="grid grid-cols-5 gap-2">
                   {INVOICE_TEMPLATES.map(template => (
                     <button
                       key={template.id}
                       type="button"
                       onClick={() => setForm(prev => ({ ...prev, template: template.id }))}
                       className={clsx(
-                        "flex-1 p-2 rounded-lg border-2 transition-all hover:scale-105",
+                        "p-3 rounded-xl border-2 transition-all hover:scale-105 hover:shadow-lg",
                         form.template === template.id
-                          ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
-                          : "border-dark-200 dark:border-dark-600"
+                          ? "border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-lg shadow-purple-500/20"
+                          : "border-dark-200 dark:border-dark-600 bg-white dark:bg-dark-800"
                       )}
                     >
                       <div className={clsx(
-                        "w-6 h-6 rounded-md bg-gradient-to-br flex items-center justify-center mx-auto",
+                        "w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center mx-auto shadow-lg",
                         template.gradient
                       )}>
-                        <template.icon className="w-3 h-3 text-white" />
+                        <template.icon className="w-4 h-4 text-white" />
                       </div>
-                      <p className="text-xs mt-1 font-medium truncate">{template.name.split(' ')[0]}</p>
+                      <p className="text-xs mt-2 font-medium text-center">{template.name.split(' ')[0]}</p>
                     </button>
                   ))}
                 </div>
@@ -912,6 +989,7 @@ function ProposalModal({ isOpen, onClose, proposal, onSave, products, users, ban
 
 // Main Admin Proposals Page
 export default function AdminProposals() {
+  const { logo: siteLogo, siteName } = useSiteSettingsStore()
   const [loading, setLoading] = useState(true)
   const [proposals, setProposals] = useState([])
   const [products, setProducts] = useState([])
@@ -1191,6 +1269,8 @@ export default function AdminProposals() {
             products={products}
             users={users}
             bankSettings={bankSettings}
+            siteLogo={siteLogo}
+            siteName={siteName}
           />
         )}
       </AnimatePresence>
