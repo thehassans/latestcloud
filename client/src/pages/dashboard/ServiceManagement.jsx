@@ -42,22 +42,12 @@ const parseServiceSpecs = (service) => {
   const ramMatch = name.match(/(\d+)\s*GB\s*RAM/i)
   if (ramMatch) specs.ram = ramMatch[1]
   
-  // Parse Storage - look for patterns like "2000GB SSD", "500GB NVMe", "100 GB"
-  const storageMatch = name.match(/(\d+)\s*GB\s*(SSD|NVMe|HDD|Storage)?/i)
-  if (storageMatch && !name.toLowerCase().includes(storageMatch[0].toLowerCase() + ' ram')) {
-    // Make sure it's not the RAM value
-    const fullMatch = storageMatch[0]
-    if (!fullMatch.toLowerCase().includes('ram')) {
-      specs.storage = storageMatch[1]
-    }
-  }
+  // Parse Storage - look for patterns like "2000GB SSD", "500GB NVMe" - must have SSD/NVMe/HDD after
+  const storageMatch = name.match(/(\d+)\s*GB\s*(SSD|NVMe|HDD)/i)
+  if (storageMatch) specs.storage = storageMatch[1]
   
-  // Better storage parsing - find storage after RAM or at end
-  const storageBetterMatch = name.match(/,\s*(\d+)\s*GB\s*(SSD|NVMe|HDD)?/i)
-  if (storageBetterMatch) specs.storage = storageBetterMatch[1]
-  
-  // Parse Bandwidth if present
-  const bwMatch = name.match(/(\d+)\s*(TB|GB)\s*(Bandwidth|BW)?/i)
+  // Parse Bandwidth - only if explicitly mentioned with "Bandwidth" or "BW"
+  const bwMatch = name.match(/(\d+)\s*(TB|GB)\s*(Bandwidth|BW)/i)
   if (bwMatch) specs.bandwidth = bwMatch[1] + (bwMatch[2] === 'GB' ? ' GB' : ' TB')
   
   return specs
