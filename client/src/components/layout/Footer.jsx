@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { 
   Facebook, Twitter, Linkedin, Instagram, Youtube,
@@ -7,7 +6,8 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { useSiteSettingsStore } from '../../store/useStore'
+import { useSiteSettingsStore, useLanguageStore } from '../../store/useStore'
+import LanguageSwitcher from '../LanguageSwitcher'
 
 const footerLinks = {
   services: [
@@ -59,7 +59,7 @@ const socialLinks = [
 ]
 
 export default function Footer() {
-  const { t } = useTranslation()
+  const { t } = useLanguageStore()
   const [email, setEmail] = useState('')
   const { siteName, logo, contactEmail } = useSiteSettingsStore()
 
@@ -78,10 +78,10 @@ export default function Footer() {
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="text-center lg:text-left">
               <h3 className="text-2xl font-bold font-display">
-                Subscribe to Our Newsletter
+                {t('footer.newsletter')}
               </h3>
               <p className="mt-2 text-dark-400">
-                Get the latest updates, offers, and news delivered to your inbox.
+                {t('footer.newsletterText')}
               </p>
             </div>
             <form onSubmit={handleSubscribe} className="flex w-full max-w-md gap-3">
@@ -99,7 +99,7 @@ export default function Footer() {
                 type="submit"
                 className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 rounded-xl font-semibold transition-all flex items-center gap-2"
               >
-                Subscribe
+                {t('footer.subscribe')}
                 <Send className="w-4 h-4" />
               </button>
             </form>
@@ -302,17 +302,20 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-dark-400 text-sm">
-              © {new Date().getFullYear()} Magnetic Clouds. All rights reserved.
+              {t('footer.copyright')}
             </p>
-            <a 
-              href="https://magnetic-infratech.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500/10 to-purple-500/10 border border-primary-500/20 hover:border-primary-500/50 transition-all"
-            >
-              <span className="text-dark-400 text-sm">Powered By</span>
-              <span className="font-bold bg-gradient-to-r from-primary-400 to-purple-400 bg-clip-text text-transparent group-hover:from-primary-300 group-hover:to-purple-300 transition-all">Magnetic Infratech</span>
-            </a>
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher variant="default" />
+              <a 
+                href="https://magnetic-infratech.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500/10 to-purple-500/10 border border-primary-500/20 hover:border-primary-500/50 transition-all"
+              >
+                <span className="text-dark-400 text-sm">Powered By</span>
+                <span className="font-bold bg-gradient-to-r from-primary-400 to-purple-400 bg-clip-text text-transparent group-hover:from-primary-300 group-hover:to-purple-300 transition-all">Magnetic Infratech</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

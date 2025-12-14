@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ChevronDown, Moon, Sun, ShoppingCart, Globe, User, Server, Cloud, Database, HardDrive, Shield, Lock, Mail, Archive, Search, Bug, Zap, Wrench, Building2, Users, Gift, Globe2, Bot, Code, Hammer, ShieldCheck, BarChart3 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSettingsStore } from '../../store/useStore'
+import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSettingsStore, useLanguageStore } from '../../store/useStore'
+import LanguageSwitcher from '../LanguageSwitcher'
 import clsx from 'clsx'
 
 const navItems = [
@@ -56,16 +56,11 @@ const navItems = [
   },
 ]
 
-const languages = [
-  { code: 'en', label: 'English' },
-  { code: 'bn', label: 'বাংলা' },
-]
-
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
-  const { t, i18n } = useTranslation()
+  const { t } = useLanguageStore()
   const { theme, toggleTheme } = useThemeStore()
   const { isAuthenticated, user } = useAuthStore()
   const { items: cartItems } = useCartStore()
@@ -78,11 +73,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const handleLanguageChange = (code) => {
-    i18n.changeLanguage(code)
-    setActiveDropdown(null)
-  }
 
   return (
     <header className={clsx(
@@ -208,38 +198,8 @@ export default function Navbar() {
           {/* Right side actions */}
           <div className="flex items-center gap-2">
             {/* Language selector */}
-            <div className="relative hidden md:block">
-              <button
-                onClick={() => setActiveDropdown(activeDropdown === 'language' ? null : 'language')}
-                className="p-2 text-dark-600 dark:text-dark-400 hover:text-dark-900 dark:hover:text-white transition-colors"
-              >
-                <Globe className="w-5 h-5" />
-              </button>
-              <AnimatePresence>
-                {activeDropdown === 'language' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full right-0 w-32 py-2 mt-1 bg-white dark:bg-dark-800 rounded-xl shadow-xl border border-dark-100 dark:border-dark-700"
-                  >
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleLanguageChange(lang.code)}
-                        className={clsx(
-                          "block w-full text-left px-4 py-2 text-sm transition-colors",
-                          i18n.language === lang.code 
-                            ? "bg-primary-50 dark:bg-primary-900/30 text-primary-600" 
-                            : "hover:bg-dark-50 dark:hover:bg-dark-700"
-                        )}
-                      >
-                        {lang.label}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="hidden md:block">
+              <LanguageSwitcher variant="compact" />
             </div>
 
             {/* Theme toggle */}
