@@ -178,6 +178,12 @@ export const adminAPI = {
   getOrders: (params) => api.get('/admin/orders', { params }),
   updateOrderStatus: (uuid, data) => api.put(`/admin/orders/${uuid}/status`, data),
   
+  // Services
+  getServices: (params) => api.get('/admin/services', { params }),
+  getService: (uuid) => api.get(`/admin/services/${uuid}`),
+  updateService: (uuid, data) => api.put(`/admin/services/${uuid}`, data),
+  getServicePleskStats: (uuid) => api.get(`/admin/services/${uuid}/plesk-stats`),
+  
   // Tickets
   getTickets: (params) => api.get('/admin/tickets', { params }),
   replyTicket: (uuid, message) => api.post(`/admin/tickets/${uuid}/reply`, { message }),

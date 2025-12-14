@@ -96,6 +96,7 @@ import AdminNoBotServices from './pages/admin/AdminNoBotServices'
 import AdminEmailLogs from './pages/admin/AdminEmailLogs'
 import AdminServerManagement from './pages/admin/AdminServerManagement'
 import AdminUserDetail from './pages/admin/AdminUserDetail'
+import AdminServiceManage from './pages/admin/AdminServiceManage'
 import AdminLogin from './pages/admin/AdminLogin'
 import ProposalView from './pages/ProposalView'
 
@@ -266,6 +267,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="users/:uuid" element={<AdminUserDetail />} />
+          <Route path="services/:uuid/manage" element={<AdminServiceManage />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="tickets" element={<AdminTickets />} />
           <Route path="domains" element={<AdminDomains />} />

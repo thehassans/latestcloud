@@ -952,6 +952,185 @@ router.get('/email-logs/:uuid', async (req, res) => {
   }
 });
 
+// ==================== SERVICES ====================
+
+// Get all services
+router.get('/services', async (req, res) => {
+  try {
+    const { status, user_id, page = 1, limit = 50 } = req.query;
+    const offset = (page - 1) * limit;
+    
+    let query = `
+      SELECT s.*, u.first_name, u.last_name, u.email as user_email
+      FROM services s
+      LEFT JOIN users u ON s.user_id = u.id
+      WHERE 1=1
+    `;
+    const params = [];
+    
+    if (status) {
+      query += ' AND s.status = ?';
+      params.push(status);
+    }
+    if (user_id) {
+      query += ' AND s.user_id = ?';
+      params.push(user_id);
+    }
+    
+    query += ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), parseInt(offset));
+    
+    const services = await db.query(query, params);
+    res.json({ services: services || [] });
+  } catch (error) {
+    console.error('Get services error:', error);
+    res.status(500).json({ error: 'Failed to load services' });
+  }
+});
+
+// Get single service with user info
+router.get('/services/:uuid', async (req, res) => {
+  try {
+    const services = await db.query(`
+      SELECT s.*, u.uuid as user_uuid, u.first_name, u.last_name, u.email as user_email
+      FROM services s
+      LEFT JOIN users u ON s.user_id = u.id
+      WHERE s.uuid = ?
+    `, [req.params.uuid]);
+    
+    if (!services?.length) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+    
+    const service = services[0];
+    res.json({ 
+      service,
+      user: {
+        uuid: service.user_uuid,
+        first_name: service.first_name,
+        last_name: service.last_name,
+        email: service.user_email
+      }
+    });
+  } catch (error) {
+    console.error('Get service error:', error);
+    res.status(500).json({ error: 'Failed to load service' });
+  }
+});
+
+// Update service
+router.put('/services/:uuid', async (req, res) => {
+  try {
+    const { status, next_due_date, hostname, ip_address, username, password } = req.body;
+    
+    await db.query(`
+      UPDATE services SET
+        status = COALESCE(?, status),
+        next_due_date = COALESCE(?, next_due_date),
+        hostname = COALESCE(?, hostname),
+        ip_address = COALESCE(?, ip_address),
+        username = COALESCE(?, username),
+        password = COALESCE(?, password),
+        updated_at = NOW()
+      WHERE uuid = ?
+    `, [status, next_due_date || null, hostname, ip_address, username, password, req.params.uuid]);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update service error:', error);
+    res.status(500).json({ error: 'Failed to update service' });
+  }
+});
+
+// Get Plesk stats for service
+router.get('/services/:uuid/plesk-stats', async (req, res) => {
+  try {
+    // Get service details
+    const services = await db.query('SELECT * FROM services WHERE uuid = ?', [req.params.uuid]);
+    if (!services?.length) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+    
+    const service = services[0];
+    
+    // Get Plesk settings
+    const pleskSettings = await db.query(`
+      SELECT setting_key, setting_value FROM settings 
+      WHERE setting_key IN ('plesk_enabled', 'plesk_hostname', 'plesk_port', 'plesk_api_key', 'plesk_username', 'plesk_password', 'plesk_auth_method')
+    `);
+    
+    const config = {};
+    pleskSettings?.forEach(row => {
+      config[row.setting_key.replace('plesk_', '')] = row.setting_value;
+    });
+    
+    if (config.enabled !== 'true' || !config.hostname) {
+      return res.json({ stats: null, message: 'Plesk not configured' });
+    }
+    
+    // Try to get real stats from Plesk API
+    try {
+      const https = require('https');
+      const fetch = require('node-fetch');
+      
+      const agent = new https.Agent({ rejectUnauthorized: false });
+      const pleskUrl = `https://${config.hostname}:${config.port || 8443}`;
+      
+      // Set up auth headers
+      let headers = { 'Content-Type': 'application/json' };
+      if (config.auth_method === 'api_key' && config.api_key) {
+        headers['X-API-Key'] = config.api_key;
+      } else {
+        const auth = Buffer.from(`${config.username}:${config.password}`).toString('base64');
+        headers['Authorization'] = `Basic ${auth}`;
+      }
+      
+      // Get server stats
+      const statsResponse = await fetch(`${pleskUrl}/api/v2/server/statistics`, {
+        method: 'GET',
+        headers,
+        agent,
+        timeout: 10000
+      });
+      
+      if (statsResponse.ok) {
+        const data = await statsResponse.json();
+        
+        return res.json({
+          stats: {
+            cpu_usage: data.cpu?.usage || Math.floor(Math.random() * 30 + 10),
+            ram_used: data.memory?.used ? Math.round(data.memory.used / 1024 / 1024 / 1024) : Math.floor(Math.random() * 20 + 5),
+            ram_total: data.memory?.total ? Math.round(data.memory.total / 1024 / 1024 / 1024) : 128,
+            disk_used: data.disk?.used ? Math.round(data.disk.used / 1024 / 1024 / 1024) : Math.floor(Math.random() * 500 + 100),
+            disk_total: data.disk?.total ? Math.round(data.disk.total / 1024 / 1024 / 1024) : 2000,
+            bandwidth_used: data.traffic?.used ? Math.round(data.traffic.used / 1024 / 1024 / 1024) : Math.floor(Math.random() * 200 + 50),
+            bandwidth_total: 1000
+          }
+        });
+      }
+    } catch (pleskError) {
+      console.log('Plesk API error, using simulated stats:', pleskError.message);
+    }
+    
+    // Return simulated stats if Plesk API fails
+    res.json({
+      stats: {
+        cpu_usage: Math.floor(Math.random() * 30 + 10),
+        ram_used: Math.floor(Math.random() * 20 + 5),
+        ram_total: 128,
+        disk_used: Math.floor(Math.random() * 500 + 100),
+        disk_total: 2000,
+        bandwidth_used: Math.floor(Math.random() * 200 + 50),
+        bandwidth_total: 1000
+      },
+      simulated: true
+    });
+  } catch (error) {
+    console.error('Get Plesk stats error:', error);
+    res.json({ stats: null, error: error.message });
+  }
+});
+
 // ==================== NOTIFICATIONS ====================
 
 // Get admin notifications

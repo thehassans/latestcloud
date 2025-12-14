@@ -32,6 +32,21 @@ const getStatusColor = (status) => {
   return colors[status] || colors.pending
 }
 
+// Parse service type from name
+const getServiceType = (service) => {
+  const name = (service.name || '').toLowerCase()
+  if (name.includes('vps')) return 'VPS'
+  if (name.includes('dedicated')) return 'Dedicated'
+  if (name.includes('cloud')) return 'Cloud'
+  if (name.includes('reseller')) return 'Reseller'
+  if (name.includes('nobot')) return 'NoBot AI'
+  if (name.includes('wordpress')) return 'WordPress'
+  if (name.includes('email')) return 'Email'
+  if (name.includes('ssl')) return 'SSL'
+  if (name.includes('domain')) return 'Domain'
+  return service.service_type || 'Hosting'
+}
+
 export default function AdminUserDetail() {
   const { uuid } = useParams()
   const navigate = useNavigate()
@@ -370,13 +385,25 @@ export default function AdminUserDetail() {
                 <th className="text-left p-4 font-medium">Type</th>
                 <th className="text-left p-4 font-medium">Status</th>
                 <th className="text-left p-4 font-medium">Next Due</th>
+                <th className="text-left p-4 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-dark-100 dark:divide-dark-700">
               {services.map(service => (
                 <tr key={service.uuid} className="hover:bg-dark-50 dark:hover:bg-dark-800/50">
                   <td className="p-4 font-medium">{service.name}</td>
-                  <td className="p-4 capitalize">{service.service_type || 'hosting'}</td>
+                  <td className="p-4">
+                    <span className={clsx(
+                      "px-2 py-1 rounded-full text-xs font-medium",
+                      getServiceType(service) === 'VPS' && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+                      getServiceType(service) === 'Dedicated' && "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+                      getServiceType(service) === 'Cloud' && "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400",
+                      getServiceType(service) === 'NoBot AI' && "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400",
+                      !['VPS', 'Dedicated', 'Cloud', 'NoBot AI'].includes(getServiceType(service)) && "bg-dark-100 text-dark-600 dark:bg-dark-700 dark:text-dark-400"
+                    )}>
+                      {getServiceType(service)}
+                    </span>
+                  </td>
                   <td className="p-4">
                     <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", getStatusColor(service.status))}>
                       {service.status}
@@ -384,6 +411,15 @@ export default function AdminUserDetail() {
                   </td>
                   <td className="p-4 text-dark-500">
                     {service.next_due_date ? new Date(service.next_due_date).toLocaleDateString() : 'N/A'}
+                  </td>
+                  <td className="p-4">
+                    <Link 
+                      to={`/admin/services/${service.uuid}/manage`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      Manage
+                    </Link>
                   </td>
                 </tr>
               ))}
