@@ -116,7 +116,7 @@ export default function AdminOrders() {
                               <Eye className="w-4 h-4" />
                             </button>
                           )}
-                          {order.payment_status === 'pending' && (
+                          {(order.payment_status === 'pending' || order.payment_status === 'unpaid' || order.status === 'pending') && (
                             <>
                               <button 
                                 onClick={() => openConfirmDialog(order, 'approve')}
