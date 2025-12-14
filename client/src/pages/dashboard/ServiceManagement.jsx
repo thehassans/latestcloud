@@ -121,8 +121,12 @@ export default function ServiceManagement() {
     )
   }
 
-  // Check if this is a domain service
-  const isDomain = service.service_type === 'domain'
+  // Check if this is a domain service - check service_type OR domain name patterns
+  const domainTLDs = ['.com', '.net', '.org', '.io', '.co', '.dev', '.app', '.xyz', '.info', '.biz', '.me', '.us', '.uk', '.ca', '.au', '.de', '.fr', '.in', '.bd']
+  const serviceName = (service.domain_name || service.name || '').toLowerCase()
+  const hasDomainTLD = domainTLDs.some(tld => serviceName.endsWith(tld))
+  const isDomain = service.service_type === 'domain' || 
+                   (hasDomainTLD && !serviceName.includes('hosting') && !serviceName.includes('vps') && !serviceName.includes('server'))
 
   // Calculate days until expiry for domains
   const getDaysUntilExpiry = (expiryDate) => {

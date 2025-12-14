@@ -63,12 +63,40 @@ export default function MyDomains() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
+  // Fetch both domains API and all services to catch domains that might be mistyped
   const { data, isLoading } = useQuery({
     queryKey: ['user-domains'],
     queryFn: () => userAPI.getDomains().then(res => res.data)
   })
 
-  const domains = data?.domains || []
+  const { data: servicesData } = useQuery({
+    queryKey: ['user-services-for-domains'],
+    queryFn: () => userAPI.getServices().then(res => res.data)
+  })
+
+  // Domain TLDs for detection
+  const domainTLDs = ['.com', '.net', '.org', '.io', '.co', '.dev', '.app', '.xyz', '.info', '.biz', '.me', '.us', '.uk', '.ca', '.au', '.de', '.fr', '.in', '.bd']
+  
+  // Check if a service name looks like a domain
+  const isDomainName = (name) => {
+    if (!name) return false
+    const lowerName = name.toLowerCase()
+    return domainTLDs.some(tld => lowerName.endsWith(tld)) && 
+           !lowerName.includes('hosting') && 
+           !lowerName.includes('vps') && 
+           !lowerName.includes('server')
+  }
+
+  // Get domains from API + any services that look like domains but aren't typed as such
+  const apiDomains = data?.domains || []
+  const apiDomainUuids = new Set(apiDomains.map(d => d.uuid))
+  
+  // Find services that look like domains but might not be in the domains list
+  const additionalDomains = (servicesData?.services || []).filter(s => 
+    !apiDomainUuids.has(s.uuid) && isDomainName(s.domain_name || s.name)
+  )
+  
+  const domains = [...apiDomains, ...additionalDomains]
   
   const filteredDomains = domains.filter(domain => {
     const matchesSearch = domain.domain_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
