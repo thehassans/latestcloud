@@ -156,19 +156,74 @@ router.get('/check/:domain', async (req, res) => {
   }
 });
 
-// Get WHOIS info (mock)
+// Get WHOIS info using DNS lookups
 router.get('/whois/:domain', async (req, res) => {
   try {
     const { domain } = req.params;
     
-    // In production, query WHOIS server
+    // Check if domain is registered
+    const availability = await checkDomainAvailability(domain);
+    
+    if (availability.available) {
+      return res.json({
+        domain,
+        available: true,
+        message: `${domain} is available for registration!`
+      });
+    }
+
+    // Domain is registered - try to get DNS info
+    let nameservers = [];
+    let soa = null;
+    let aRecords = [];
+    let mxRecords = [];
+
+    try {
+      nameservers = await dns.resolveNs(domain);
+    } catch (e) {}
+
+    try {
+      soa = await dns.resolveSoa(domain);
+    } catch (e) {}
+
+    try {
+      aRecords = await dns.resolve4(domain);
+    } catch (e) {}
+
+    try {
+      mxRecords = await dns.resolveMx(domain);
+    } catch (e) {}
+
+    // Extract registrar info from nameservers (common patterns)
+    let registrar = 'Unknown Registrar';
+    const nsString = nameservers.join(' ').toLowerCase();
+    if (nsString.includes('cloudflare')) registrar = 'Cloudflare';
+    else if (nsString.includes('godaddy')) registrar = 'GoDaddy';
+    else if (nsString.includes('namecheap')) registrar = 'Namecheap';
+    else if (nsString.includes('google')) registrar = 'Google Domains';
+    else if (nsString.includes('aws') || nsString.includes('amazon')) registrar = 'Amazon Route 53';
+    else if (nsString.includes('hostgator')) registrar = 'HostGator';
+    else if (nsString.includes('bluehost')) registrar = 'Bluehost';
+    else if (nsString.includes('dns')) registrar = 'DNS Provider';
+
     res.json({
       domain,
-      registrar: 'Magnetic Clouds',
-      status: 'active',
-      created_date: '2020-01-01',
-      expiry_date: '2025-01-01',
-      nameservers: ['ns1.magneticclouds.com', 'ns2.magneticclouds.com']
+      available: false,
+      registered: true,
+      message: `${domain} is already registered`,
+      registrar,
+      nameservers: nameservers.slice(0, 4),
+      soa: soa ? {
+        primaryNs: soa.nsname,
+        hostmaster: soa.hostmaster,
+        serial: soa.serial,
+        refresh: soa.refresh,
+        retry: soa.retry,
+        expire: soa.expire
+      } : null,
+      aRecords: aRecords.slice(0, 4),
+      mxRecords: mxRecords.slice(0, 4).map(mx => ({ priority: mx.priority, exchange: mx.exchange })),
+      status: 'active'
     });
   } catch (error) {
     console.error('WHOIS error:', error);

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { Search, Globe, CheckCircle, XCircle, ShoppingCart, Shield, Zap, Lock, ArrowRight, Headphones, RefreshCw } from 'lucide-react'
+import { Search, Globe, CheckCircle, XCircle, ShoppingCart, Shield, Zap, Lock, ArrowRight, Headphones, RefreshCw, Info, Server, Mail, ChevronDown, ChevronUp, Loader2, ExternalLink } from 'lucide-react'
 import { domainsAPI } from '../lib/api'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../store/useStore'
 import clsx from 'clsx'
@@ -37,6 +37,13 @@ export default function Domains() {
     queryKey: ['domain-search', searchTerm],
     queryFn: () => domainsAPI.search(searchTerm).then(res => res.data),
     enabled: searched && searchTerm.length > 0
+  })
+
+  const [showWhois, setShowWhois] = useState(null)
+  const { data: whoisData, isLoading: loadingWhois } = useQuery({
+    queryKey: ['whois', showWhois],
+    queryFn: () => domainsAPI.whois(showWhois).then(res => res.data),
+    enabled: !!showWhois
   })
 
   // Auto-search on URL param
@@ -174,6 +181,231 @@ export default function Domains() {
               </div>
             </div>
           </motion.form>
+
+          {/* Primary Domain Result - Premium Card Below Search */}
+          <AnimatePresence>
+            {searched && searchResults?.primary && (
+              <motion.div
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                className="max-w-3xl mx-auto mt-6"
+              >
+                <div className={clsx(
+                  "relative rounded-2xl overflow-hidden",
+                  searchResults.primary.available
+                    ? "bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10"
+                    : "bg-gradient-to-r from-red-500/10 via-rose-500/5 to-pink-500/10"
+                )}>
+                  {/* Glow effect */}
+                  <div className={clsx(
+                    "absolute inset-0 opacity-30 blur-xl",
+                    searchResults.primary.available
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-500"
+                      : "bg-gradient-to-r from-red-500 to-rose-500"
+                  )} />
+                  
+                  <div className={clsx(
+                    "relative p-6 backdrop-blur-sm border-2 rounded-2xl",
+                    searchResults.primary.available
+                      ? "border-emerald-500/40"
+                      : "border-red-500/40"
+                  )}>
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                      {/* Domain Info */}
+                      <div className="flex items-center gap-4">
+                        <div className={clsx(
+                          "w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg",
+                          searchResults.primary.available
+                            ? "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30"
+                            : "bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/30"
+                        )}>
+                          {searching ? (
+                            <Loader2 className="w-8 h-8 text-white animate-spin" />
+                          ) : searchResults.primary.available ? (
+                            <CheckCircle className="w-8 h-8 text-white" />
+                          ) : (
+                            <XCircle className="w-8 h-8 text-white" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-2xl md:text-3xl font-bold text-dark-900 dark:text-white">
+                            {searchResults.primary.domain}
+                          </h3>
+                          <p className={clsx(
+                            "text-lg font-semibold mt-1",
+                            searchResults.primary.available
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-red-600 dark:text-red-400"
+                          )}>
+                            {searchResults.primary.available
+                              ? `✓ ${searchResults.primary.domain} is available!`
+                              : `✗ ${searchResults.primary.domain} is already registered`}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-4 w-full md:w-auto">
+                        {searchResults.primary.available ? (
+                          <>
+                            <div className="text-right">
+                              {searchResults.primary.promo_price ? (
+                                <>
+                                  <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+                                    {format(searchResults.primary.promo_price)}
+                                    <span className="text-sm text-dark-500 font-normal">/yr</span>
+                                  </p>
+                                  <p className="text-sm text-dark-400 line-through">
+                                    {format(searchResults.primary.price_register)}/yr
+                                  </p>
+                                </>
+                              ) : (
+                                <p className="text-3xl font-bold text-dark-900 dark:text-white">
+                                  {format(searchResults.primary.price_register)}
+                                  <span className="text-sm text-dark-500 font-normal">/yr</span>
+                                </p>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleAddToCart(searchResults.primary)}
+                              className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-emerald-500/30 transition-all transform hover:scale-105"
+                            >
+                              <ShoppingCart className="w-5 h-5" />
+                              Add to Cart
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => setShowWhois(showWhois === searchResults.primary.domain ? null : searchResults.primary.domain)}
+                            className={clsx(
+                              "flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all",
+                              showWhois === searchResults.primary.domain
+                                ? "bg-dark-800 text-white"
+                                : "bg-dark-100 dark:bg-dark-800 text-dark-600 dark:text-dark-300 hover:bg-dark-200 dark:hover:bg-dark-700"
+                            )}
+                          >
+                            <Info className="w-5 h-5" />
+                            {showWhois === searchResults.primary.domain ? 'Hide' : 'View'} WHOIS Info
+                            {showWhois === searchResults.primary.domain ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* WHOIS Details Panel */}
+                    <AnimatePresence>
+                      {showWhois === searchResults.primary.domain && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-6 pt-6 border-t border-dark-200 dark:border-dark-700">
+                            {loadingWhois ? (
+                              <div className="flex items-center justify-center py-8">
+                                <Loader2 className="w-6 h-6 animate-spin text-primary-500 mr-2" />
+                                <span className="text-dark-500">Loading WHOIS information...</span>
+                              </div>
+                            ) : whoisData ? (
+                              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {/* Registrar */}
+                                <div className="p-4 rounded-xl bg-dark-50 dark:bg-dark-800/50">
+                                  <div className="flex items-center gap-2 text-dark-500 text-sm mb-1">
+                                    <Shield className="w-4 h-4" />
+                                    Registrar / DNS Provider
+                                  </div>
+                                  <p className="font-semibold text-dark-900 dark:text-white">{whoisData.registrar || 'Unknown'}</p>
+                                </div>
+
+                                {/* Status */}
+                                <div className="p-4 rounded-xl bg-dark-50 dark:bg-dark-800/50">
+                                  <div className="flex items-center gap-2 text-dark-500 text-sm mb-1">
+                                    <Globe className="w-4 h-4" />
+                                    Status
+                                  </div>
+                                  <p className="font-semibold text-red-500">Already Registered</p>
+                                </div>
+
+                                {/* Nameservers */}
+                                {whoisData.nameservers?.length > 0 && (
+                                  <div className="p-4 rounded-xl bg-dark-50 dark:bg-dark-800/50">
+                                    <div className="flex items-center gap-2 text-dark-500 text-sm mb-1">
+                                      <Server className="w-4 h-4" />
+                                      Nameservers
+                                    </div>
+                                    <div className="space-y-1">
+                                      {whoisData.nameservers.slice(0, 2).map((ns, i) => (
+                                        <p key={i} className="font-mono text-xs text-dark-700 dark:text-dark-300 truncate">{ns}</p>
+                                      ))}
+                                      {whoisData.nameservers.length > 2 && (
+                                        <p className="text-xs text-dark-400">+{whoisData.nameservers.length - 2} more</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* MX Records */}
+                                {whoisData.mxRecords?.length > 0 && (
+                                  <div className="p-4 rounded-xl bg-dark-50 dark:bg-dark-800/50">
+                                    <div className="flex items-center gap-2 text-dark-500 text-sm mb-1">
+                                      <Mail className="w-4 h-4" />
+                                      Mail Server
+                                    </div>
+                                    <p className="font-mono text-xs text-dark-700 dark:text-dark-300 truncate">
+                                      {whoisData.mxRecords[0]?.exchange || 'N/A'}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {/* IP Address */}
+                                {whoisData.aRecords?.length > 0 && (
+                                  <div className="p-4 rounded-xl bg-dark-50 dark:bg-dark-800/50">
+                                    <div className="flex items-center gap-2 text-dark-500 text-sm mb-1">
+                                      <Server className="w-4 h-4" />
+                                      IP Address
+                                    </div>
+                                    <p className="font-mono text-sm text-dark-700 dark:text-dark-300">{whoisData.aRecords[0]}</p>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-center text-dark-500 py-4">Unable to fetch WHOIS information</p>
+                            )}
+
+                            <p className="mt-4 text-sm text-dark-500 text-center">
+                              💡 Try a different extension like <span className="font-semibold text-emerald-500">.io</span>, <span className="font-semibold text-emerald-500">.co</span>, or <span className="font-semibold text-emerald-500">.net</span>
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Loading State */}
+          {searching && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="max-w-3xl mx-auto mt-6"
+            >
+              <div className="p-6 rounded-2xl bg-dark-100 dark:bg-dark-800 animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-dark-200 dark:bg-dark-700" />
+                  <div className="flex-1">
+                    <div className="h-8 w-48 bg-dark-200 dark:bg-dark-700 rounded mb-2" />
+                    <div className="h-5 w-64 bg-dark-200 dark:bg-dark-700 rounded" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
           {/* Popular TLDs Quick View */}
           <motion.div
