@@ -471,14 +471,9 @@ export default function Dashboard() {
                       <td className="px-6 py-4 text-right">
                         <Link
                           to={`/dashboard/invoices/${invoice.uuid}`}
-                          className={clsx(
-                            "inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-all",
-                            invoice.status === 'unpaid'
-                              ? "bg-primary-500 hover:bg-primary-600 text-white"
-                              : "bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 text-dark-700 dark:text-dark-200"
-                          )}
+                          className="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 text-dark-700 dark:text-dark-200"
                         >
-                          {invoice.status === 'unpaid' ? 'Pay Now' : 'View'}
+                          View
                           <ChevronRight className="w-4 h-4" />
                         </Link>
                       </td>
