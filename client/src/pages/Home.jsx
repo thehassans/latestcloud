@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
   Search, Server, Cloud, Database, Globe, Shield, Mail,
@@ -10,7 +9,7 @@ import {
   ArrowRight, ChevronRight, Star, Users, Award, TrendingUp
 } from 'lucide-react'
 import { productsAPI, domainsAPI, settingsAPI } from '../lib/api'
-import { useCurrencyStore, useThemeStore, useSiteSettingsStore } from '../store/useStore'
+import { useCurrencyStore, useThemeStore, useSiteSettingsStore, useLanguageStore } from '../store/useStore'
 import clsx from 'clsx'
 
 const features = [
@@ -41,7 +40,7 @@ const stats = [
 ]
 
 export default function Home() {
-  const { t } = useTranslation()
+  const { t } = useLanguageStore()
   const navigate = useNavigate()
   const { format } = useCurrencyStore()
   const { themeStyle } = useThemeStore()
@@ -144,11 +143,11 @@ export default function Home() {
               {/* CTA buttons */}
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link to="/hosting" className="btn-primary">
-                  Get Started
+                  {t('hero.getStarted')}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
                 <Link to="/pricing" className="btn-outline">
-                  View Pricing
+                  {t('hero.viewPlans')}
                 </Link>
               </div>
 
