@@ -291,40 +291,41 @@ router.get('/currencies', async (req, res) => {
 // Get payment gateway settings (admin only)
 router.get('/payment-gateway', authenticate, requireRole('admin'), async (req, res) => {
   try {
-    const settings = {};
-    const keys = [
-      'stripe_enabled', 'stripe_mode', 
-      'stripe_publishable_key_test', 'stripe_secret_key_test',
-      'stripe_publishable_key_live', 'stripe_secret_key_live',
-      'stripe_webhook_secret',
-      // PayPal
-      'paypal_enabled', 'paypal_mode',
-      'paypal_client_id_sandbox', 'paypal_secret_sandbox',
-      'paypal_client_id_live', 'paypal_secret_live',
-      // bKash
-      'bkash_enabled', 'bkash_number', 'bkash_account_type', 'bkash_instructions',
-      // Rocket
-      'rocket_enabled', 'rocket_number', 'rocket_account_type', 'rocket_instructions',
-      // Bank & Cash
-      'bank_transfer_enabled', 'bank_name', 'bank_account_number',
-      'bank_account_holder', 'bank_additional_info',
-      'cash_payment_enabled', 'cash_payment_instructions'
-    ];
-
-    // Generate placeholders for IN clause
-    const placeholders = keys.map(() => '?').join(', ');
+    // Query all payment gateway settings
     const results = await db.query(
-      `SELECT setting_key, setting_value, setting_type FROM settings WHERE setting_key IN (${placeholders})`,
-      keys
+      `SELECT setting_key, setting_value FROM settings WHERE setting_key IN (
+        'stripe_enabled', 'stripe_mode', 
+        'stripe_publishable_key_test', 'stripe_secret_key_test',
+        'stripe_publishable_key_live', 'stripe_secret_key_live',
+        'stripe_webhook_secret',
+        'paypal_enabled', 'paypal_mode',
+        'paypal_client_id_sandbox', 'paypal_secret_sandbox',
+        'paypal_client_id_live', 'paypal_secret_live',
+        'bkash_enabled', 'bkash_number', 'bkash_account_type', 'bkash_instructions',
+        'rocket_enabled', 'rocket_number', 'rocket_account_type', 'rocket_instructions',
+        'bank_transfer_enabled', 'bank_name', 'bank_account_number',
+        'bank_account_holder', 'bank_additional_info',
+        'cash_payment_enabled', 'cash_payment_instructions'
+      )`
     );
+
+    // Build settings object
+    const settings = {};
+    const booleanKeys = [
+      'stripe_enabled', 'paypal_enabled', 'bkash_enabled', 
+      'rocket_enabled', 'bank_transfer_enabled', 'cash_payment_enabled'
+    ];
 
     if (results && Array.isArray(results)) {
       results.forEach(row => {
-        let value = row.setting_value;
-        if (row.setting_type === 'boolean' || row.setting_key.endsWith('_enabled')) {
-          value = value === 'true' || value === '1' || value === true;
+        if (row && row.setting_key) {
+          // Convert boolean string values to actual booleans
+          if (booleanKeys.includes(row.setting_key)) {
+            settings[row.setting_key] = row.setting_value === 'true' || row.setting_value === '1';
+          } else {
+            settings[row.setting_key] = row.setting_value || '';
+          }
         }
-        settings[row.setting_key] = value;
       });
     }
 
@@ -402,48 +403,39 @@ router.post('/payment-gateway/test', authenticate, requireRole('admin'), async (
 // Get payment methods and bank details (public)
 router.get('/payment-methods', async (req, res) => {
   try {
-    const keys = [
-      'stripe_enabled', 'paypal_enabled', 'bkash_enabled', 'rocket_enabled',
-      'bank_transfer_enabled', 'cash_payment_enabled',
-      'bank_name', 'bank_account_number', 'bank_account_holder', 'bank_additional_info',
-      'bkash_number', 'bkash_account_type', 'bkash_instructions',
-      'rocket_number', 'rocket_account_type', 'rocket_instructions',
-      'cash_payment_instructions'
-    ];
-    
-    let results = [];
-    try {
-      // Generate placeholders for IN clause
-      const placeholders = keys.map(() => '?').join(', ');
-      results = await db.query(
-        `SELECT setting_key, setting_value, setting_type FROM settings WHERE setting_key IN (${placeholders})`,
-        keys
-      );
-    } catch (dbError) {
-      console.error('Database query error:', dbError);
-      // Continue with empty results
-    }
+    // Query all payment-related settings directly
+    const results = await db.query(
+      `SELECT setting_key, setting_value FROM settings WHERE setting_key IN (
+        'stripe_enabled', 'paypal_enabled', 'bkash_enabled', 'rocket_enabled',
+        'bank_transfer_enabled', 'cash_payment_enabled',
+        'bank_name', 'bank_account_number', 'bank_account_holder', 'bank_additional_info',
+        'bkash_number', 'bkash_account_type', 'bkash_instructions',
+        'rocket_number', 'rocket_account_type', 'rocket_instructions',
+        'cash_payment_instructions'
+      )`
+    );
 
+    // Build settings object from database results
     const settings = {};
     if (results && Array.isArray(results)) {
       results.forEach(row => {
         if (row && row.setting_key) {
-          let value = row.setting_value;
-          if (row.setting_type === 'boolean' || row.setting_key.endsWith('_enabled')) {
-            value = value === 'true' || value === '1' || value === true;
-          }
-          settings[row.setting_key] = value;
+          settings[row.setting_key] = row.setting_value;
         }
       });
     }
 
+    // Helper to parse boolean from DB value
+    const parseBool = (val) => val === 'true' || val === '1' || val === true;
+
+    // Return payment settings with explicit boolean conversion
     res.json({
-      stripe_enabled: settings.stripe_enabled === true,
-      paypal_enabled: settings.paypal_enabled === true,
-      bkash_enabled: settings.bkash_enabled === true,
-      rocket_enabled: settings.rocket_enabled === true,
-      bank_transfer_enabled: settings.bank_transfer_enabled === true,
-      cash_payment_enabled: settings.cash_payment_enabled === true,
+      stripe_enabled: parseBool(settings.stripe_enabled),
+      paypal_enabled: parseBool(settings.paypal_enabled),
+      bkash_enabled: parseBool(settings.bkash_enabled),
+      rocket_enabled: parseBool(settings.rocket_enabled),
+      bank_transfer_enabled: parseBool(settings.bank_transfer_enabled),
+      cash_payment_enabled: parseBool(settings.cash_payment_enabled),
       bank_details: {
         bank_name: settings.bank_name || '',
         account_number: settings.bank_account_number || '',
@@ -453,14 +445,14 @@ router.get('/payment-methods', async (req, res) => {
       bkash_details: {
         number: settings.bkash_number || '',
         account_type: settings.bkash_account_type || 'personal',
-        instructions: settings.bkash_instructions || 'Send payment to our bKash number and use Order ID as reference.'
+        instructions: settings.bkash_instructions || ''
       },
       rocket_details: {
         number: settings.rocket_number || '',
         account_type: settings.rocket_account_type || 'personal',
-        instructions: settings.rocket_instructions || 'Send payment to our Rocket number and use Order ID as reference.'
+        instructions: settings.rocket_instructions || ''
       },
-      cash_instructions: settings.cash_payment_instructions || 'Contact us to arrange cash payment. Upload receipt after payment.'
+      cash_instructions: settings.cash_payment_instructions || ''
     });
   } catch (error) {
     console.error('Get payment methods error:', error);
