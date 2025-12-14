@@ -28,6 +28,7 @@ const menuGroups = [
       { to: '/admin/proposals', icon: Send, label: 'Proposals' },
       { to: '/admin/invoices', icon: Receipt, label: 'Invoices' },
       { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
+      { to: '/admin/ai-chats', icon: MessageSquare, label: 'Chat History' },
     ]
   },
   {
@@ -49,6 +50,7 @@ const menuGroups = [
       { to: '/admin/email-logs', icon: Mail, label: 'Email Logs' },
       { to: '/admin/nobot-services', icon: Bot, label: 'NoBot Services' },
       { to: '/admin/ai-agent', icon: Bot, label: 'AI Agents' },
+      { to: '/admin/pages', icon: FileText, label: 'Pages' },
     ]
   }
 ]
@@ -56,8 +58,6 @@ const menuGroups = [
 // Bottom links (after groups)
 const bottomLinks = [
   { to: '/admin/tickets', icon: Ticket, label: 'Tickets' },
-  { to: '/admin/pages', icon: FileText, label: 'Pages' },
-  { to: '/admin/ai-chats', icon: MessageSquare, label: 'Chat History' },
 ]
 
 const NOTIFICATION_ICONS = {
