@@ -474,21 +474,6 @@ class EmailService {
     let html = '';
     
     try {
-      // Check if enabled
-      if (!await this.isEnabled(templateName)) {
-        console.log(`Email ${templateName} is disabled or Mailgun not configured`);
-        return false;
-      }
-
-      // Initialize if needed
-      if (!this.mg) {
-        const initialized = await this.init();
-        if (!initialized) {
-          console.log('Mailgun not initialized');
-          return false;
-        }
-      }
-
       const template = templates[templateName];
       if (!template) {
         console.error(`Template ${templateName} not found`);
@@ -507,7 +492,7 @@ class EmailService {
       subject = this.replaceVariables(template.subject, allVariables);
       html = this.replaceVariables(template.html, allVariables);
 
-      // Log email before sending
+      // Always log email attempt first
       await this.logEmail({
         uuid: emailUuid,
         user_id: userId,
@@ -519,6 +504,23 @@ class EmailService {
         status: 'pending',
         metadata: JSON.stringify(variables)
       });
+
+      // Check if Mailgun is enabled
+      if (!await this.isEnabled(templateName)) {
+        console.log(`Email ${templateName} is disabled or Mailgun not configured - logged only`);
+        await this.updateEmailLog(emailUuid, 'failed', 'Mailgun not configured or email type disabled');
+        return false;
+      }
+
+      // Initialize if needed
+      if (!this.mg) {
+        const initialized = await this.init();
+        if (!initialized) {
+          console.log('Mailgun not initialized - email logged');
+          await this.updateEmailLog(emailUuid, 'failed', 'Mailgun initialization failed');
+          return false;
+        }
+      }
 
       const result = await this.mg.messages.create(this.settings.mailgun_domain, {
         from: `${this.settings.mailgun_from_name} <${this.settings.mailgun_from_email}>`,

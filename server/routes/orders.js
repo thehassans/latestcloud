@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const db = require('../database/connection');
 const { authenticate } = require('../middleware/auth');
 const emailService = require('../services/emailService');
+const notificationService = require('../services/notificationService');
 
 const router = express.Router();
 
@@ -292,6 +293,11 @@ router.post('/', authenticate, [
     // Email to admin
     emailService.notifyAdminNewOrder(orderData, req.user).catch(err => 
       console.error('Failed to notify admin:', err)
+    );
+
+    // Create notifications
+    notificationService.notifyNewOrder(orderData, req.user).catch(err =>
+      console.error('Failed to create order notification:', err)
     );
 
     res.status(201).json({

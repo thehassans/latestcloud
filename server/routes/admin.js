@@ -6,6 +6,7 @@ const slugify = require('slugify');
 const db = require('../database/connection');
 const { authenticate, requireRole } = require('../middleware/auth');
 const emailService = require('../services/emailService');
+const notificationService = require('../services/notificationService');
 
 const router = express.Router();
 
@@ -948,6 +949,55 @@ router.get('/email-logs/:uuid', async (req, res) => {
   } catch (error) {
     console.error('Get email log error:', error);
     res.status(500).json({ error: 'Failed to load email' });
+  }
+});
+
+// ==================== NOTIFICATIONS ====================
+
+// Get admin notifications
+router.get('/notifications', async (req, res) => {
+  try {
+    const { limit = 50, unread_only = false } = req.query;
+    const notifications = await notificationService.getAdminNotifications(
+      parseInt(limit), 
+      unread_only === 'true'
+    );
+    const unreadCount = await notificationService.getAdminUnreadCount();
+    
+    res.json({ notifications, unreadCount });
+  } catch (error) {
+    console.error('Get notifications error:', error);
+    res.json({ notifications: [], unreadCount: 0 });
+  }
+});
+
+// Get unread count only
+router.get('/notifications/count', async (req, res) => {
+  try {
+    const count = await notificationService.getAdminUnreadCount();
+    res.json({ count });
+  } catch (error) {
+    res.json({ count: 0 });
+  }
+});
+
+// Mark notification as read
+router.put('/notifications/:uuid/read', async (req, res) => {
+  try {
+    await notificationService.markAdminNotificationRead(req.params.uuid);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to mark as read' });
+  }
+});
+
+// Mark all notifications as read
+router.put('/notifications/read-all', async (req, res) => {
+  try {
+    await notificationService.markAllAdminRead();
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to mark all as read' });
   }
 });
 
