@@ -257,8 +257,10 @@ export default function Domains() {
                       </div>
                       <div>
                         <p className="font-bold text-xl text-dark-900 dark:text-white">{result.domain}</p>
-                        <p className={clsx("text-sm font-medium", result.available ? "text-emerald-600 dark:text-emerald-400" : "text-dark-500")}>
-                          {result.available ? '✓ Available - Register Now!' : '✗ Domain is Taken'}
+                        <p className={clsx("text-sm font-medium", result.available ? "text-emerald-600 dark:text-emerald-400" : "text-red-500 dark:text-red-400")}>
+                          {result.available 
+                            ? `✓ ${result.domain} is available!` 
+                            : `✗ ${result.domain} is already registered`}
                         </p>
                       </div>
                     </div>

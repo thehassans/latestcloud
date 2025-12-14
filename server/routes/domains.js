@@ -1,9 +1,34 @@
 const express = require('express');
+const dns = require('dns').promises;
 const db = require('../database/connection');
 
 const router = express.Router();
 
-// Search domain availability (mock - in production, connect to registrar API)
+// Check if domain is registered using DNS lookup
+async function checkDomainAvailability(fullDomain) {
+  try {
+    // Try to resolve NS records - if they exist, domain is registered
+    await dns.resolveNs(fullDomain);
+    return { available: false, registered: true };
+  } catch (err) {
+    if (err.code === 'ENOTFOUND' || err.code === 'ENODATA') {
+      // No NS records found - try SOA as backup
+      try {
+        await dns.resolveSoa(fullDomain);
+        return { available: false, registered: true };
+      } catch (soaErr) {
+        if (soaErr.code === 'ENOTFOUND' || soaErr.code === 'ENODATA') {
+          // Domain likely available
+          return { available: true, registered: false };
+        }
+      }
+    }
+    // For other errors, assume available (can't confirm either way)
+    return { available: true, registered: false, uncertain: true };
+  }
+}
+
+// Search domain availability with real DNS checks
 router.get('/search', async (req, res) => {
   try {
     const { domain } = req.query;
@@ -15,6 +40,7 @@ router.get('/search', async (req, res) => {
     // Extract domain name without TLD
     const domainParts = domain.toLowerCase().replace(/[^a-z0-9.-]/g, '').split('.');
     const domainName = domainParts[0];
+    const searchedTld = domainParts.length > 1 ? '.' + domainParts.slice(1).join('.') : null;
     
     if (!domainName || domainName.length < 2) {
       return res.status(400).json({ error: 'Invalid domain name' });
@@ -23,33 +49,46 @@ router.get('/search', async (req, res) => {
     // Get all TLDs
     const tlds = await db.query('SELECT * FROM domain_tlds WHERE is_active = TRUE ORDER BY is_popular DESC, price_register');
 
-    // Simulate availability check (in production, call registrar API)
-    const results = tlds.map(tld => {
+    // Check availability for each TLD using real DNS lookups
+    const results = await Promise.all(tlds.map(async (tld) => {
       const fullDomain = `${domainName}${tld.tld}`;
-      // Simulate random availability
-      const available = Math.random() > 0.3;
+      
+      // Perform real DNS check
+      const availability = await checkDomainAvailability(fullDomain);
       
       return {
         domain: fullDomain,
         tld: tld.tld,
-        available,
+        available: availability.available,
+        registered: availability.registered,
+        message: availability.available 
+          ? `${fullDomain} is available!` 
+          : `${fullDomain} is already registered`,
         price_register: parseFloat(tld.price_register),
         price_renew: parseFloat(tld.price_renew),
         price_transfer: parseFloat(tld.price_transfer),
         promo_price: tld.promo_price ? parseFloat(tld.promo_price) : null,
-        is_popular: tld.is_popular
+        is_popular: tld.is_popular,
+        is_searched: searchedTld === tld.tld
       };
-    });
+    }));
 
-    // Sort: available first, then popular, then by price
+    // Sort: searched TLD first, then available, then popular, then by price
     results.sort((a, b) => {
+      if (a.is_searched !== b.is_searched) return b.is_searched - a.is_searched;
       if (a.available !== b.available) return b.available - a.available;
       if (a.is_popular !== b.is_popular) return b.is_popular - a.is_popular;
       return a.price_register - b.price_register;
     });
 
+    // Get the primary searched domain result
+    const primaryDomain = searchedTld 
+      ? results.find(r => r.tld === searchedTld) 
+      : results.find(r => r.tld === '.com') || results[0];
+
     res.json({
       search_term: domainName,
+      primary: primaryDomain,
       results
     });
   } catch (error) {
@@ -86,13 +125,13 @@ router.get('/tlds', async (req, res) => {
   }
 });
 
-// Check single domain availability
+// Check single domain availability with real DNS lookup
 router.get('/check/:domain', async (req, res) => {
   try {
     const { domain } = req.params;
     
-    // In production, call registrar API
-    const available = Math.random() > 0.3;
+    // Perform real DNS check
+    const availability = await checkDomainAvailability(domain);
 
     // Get TLD pricing
     const tld = '.' + domain.split('.').slice(1).join('.');
@@ -100,7 +139,11 @@ router.get('/check/:domain', async (req, res) => {
 
     res.json({
       domain,
-      available,
+      available: availability.available,
+      registered: availability.registered,
+      message: availability.available 
+        ? `${domain} is available!` 
+        : `${domain} is already registered`,
       pricing: tlds.length ? {
         register: parseFloat(tlds[0].price_register),
         renew: parseFloat(tlds[0].price_renew),
