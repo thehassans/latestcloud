@@ -91,7 +91,7 @@ export default function Home() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full text-sm font-medium mb-6">
                 <Star className="w-4 h-4" />
-                Trusted by 50,000+ Customers Worldwide
+                {t('hero.trustedBy')}
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display leading-tight">
@@ -661,18 +661,17 @@ export default function Home() {
             
             <div className="relative text-center text-white">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display">
-                Ready to Get Started?
+                {t('hero.readyToStart')}
               </h2>
               <p className="mt-4 text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-                Join thousands of satisfied customers and experience the Magnetic Clouds difference.
-                45-day money-back guarantee on all plans.
+                {t('hero.joinThousands')}
               </p>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   to="/hosting"
                   className="btn bg-white text-primary-600 hover:bg-dark-100 shadow-xl"
                 >
-                  Get Started Now
+                  {t('hero.getStarted')}
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
                 <Link
