@@ -48,6 +48,7 @@ const menuGroups = [
     icon: Settings,
     to: '/admin/settings',
     children: [
+      { to: '/admin/server-management', icon: Server, label: 'Server Management' },
       { to: '/admin/email-settings', icon: Mail, label: 'Email Settings' },
       { to: '/admin/email-logs', icon: Mail, label: 'Email Logs' },
       { to: '/admin/nobot-services', icon: Bot, label: 'NoBot Services' },

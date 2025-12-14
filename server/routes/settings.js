@@ -723,4 +723,186 @@ router.put('/bulk', authenticate, requireRole('admin'), async (req, res) => {
   }
 });
 
+// Get server management settings (admin only)
+router.get('/server-management', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const keys = [
+      'plesk_enabled', 'plesk_hostname', 'plesk_port', 'plesk_username',
+      'plesk_password', 'plesk_api_key', 'plesk_auth_method', 'plesk_verify_ssl'
+    ];
+    
+    const results = await db.query(
+      `SELECT setting_key, setting_value FROM settings WHERE setting_key IN (${keys.map(() => '?').join(', ')})`,
+      keys
+    );
+
+    const settings = {};
+    if (results && Array.isArray(results)) {
+      results.forEach(row => {
+        const key = row.setting_key.replace('plesk_', '');
+        let value = row.setting_value;
+        if (key === 'enabled' || key === 'verify_ssl') {
+          value = value === 'true' || value === '1';
+        }
+        settings[key] = value;
+      });
+    }
+
+    res.json({ settings });
+  } catch (error) {
+    console.error('Get server management error:', error);
+    res.status(500).json({ error: 'Failed to load server management settings' });
+  }
+});
+
+// Update server management settings (admin only)
+router.put('/server-management', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const config = req.body;
+    
+    const keyMap = {
+      enabled: 'plesk_enabled',
+      hostname: 'plesk_hostname',
+      port: 'plesk_port',
+      username: 'plesk_username',
+      password: 'plesk_password',
+      api_key: 'plesk_api_key',
+      auth_method: 'plesk_auth_method',
+      verify_ssl: 'plesk_verify_ssl'
+    };
+
+    for (const [key, value] of Object.entries(config)) {
+      const dbKey = keyMap[key];
+      if (!dbKey) continue;
+      
+      const settingType = typeof value === 'boolean' ? 'boolean' : 'string';
+      const dbValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : String(value || '');
+      
+      const existing = await db.query('SELECT id FROM settings WHERE setting_key = ?', [dbKey]);
+      
+      if (existing && existing.length > 0) {
+        await db.query(
+          'UPDATE settings SET setting_value = ?, setting_type = ? WHERE setting_key = ?',
+          [dbValue, settingType, dbKey]
+        );
+      } else {
+        await db.query(
+          'INSERT INTO settings (setting_key, setting_value, setting_type, category) VALUES (?, ?, ?, ?)',
+          [dbKey, dbValue, settingType, 'server']
+        );
+      }
+    }
+
+    res.json({ message: 'Server management settings saved' });
+  } catch (error) {
+    console.error('Update server management error:', error);
+    res.status(500).json({ error: 'Failed to save server management settings' });
+  }
+});
+
+// Test Plesk connection (admin only)
+router.post('/server-management/test', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { hostname, port, username, password, api_key, auth_method, verify_ssl } = req.body;
+    
+    if (!hostname) {
+      return res.status(400).json({ error: 'Hostname is required' });
+    }
+
+    const https = require('https');
+    const http = require('http');
+    
+    // Build Plesk API URL
+    const pleskUrl = `https://${hostname}:${port || 8443}/api/v2/server`;
+    
+    // Build auth headers
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    if (auth_method === 'api_key' && api_key) {
+      headers['X-API-Key'] = api_key;
+    } else if (username && password) {
+      const auth = Buffer.from(`${username}:${password}`).toString('base64');
+      headers['Authorization'] = `Basic ${auth}`;
+    } else {
+      return res.status(400).json({ error: 'Authentication credentials required' });
+    }
+
+    // Make request to Plesk API
+    const fetch = require('node-fetch');
+    const agent = new https.Agent({
+      rejectUnauthorized: verify_ssl !== false
+    });
+
+    const response = await fetch(pleskUrl, {
+      method: 'GET',
+      headers,
+      agent,
+      timeout: 10000
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Plesk API error:', response.status, errorText);
+      return res.json({ 
+        success: false, 
+        error: `Connection failed: ${response.status} ${response.statusText}` 
+      });
+    }
+
+    const serverData = await response.json();
+    
+    // Get additional stats - domains count
+    let domainsCount = 0;
+    let clientsCount = 0;
+    
+    try {
+      const domainsResponse = await fetch(`https://${hostname}:${port || 8443}/api/v2/domains`, {
+        method: 'GET',
+        headers,
+        agent
+      });
+      if (domainsResponse.ok) {
+        const domains = await domainsResponse.json();
+        domainsCount = Array.isArray(domains) ? domains.length : 0;
+      }
+    } catch (e) {
+      console.log('Could not fetch domains count');
+    }
+
+    try {
+      const clientsResponse = await fetch(`https://${hostname}:${port || 8443}/api/v2/clients`, {
+        method: 'GET',
+        headers,
+        agent
+      });
+      if (clientsResponse.ok) {
+        const clients = await clientsResponse.json();
+        clientsCount = Array.isArray(clients) ? clients.length : 0;
+      }
+    } catch (e) {
+      console.log('Could not fetch clients count');
+    }
+
+    res.json({
+      success: true,
+      serverInfo: {
+        hostname: serverData.hostname || hostname,
+        version: serverData.panel_version || serverData.version || 'Unknown',
+        os: serverData.platform || serverData.os || 'Unknown',
+        domains: domainsCount,
+        clients: clientsCount
+      }
+    });
+  } catch (error) {
+    console.error('Plesk connection test error:', error);
+    res.json({ 
+      success: false, 
+      error: error.message || 'Failed to connect to Plesk server' 
+    });
+  }
+});
+
 module.exports = router;

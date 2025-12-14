@@ -93,6 +93,7 @@ import AdminProposalEditor from './pages/admin/AdminProposalEditor'
 import AdminInvoices from './pages/admin/AdminInvoices'
 import AdminNoBotServices from './pages/admin/AdminNoBotServices'
 import AdminEmailLogs from './pages/admin/AdminEmailLogs'
+import AdminServerManagement from './pages/admin/AdminServerManagement'
 import AdminLogin from './pages/admin/AdminLogin'
 import ProposalView from './pages/ProposalView'
 
@@ -279,6 +280,7 @@ function App() {
           <Route path="invoices" element={<AdminInvoices />} />
           <Route path="nobot-services" element={<AdminNoBotServices />} />
           <Route path="email-logs" element={<AdminEmailLogs />} />
+          <Route path="server-management" element={<AdminServerManagement />} />
         </Route>
 
         {/* 404 */}

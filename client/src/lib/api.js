@@ -110,7 +110,11 @@ export const settingsAPI = {
   testEmail: (email) => api.post('/settings/email/test', { email }),
   // Page visibility
   updatePageVisibility: (key, visible) => api.put('/settings/page-visibility', { key, visible }),
-  updateBulkSettings: (settings) => api.put('/settings/bulk', { settings })
+  updateBulkSettings: (settings) => api.put('/settings/bulk', { settings }),
+  // Server Management / Plesk
+  getServerManagement: () => api.get('/settings/server-management'),
+  updateServerManagement: (settings) => api.put('/settings/server-management', settings),
+  testPleskConnection: (config) => api.post('/settings/server-management/test', config)
 }
 
 // Payments API
