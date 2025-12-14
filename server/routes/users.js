@@ -93,6 +93,51 @@ router.get('/services', authenticate, async (req, res) => {
   }
 });
 
+// Get user domains
+router.get('/domains', authenticate, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+    
+    let query = `
+      SELECT s.*, 
+             oi.unit_price as purchase_price,
+             o.order_number, o.created_at as purchase_date
+      FROM services s
+      LEFT JOIN order_items oi ON s.order_item_id = oi.id
+      LEFT JOIN orders o ON oi.order_id = o.id
+      WHERE s.user_id = ? AND s.service_type = 'domain'
+    `;
+    const params = [req.user.id];
+
+    if (status) {
+      query += ' AND s.status = ?';
+      params.push(status);
+    }
+
+    query += ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), parseInt(offset));
+
+    const domains = await db.query(query, params);
+    const countResult = await db.query(
+      "SELECT COUNT(*) as total FROM services WHERE user_id = ? AND service_type = 'domain'", 
+      [req.user.id]
+    );
+
+    res.json({
+      domains,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: Number(countResult[0].total)
+      }
+    });
+  } catch (error) {
+    console.error('Get domains error:', error);
+    res.status(500).json({ error: 'Failed to load domains' });
+  }
+});
+
 // Get service details
 router.get('/services/:uuid', authenticate, async (req, res) => {
   try {

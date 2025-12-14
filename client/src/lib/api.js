@@ -75,6 +75,7 @@ export const userAPI = {
   getDashboard: () => api.get('/users/dashboard'),
   getServices: (params) => api.get('/users/services', { params }),
   getService: (uuid) => api.get(`/users/services/${uuid}`),
+  getDomains: (params) => api.get('/users/domains', { params }),
   getInvoices: (params) => api.get('/users/invoices', { params }),
   getInvoice: (uuid) => api.get(`/users/invoices/${uuid}`),
   getTransactions: (params) => api.get('/users/transactions', { params }),
