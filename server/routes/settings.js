@@ -341,18 +341,36 @@ router.put('/payment-gateway', authenticate, requireRole('admin'), async (req, r
   try {
     const settings = req.body;
     
+    // List of boolean keys that should be stored as 'true' or 'false'
+    const booleanKeys = [
+      'stripe_enabled', 'paypal_enabled', 'bkash_enabled', 
+      'rocket_enabled', 'bank_transfer_enabled', 'cash_payment_enabled'
+    ];
+    
     for (const [key, value] of Object.entries(settings)) {
-      const settingType = typeof value === 'boolean' ? 'boolean' : 'string';
-      const dbValue = typeof value === 'boolean' ? (value ? 'true' : 'false') : (value || '');
+      let dbValue;
+      let settingType;
       
-      // First try to update existing row
-      const updateResult = await db.query(
-        `UPDATE settings SET setting_value = ?, setting_type = ? WHERE setting_key = ?`,
-        [dbValue, settingType, key]
-      );
+      // Handle boolean fields - convert to 'true' or 'false' string
+      if (booleanKeys.includes(key)) {
+        dbValue = value === true || value === 'true' ? 'true' : 'false';
+        settingType = 'boolean';
+      } else {
+        dbValue = value !== null && value !== undefined ? String(value) : '';
+        settingType = 'string';
+      }
       
-      // If no row was updated, insert new row
-      if (updateResult.affectedRows === 0) {
+      // Check if setting exists
+      const existing = await db.query('SELECT id FROM settings WHERE setting_key = ?', [key]);
+      
+      if (existing && existing.length > 0) {
+        // Update existing setting
+        await db.query(
+          `UPDATE settings SET setting_value = ?, setting_type = ? WHERE setting_key = ?`,
+          [dbValue, settingType, key]
+        );
+      } else {
+        // Insert new setting
         await db.query(
           `INSERT INTO settings (setting_key, setting_value, setting_type, category)
            VALUES (?, ?, ?, 'payment')`,
