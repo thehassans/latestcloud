@@ -1,18 +1,522 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import { 
   Server, ArrowLeft, Globe, Shield, HardDrive, Cloud, Mail, Database,
   ExternalLink, Cpu, MemoryStick, HardDrive as Storage, Activity, Loader2,
   Copy, Check, MonitorPlay, Lock, Zap, RefreshCw, Settings, Calendar,
   CreditCard, Clock, ChevronRight, FileText, Power, Pause, Play, Sparkles,
-  Receipt, Headphones, BarChart3, Wifi, Key, AlertCircle, Edit, Trash2
+  Receipt, Headphones, BarChart3, Wifi, Key, AlertCircle, Edit, Trash2,
+  Plus, X, Save, RotateCcw
 } from 'lucide-react'
 import { userAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
+
+// DNS Record Types
+const DNS_RECORD_TYPES = ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SRV']
+
+// Default Nameservers
+const DEFAULT_NAMESERVERS = [
+  'ns1.magnetichosting.com',
+  'ns2.magnetichosting.com'
+]
+
+// Domain Management Tabs Component
+function DomainManagementTabs({ domainName }) {
+  const [activeTab, setActiveTab] = useState('dns')
+  const [dnsRecords, setDnsRecords] = useState([
+    { id: 1, type: 'A', name: '@', value: '192.168.1.1', ttl: 3600 },
+    { id: 2, type: 'CNAME', name: 'www', value: domainName, ttl: 3600 },
+    { id: 3, type: 'MX', name: '@', value: 'mail.' + domainName, ttl: 3600, priority: 10 },
+  ])
+  const [nameservers, setNameservers] = useState(DEFAULT_NAMESERVERS)
+  const [emailForwards, setEmailForwards] = useState([
+    { id: 1, from: 'info', to: 'admin@gmail.com' }
+  ])
+  const [urlForward, setUrlForward] = useState({ enabled: false, url: '', type: 'permanent' })
+  
+  // Form states
+  const [showDnsForm, setShowDnsForm] = useState(false)
+  const [showEmailForm, setShowEmailForm] = useState(false)
+  const [editingDns, setEditingDns] = useState(null)
+  const [newDns, setNewDns] = useState({ type: 'A', name: '', value: '', ttl: 3600, priority: 10 })
+  const [newEmail, setNewEmail] = useState({ from: '', to: '' })
+  const [customNs, setCustomNs] = useState(false)
+  const [nsInputs, setNsInputs] = useState(['', ''])
+
+  const tabs = [
+    { id: 'dns', label: 'DNS Records', icon: Server, color: 'indigo' },
+    { id: 'nameservers', label: 'Nameservers', icon: Globe, color: 'purple' },
+    { id: 'email', label: 'Email Forwarding', icon: Mail, color: 'blue' },
+    { id: 'url', label: 'URL Forwarding', icon: ExternalLink, color: 'amber' },
+  ]
+
+  const handleAddDns = () => {
+    if (!newDns.name || !newDns.value) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    const record = { ...newDns, id: Date.now() }
+    setDnsRecords([...dnsRecords, record])
+    setNewDns({ type: 'A', name: '', value: '', ttl: 3600, priority: 10 })
+    setShowDnsForm(false)
+    toast.success('DNS record added successfully')
+  }
+
+  const handleDeleteDns = (id) => {
+    setDnsRecords(dnsRecords.filter(r => r.id !== id))
+    toast.success('DNS record deleted')
+  }
+
+  const handleAddEmail = () => {
+    if (!newEmail.from || !newEmail.to) {
+      toast.error('Please fill in all fields')
+      return
+    }
+    setEmailForwards([...emailForwards, { ...newEmail, id: Date.now() }])
+    setNewEmail({ from: '', to: '' })
+    setShowEmailForm(false)
+    toast.success('Email forward added')
+  }
+
+  const handleDeleteEmail = (id) => {
+    setEmailForwards(emailForwards.filter(e => e.id !== id))
+    toast.success('Email forward deleted')
+  }
+
+  const handleSaveNameservers = () => {
+    if (customNs) {
+      if (!nsInputs[0] || !nsInputs[1]) {
+        toast.error('Please enter at least 2 nameservers')
+        return
+      }
+      setNameservers(nsInputs.filter(ns => ns))
+    } else {
+      setNameservers(DEFAULT_NAMESERVERS)
+    }
+    toast.success('Nameservers updated successfully')
+  }
+
+  const handleSaveUrlForward = () => {
+    if (urlForward.enabled && !urlForward.url) {
+      toast.error('Please enter a destination URL')
+      return
+    }
+    toast.success('URL forwarding settings saved')
+  }
+
+  return (
+    <div className="card overflow-hidden">
+      {/* Tabs Header */}
+      <div className="flex border-b border-dark-100 dark:border-dark-700 overflow-x-auto">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={clsx(
+              "flex items-center gap-2 px-5 py-4 font-medium text-sm whitespace-nowrap transition-all border-b-2 -mb-px",
+              activeTab === tab.id
+                ? `border-${tab.color}-500 text-${tab.color}-500 bg-${tab.color}-50 dark:bg-${tab.color}-900/20`
+                : "border-transparent text-dark-500 hover:text-dark-700 dark:hover:text-dark-300"
+            )}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="p-6">
+        <AnimatePresence mode="wait">
+          {/* DNS Records Tab */}
+          {activeTab === 'dns' && (
+            <motion.div
+              key="dns"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-lg">DNS Records</h3>
+                  <p className="text-sm text-dark-500">Manage your domain's DNS records</p>
+                </div>
+                <button
+                  onClick={() => setShowDnsForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Record
+                </button>
+              </div>
+
+              {/* Add DNS Form */}
+              {showDnsForm && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mb-4 p-4 bg-dark-50 dark:bg-dark-700 rounded-xl"
+                >
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <select
+                      value={newDns.type}
+                      onChange={(e) => setNewDns({ ...newDns, type: e.target.value })}
+                      className="input"
+                    >
+                      {DNS_RECORD_TYPES.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Name (@ for root)"
+                      value={newDns.name}
+                      onChange={(e) => setNewDns({ ...newDns, name: e.target.value })}
+                      className="input"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Value"
+                      value={newDns.value}
+                      onChange={(e) => setNewDns({ ...newDns, value: e.target.value })}
+                      className="input"
+                    />
+                    <input
+                      type="number"
+                      placeholder="TTL"
+                      value={newDns.ttl}
+                      onChange={(e) => setNewDns({ ...newDns, ttl: parseInt(e.target.value) })}
+                      className="input"
+                    />
+                    <div className="flex gap-2">
+                      <button onClick={handleAddDns} className="flex-1 btn-primary py-2">
+                        <Save className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setShowDnsForm(false)} className="px-3 py-2 bg-dark-200 dark:bg-dark-600 rounded-lg">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* DNS Records Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-dark-100 dark:border-dark-700">
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-dark-500 uppercase">Type</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-dark-500 uppercase">Name</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-dark-500 uppercase">Value</th>
+                      <th className="text-left py-3 px-4 text-xs font-semibold text-dark-500 uppercase">TTL</th>
+                      <th className="text-right py-3 px-4 text-xs font-semibold text-dark-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-dark-100 dark:divide-dark-700">
+                    {dnsRecords.map((record) => (
+                      <tr key={record.id} className="hover:bg-dark-50 dark:hover:bg-dark-800/50">
+                        <td className="py-3 px-4">
+                          <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded text-xs font-medium">
+                            {record.type}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-mono text-sm">{record.name}</td>
+                        <td className="py-3 px-4 font-mono text-sm truncate max-w-[200px]">{record.value}</td>
+                        <td className="py-3 px-4 text-dark-500">{record.ttl}s</td>
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={() => handleDeleteDns(record.id)}
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Nameservers Tab */}
+          {activeTab === 'nameservers' && (
+            <motion.div
+              key="nameservers"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="mb-6">
+                <h3 className="font-bold text-lg mb-1">Nameservers</h3>
+                <p className="text-sm text-dark-500">Configure which nameservers your domain uses</p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Default NS Option */}
+                <label className={clsx(
+                  "flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all",
+                  !customNs ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20" : "border-dark-200 dark:border-dark-700"
+                )}>
+                  <input
+                    type="radio"
+                    checked={!customNs}
+                    onChange={() => setCustomNs(false)}
+                    className="mt-1"
+                  />
+                  <div>
+                    <p className="font-medium">Use Default Nameservers (Recommended)</p>
+                    <p className="text-sm text-dark-500 mt-1">Use Magnetic Clouds nameservers for easy DNS management</p>
+                    <div className="mt-3 space-y-1">
+                      {DEFAULT_NAMESERVERS.map((ns, i) => (
+                        <p key={i} className="text-sm font-mono bg-dark-100 dark:bg-dark-700 px-3 py-1.5 rounded inline-block mr-2">
+                          {ns}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                </label>
+
+                {/* Custom NS Option */}
+                <label className={clsx(
+                  "flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all",
+                  customNs ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20" : "border-dark-200 dark:border-dark-700"
+                )}>
+                  <input
+                    type="radio"
+                    checked={customNs}
+                    onChange={() => setCustomNs(true)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium">Use Custom Nameservers</p>
+                    <p className="text-sm text-dark-500 mt-1">Point to your own nameservers</p>
+                    {customNs && (
+                      <div className="mt-3 space-y-2">
+                        <input
+                          type="text"
+                          placeholder="ns1.example.com"
+                          value={nsInputs[0]}
+                          onChange={(e) => setNsInputs([e.target.value, nsInputs[1]])}
+                          className="input w-full"
+                        />
+                        <input
+                          type="text"
+                          placeholder="ns2.example.com"
+                          value={nsInputs[1]}
+                          onChange={(e) => setNsInputs([nsInputs[0], e.target.value])}
+                          className="input w-full"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </label>
+
+                <button
+                  onClick={handleSaveNameservers}
+                  className="flex items-center gap-2 px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl transition-colors"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Nameservers
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Email Forwarding Tab */}
+          {activeTab === 'email' && (
+            <motion.div
+              key="email"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-bold text-lg">Email Forwarding</h3>
+                  <p className="text-sm text-dark-500">Forward emails to external addresses</p>
+                </div>
+                <button
+                  onClick={() => setShowEmailForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Forward
+                </button>
+              </div>
+
+              {/* Add Email Form */}
+              {showEmailForm && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mb-4 p-4 bg-dark-50 dark:bg-dark-700 rounded-xl"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="alias"
+                        value={newEmail.from}
+                        onChange={(e) => setNewEmail({ ...newEmail, from: e.target.value })}
+                        className="input flex-1"
+                      />
+                      <span className="text-dark-500">@{domainName}</span>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-dark-400" />
+                    <input
+                      type="email"
+                      placeholder="forward@example.com"
+                      value={newEmail.to}
+                      onChange={(e) => setNewEmail({ ...newEmail, to: e.target.value })}
+                      className="input flex-1"
+                    />
+                    <button onClick={handleAddEmail} className="btn-primary py-2 px-4">
+                      <Save className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setShowEmailForm(false)} className="px-3 py-2 bg-dark-200 dark:bg-dark-600 rounded-lg">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Email Forwards List */}
+              <div className="space-y-3">
+                {emailForwards.map((forward) => (
+                  <div key={forward.id} className="flex items-center justify-between p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                        <Mail className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{forward.from}@{domainName}</p>
+                        <p className="text-sm text-dark-500">→ {forward.to}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteEmail(forward.id)}
+                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                {emailForwards.length === 0 && (
+                  <div className="text-center py-8 text-dark-500">
+                    <Mail className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No email forwards configured</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* URL Forwarding Tab */}
+          {activeTab === 'url' && (
+            <motion.div
+              key="url"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <div className="mb-6">
+                <h3 className="font-bold text-lg mb-1">URL Forwarding</h3>
+                <p className="text-sm text-dark-500">Redirect your domain to another website</p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Enable Toggle */}
+                <div className="flex items-center justify-between p-4 bg-dark-50 dark:bg-dark-700 rounded-xl">
+                  <div>
+                    <p className="font-medium">Enable URL Forwarding</p>
+                    <p className="text-sm text-dark-500">Redirect visitors to another URL</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={urlForward.enabled}
+                      onChange={(e) => setUrlForward({ ...urlForward, enabled: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-dark-300 peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                  </label>
+                </div>
+
+                {urlForward.enabled && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="space-y-4"
+                  >
+                    {/* Destination URL */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Destination URL</label>
+                      <input
+                        type="url"
+                        placeholder="https://example.com"
+                        value={urlForward.url}
+                        onChange={(e) => setUrlForward({ ...urlForward, url: e.target.value })}
+                        className="input w-full"
+                      />
+                    </div>
+
+                    {/* Redirect Type */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Redirect Type</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <label className={clsx(
+                          "flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
+                          urlForward.type === 'permanent' ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20" : "border-dark-200 dark:border-dark-700"
+                        )}>
+                          <input
+                            type="radio"
+                            checked={urlForward.type === 'permanent'}
+                            onChange={() => setUrlForward({ ...urlForward, type: 'permanent' })}
+                          />
+                          <div>
+                            <p className="font-medium">Permanent (301)</p>
+                            <p className="text-xs text-dark-500">SEO-friendly, cached by browsers</p>
+                          </div>
+                        </label>
+                        <label className={clsx(
+                          "flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all",
+                          urlForward.type === 'temporary' ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20" : "border-dark-200 dark:border-dark-700"
+                        )}>
+                          <input
+                            type="radio"
+                            checked={urlForward.type === 'temporary'}
+                            onChange={() => setUrlForward({ ...urlForward, type: 'temporary' })}
+                          />
+                          <div>
+                            <p className="font-medium">Temporary (302)</p>
+                            <p className="text-xs text-dark-500">Not cached, for temporary redirects</p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                <button
+                  onClick={handleSaveUrlForward}
+                  className="flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl transition-colors"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Settings
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
 
 // Format currency
 const formatCurrency = (amount) => {
@@ -334,71 +838,8 @@ export default function ServiceManagement() {
               </div>
             </div>
 
-            {/* Domain Actions */}
-            <div className="card p-6">
-              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Settings className="w-5 h-5 text-primary-500" />
-                Domain Management
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                <button className="p-4 bg-dark-50 dark:bg-dark-700 hover:bg-dark-100 dark:hover:bg-dark-600 rounded-xl transition-colors text-left group">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
-                        <Server className="w-5 h-5 text-indigo-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium">DNS Records</p>
-                        <p className="text-xs text-dark-500">Manage A, CNAME, MX records</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
-                  </div>
-                </button>
-                <button className="p-4 bg-dark-50 dark:bg-dark-700 hover:bg-dark-100 dark:hover:bg-dark-600 rounded-xl transition-colors text-left group">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                        <Globe className="w-5 h-5 text-purple-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Nameservers</p>
-                        <p className="text-xs text-dark-500">Update nameserver settings</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
-                  </div>
-                </button>
-                <button className="p-4 bg-dark-50 dark:bg-dark-700 hover:bg-dark-100 dark:hover:bg-dark-600 rounded-xl transition-colors text-left group">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                        <Mail className="w-5 h-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Email Forwarding</p>
-                        <p className="text-xs text-dark-500">Setup email redirects</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
-                  </div>
-                </button>
-                <button className="p-4 bg-dark-50 dark:bg-dark-700 hover:bg-dark-100 dark:hover:bg-dark-600 rounded-xl transition-colors text-left group">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
-                        <ExternalLink className="w-5 h-5 text-amber-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium">URL Forwarding</p>
-                        <p className="text-xs text-dark-500">Redirect to another URL</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-dark-400 group-hover:text-primary-500 transition-colors" />
-                  </div>
-                </button>
-              </div>
-            </div>
+            {/* Domain Management Tabs */}
+            <DomainManagementTabs domainName={service.domain_name || service.name} />
           </div>
 
           {/* Sidebar */}
