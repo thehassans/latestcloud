@@ -17,14 +17,14 @@ const simpleLinks = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
 ]
 
-// Collapsible menu groups
+// Collapsible menu groups with main page links
 const menuGroups = [
   {
     id: 'users',
     label: 'Users',
     icon: Users,
+    to: '/admin/users',
     children: [
-      { to: '/admin/users', icon: Users, label: 'All Users' },
       { to: '/admin/proposals', icon: Send, label: 'Proposals' },
       { to: '/admin/invoices', icon: Receipt, label: 'Invoices' },
       { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
@@ -35,6 +35,7 @@ const menuGroups = [
     id: 'pricing',
     label: 'Pricing',
     icon: DollarSign,
+    to: '/admin/pricing',
     children: [
       { to: '/admin/payment-gateway', icon: CreditCard, label: 'Payment Gateways' },
       { to: '/admin/customize-plans', icon: Sliders, label: 'Customize Plans' },
@@ -45,6 +46,7 @@ const menuGroups = [
     id: 'settings',
     label: 'Settings',
     icon: Settings,
+    to: '/admin/settings',
     children: [
       { to: '/admin/email-settings', icon: Mail, label: 'Email Settings' },
       { to: '/admin/email-logs', icon: Mail, label: 'Email Logs' },
@@ -226,28 +228,35 @@ export default function AdminLayout() {
           {menuGroups.map((group) => {
             const isExpanded = expandedMenus.includes(group.id)
             const hasActiveChild = isMenuActive(group)
+            const isMainActive = location.pathname === group.to
             
             return (
               <div key={group.id} className="mt-2">
-                {/* Group Header */}
-                <button
-                  onClick={() => toggleMenu(group.id)}
-                  className={clsx(
-                    "w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all duration-200",
-                    hasActiveChild
-                      ? "bg-primary-500/20 text-primary-400"
-                      : "text-dark-300 hover:bg-dark-800 hover:text-white"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
+                {/* Group Header - Split: Label navigates, Chevron toggles */}
+                <div className={clsx(
+                  "flex items-center rounded-xl font-medium transition-all duration-200",
+                  (hasActiveChild || isMainActive)
+                    ? "bg-primary-500/20 text-primary-400"
+                    : "text-dark-300 hover:bg-dark-800 hover:text-white"
+                )}>
+                  <NavLink
+                    to={group.to}
+                    onClick={() => setSidebarOpen(false)}
+                    className="flex-1 flex items-center gap-3 px-4 py-3"
+                  >
                     <group.icon className="w-5 h-5" />
                     <span>{group.label}</span>
-                  </div>
-                  <ChevronDown className={clsx(
-                    "w-4 h-4 transition-transform duration-200",
-                    isExpanded && "rotate-180"
-                  )} />
-                </button>
+                  </NavLink>
+                  <button
+                    onClick={() => toggleMenu(group.id)}
+                    className="p-3 hover:bg-dark-700 rounded-r-xl transition-colors"
+                  >
+                    <ChevronDown className={clsx(
+                      "w-4 h-4 transition-transform duration-200",
+                      isExpanded && "rotate-180"
+                    )} />
+                  </button>
+                </div>
 
                 {/* Submenu */}
                 <AnimatePresence>
