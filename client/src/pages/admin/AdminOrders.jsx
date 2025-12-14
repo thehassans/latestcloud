@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminAPI } from '../../lib/api'
 import { useCurrencyStore } from '../../store/useStore'
-import { CheckCircle, XCircle, Eye, Clock, CreditCard, Building2, Banknote, X } from 'lucide-react'
+import { CheckCircle, XCircle, Eye, Clock, CreditCard, Building2, Banknote, X, Sparkles, Shield, Zap, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -15,6 +16,7 @@ export default function AdminOrders() {
   const queryClient = useQueryClient()
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [viewProof, setViewProof] = useState(null)
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, order: null, action: null })
   
   const { data, isLoading } = useQuery({ 
     queryKey: ['admin-orders'], 
@@ -27,16 +29,22 @@ export default function AdminOrders() {
       queryClient.invalidateQueries(['admin-orders'])
       toast.success('Order updated successfully')
       setSelectedOrder(null)
+      setConfirmDialog({ open: false, order: null, action: null })
     },
     onError: () => toast.error('Failed to update order')
   })
 
-  const handleApprove = (order) => {
-    updateStatus.mutate({ uuid: order.uuid, status: 'active', payment_status: 'paid' })
+  const openConfirmDialog = (order, action) => {
+    setConfirmDialog({ open: true, order, action })
   }
 
-  const handleReject = (order) => {
-    updateStatus.mutate({ uuid: order.uuid, status: 'cancelled', payment_status: 'failed' })
+  const handleConfirm = () => {
+    if (!confirmDialog.order) return
+    if (confirmDialog.action === 'approve') {
+      updateStatus.mutate({ uuid: confirmDialog.order.uuid, status: 'active', payment_status: 'paid' })
+    } else if (confirmDialog.action === 'reject') {
+      updateStatus.mutate({ uuid: confirmDialog.order.uuid, status: 'cancelled', payment_status: 'failed' })
+    }
   }
 
   const getPaymentIcon = (method) => {
@@ -111,14 +119,14 @@ export default function AdminOrders() {
                           {order.payment_status === 'pending' && (
                             <>
                               <button 
-                                onClick={() => handleApprove(order)}
+                                onClick={() => openConfirmDialog(order, 'approve')}
                                 className="p-2 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-lg text-green-500"
                                 title="Approve Payment"
                               >
                                 <CheckCircle className="w-4 h-4" />
                               </button>
                               <button 
-                                onClick={() => handleReject(order)}
+                                onClick={() => openConfirmDialog(order, 'reject')}
                                 className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg text-red-500"
                                 title="Reject Order"
                               >
@@ -155,6 +163,155 @@ export default function AdminOrders() {
           </div>
         </div>
       )}
+
+      {/* Premium Confirmation Modal */}
+      <AnimatePresence>
+        {confirmDialog.open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setConfirmDialog({ open: false, order: null, action: null })}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="relative bg-white dark:bg-dark-800 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Gradient Header */}
+              <div className={clsx(
+                "relative px-6 py-8 text-center text-white overflow-hidden",
+                confirmDialog.action === 'approve' 
+                  ? "bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600"
+                  : "bg-gradient-to-br from-red-500 via-rose-500 to-pink-600"
+              )}>
+                {/* Animated Background Elements */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
+                  <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+                  {confirmDialog.action === 'approve' && (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        className="absolute top-4 right-4"
+                      >
+                        <Sparkles className="w-6 h-6 text-white/30" />
+                      </motion.div>
+                      <motion.div
+                        animate={{ y: [-5, 5, -5] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                        className="absolute bottom-4 left-4"
+                      >
+                        <Shield className="w-5 h-5 text-white/30" />
+                      </motion.div>
+                    </>
+                  )}
+                </div>
+
+                {/* Icon */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", delay: 0.1 }}
+                  className={clsx(
+                    "relative mx-auto w-20 h-20 rounded-2xl flex items-center justify-center mb-4 shadow-lg",
+                    confirmDialog.action === 'approve'
+                      ? "bg-white/20 shadow-emerald-600/30"
+                      : "bg-white/20 shadow-red-600/30"
+                  )}
+                >
+                  {confirmDialog.action === 'approve' ? (
+                    <CheckCircle className="w-10 h-10 text-white" />
+                  ) : (
+                    <XCircle className="w-10 h-10 text-white" />
+                  )}
+                </motion.div>
+
+                <h3 className="text-2xl font-bold mb-2">
+                  {confirmDialog.action === 'approve' ? 'Activate Order' : 'Reject Order'}
+                </h3>
+                <p className="text-white/80 text-sm">
+                  {confirmDialog.action === 'approve' 
+                    ? 'This will mark the order as paid and active'
+                    : 'This will cancel the order and mark payment as failed'}
+                </p>
+              </div>
+
+              {/* Order Details */}
+              {confirmDialog.order && (
+                <div className="px-6 py-5 border-b border-dark-100 dark:border-dark-700">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-dark-500 text-sm">Order Number</span>
+                      <span className="font-bold">{confirmDialog.order.order_number}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-dark-500 text-sm">Customer</span>
+                      <span className="font-medium">{confirmDialog.order.first_name} {confirmDialog.order.last_name}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-dark-500 text-sm">Amount</span>
+                      <span className="font-bold text-lg">{format(confirmDialog.order.total)}</span>
+                    </div>
+                    {confirmDialog.action === 'approve' && (
+                      <div className="flex justify-between items-center pt-2 border-t border-dark-100 dark:border-dark-700">
+                        <span className="text-dark-500 text-sm">New Status</span>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full text-xs font-medium">paid</span>
+                          <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-xs font-medium">active</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="px-6 py-4 flex gap-3">
+                <button
+                  onClick={() => setConfirmDialog({ open: false, order: null, action: null })}
+                  className="flex-1 px-4 py-3 bg-dark-100 dark:bg-dark-700 hover:bg-dark-200 dark:hover:bg-dark-600 rounded-xl font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirm}
+                  disabled={updateStatus.isPending}
+                  className={clsx(
+                    "flex-1 px-4 py-3 rounded-xl font-medium text-white transition-all flex items-center justify-center gap-2",
+                    confirmDialog.action === 'approve'
+                      ? "bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 shadow-lg shadow-emerald-500/30"
+                      : "bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 shadow-lg shadow-red-500/30"
+                  )}
+                >
+                  {updateStatus.isPending ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      {confirmDialog.action === 'approve' ? (
+                        <>
+                          <Zap className="w-4 h-4" />
+                          Activate
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="w-4 h-4" />
+                          Reject
+                        </>
+                      )}
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
