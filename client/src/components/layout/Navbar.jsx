@@ -3,7 +3,7 @@ import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ChevronDown, Moon, Sun, ShoppingCart, Globe, User, Server, Cloud, Database, HardDrive, Shield, Lock, Mail, Archive, Search, Bug, Zap, Wrench, Building2, Users, Gift, Globe2, Bot, Code, Hammer, ShieldCheck, BarChart3 } from 'lucide-react'
 import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSettingsStore, useLanguageStore } from '../../store/useStore'
-import LanguageSelector from '../LanguageSelector'
+import GoogleTranslate from '../GoogleTranslate'
 import clsx from 'clsx'
 
 const getNavItems = (t) => [
@@ -197,9 +197,9 @@ export default function Navbar() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
-            {/* Language selector */}
+            {/* Google Translate */}
             <div className="hidden md:block">
-              <LanguageSelector variant="minimal" />
+              <GoogleTranslate variant="minimal" />
             </div>
 
             {/* Theme toggle */}

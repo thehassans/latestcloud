@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore, useThemeStore } from '../store/useStore'
 import { userAPI, settingsAPI } from '../lib/api'
+import GoogleTranslate from '../components/GoogleTranslate'
 import clsx from 'clsx'
 
 const NOTIFICATION_ICONS = {
@@ -227,6 +228,9 @@ export default function DashboardLayout() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Google Translate */}
+              <GoogleTranslate variant="minimal" />
+              
               <button
                 onClick={toggleTheme}
                 className="p-2 hover:bg-dark-100 dark:hover:bg-dark-800 rounded-lg transition-colors"

@@ -331,3 +331,46 @@ div[data-sonner-toast]::before,
 .custom-marker {
   @apply w-8 h-8 rounded-full bg-primary-500 border-4 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold;
 }
+
+/* Google Translate Customization */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.skiptranslate {
+  display: none !important;
+}
+
+/* Hide the Google Translate bar at top */
+body > .skiptranslate {
+  display: none !important;
+}
+
+.goog-te-gadget {
+  font-size: 0 !important;
+}
+
+.goog-te-combo {
+  display: none !important;
+}
+
+/* Ensure translated text looks natural */
+font[style] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  vertical-align: baseline !important;
+}
