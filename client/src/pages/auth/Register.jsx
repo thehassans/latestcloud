@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 import { Mail, Lock, Eye, EyeOff, User, Phone, Building, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react'
 import { authAPI } from '../../lib/api'
 import { useAuthStore, useThemeStore } from '../../store/useStore'
@@ -17,7 +16,6 @@ const passwordRequirements = [
 ]
 
 export default function Register() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const { setUser } = useAuthStore()
   const { themeStyle } = useThemeStore()
@@ -71,7 +69,7 @@ export default function Register() {
       })
 
       setUser(response.data.user, response.data.token)
-      toast.success(t('auth.signupSuccess'))
+      toast.success('Account created successfully!')
       navigate('/dashboard')
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.')
@@ -128,7 +126,7 @@ export default function Register() {
               {/* Name row */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('auth.firstName')}</label>
+                  <label className="block text-sm font-medium mb-2">First Name</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                     <input
@@ -142,7 +140,7 @@ export default function Register() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('auth.lastName')}</label>
+                  <label className="block text-sm font-medium mb-2">Last Name</label>
                   <input
                     type="text"
                     value={form.last_name}
@@ -156,7 +154,7 @@ export default function Register() {
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
+                <label className="block text-sm font-medium mb-2">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                   <input
@@ -173,7 +171,7 @@ export default function Register() {
               {/* Phone & Company row */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('auth.phone')}</label>
+                  <label className="block text-sm font-medium mb-2">Phone (Optional)</label>
                   <div className="relative">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                     <input
@@ -186,7 +184,7 @@ export default function Register() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">{t('auth.company')}</label>
+                  <label className="block text-sm font-medium mb-2">Company (Optional)</label>
                   <div className="relative">
                     <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                     <input
@@ -202,7 +200,7 @@ export default function Register() {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
+                <label className="block text-sm font-medium mb-2">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                   <input
@@ -240,7 +238,7 @@ export default function Register() {
 
               {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-medium mb-2">{t('auth.confirmPassword')}</label>
+                <label className="block text-sm font-medium mb-2">Confirm Password</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                   <input
@@ -292,7 +290,7 @@ export default function Register() {
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    {t('auth.createAccount')}
+                    Create Account
                     <ArrowRight className="w-5 h-5" />
                   </span>
                 )}
@@ -339,9 +337,9 @@ export default function Register() {
 
           {/* Login link */}
           <p className="mt-8 text-center text-dark-600 dark:text-dark-400">
-            {t('auth.hasAccount')}{' '}
+            Already have an account?{' '}
             <Link to="/login" className="text-primary-500 hover:text-primary-600 font-semibold">
-              {t('auth.login')}
+              Sign In
             </Link>
           </p>
         </motion.div>

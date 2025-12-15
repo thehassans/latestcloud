@@ -660,17 +660,17 @@ export default function Home() {
             
             <div className="relative text-center text-white">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display">
-                {t('hero.readyToStart')}
+                Ready to Get Started?
               </h2>
               <p className="mt-4 text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-                {t('hero.joinThousands')}
+                Join thousands of satisfied customers and experience the difference.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   to="/hosting"
                   className="btn bg-white text-primary-600 hover:bg-dark-100 shadow-xl"
                 >
-                  {t('hero.getStarted')}
+                  Get Started
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
                 <Link

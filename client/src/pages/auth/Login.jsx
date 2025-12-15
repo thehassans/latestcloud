@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react'
 import { authAPI } from '../../lib/api'
 import { useAuthStore, useThemeStore } from '../../store/useStore'
@@ -10,7 +9,6 @@ import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
 export default function Login() {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { setUser } = useAuthStore()
@@ -46,7 +44,7 @@ export default function Login() {
       }
 
       setUser(response.data.user, response.data.token)
-      toast.success(t('auth.loginSuccess'))
+      toast.success('Login successful!')
       navigate(from, { replace: true })
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please try again.')
@@ -102,7 +100,7 @@ export default function Login() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
+                <label className="block text-sm font-medium mb-2">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                   <input
@@ -118,7 +116,7 @@ export default function Login() {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
+                <label className="block text-sm font-medium mb-2">Password</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
                   <input
@@ -148,13 +146,13 @@ export default function Login() {
                     onChange={(e) => setForm({ ...form, remember: e.target.checked })}
                     className="w-4 h-4 rounded border-dark-300 text-primary-500 focus:ring-primary-500"
                   />
-                  <span className="text-sm text-dark-600 dark:text-dark-400">{t('auth.rememberMe')}</span>
+                  <span className="text-sm text-dark-600 dark:text-dark-400">Remember me</span>
                 </label>
                 <Link
                   to="/forgot-password"
                   className="text-sm text-primary-500 hover:text-primary-600 font-medium"
                 >
-                  {t('auth.forgotPassword')}
+                  Forgot Password?
                 </Link>
               </div>
 
@@ -177,7 +175,7 @@ export default function Login() {
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    {t('auth.login')}
+                    Sign In
                     <ArrowRight className="w-5 h-5" />
                   </span>
                 )}
@@ -224,9 +222,9 @@ export default function Login() {
 
           {/* Sign up link */}
           <p className="mt-8 text-center text-dark-600 dark:text-dark-400">
-            {t('auth.noAccount')}{' '}
+            Don't have an account?{' '}
             <Link to="/register" className="text-primary-500 hover:text-primary-600 font-semibold">
-              {t('auth.createAccount')}
+              Create Account
             </Link>
           </p>
         </motion.div>
