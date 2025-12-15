@@ -59,67 +59,73 @@ const reviewTexts = [
   'The uptime guarantee is real. We\'ve tracked 99.99% uptime over the past year.',
 ]
 
-// Mulberry32 seeded random number generator for better distribution
-const mulberry32 = (seed) => {
-  return () => {
-    let t = seed += 0x6D2B79F5
-    t = Math.imul(t ^ t >>> 15, t | 1)
-    t ^= t + Math.imul(t ^ t >>> 7, t | 61)
-    return ((t ^ t >>> 14) >>> 0) / 4294967296
-  }
-}
-
-// Generate all 2847 reviews
+// Generate all 2847 reviews with unique names
 const generateReviews = () => {
   const allReviews = []
   const totalReviews = 2847
+  const usedNames = new Set()
   
   for (let i = 0; i < totalReviews; i++) {
-    // Create unique random generator for each review
-    const rand = mulberry32(i * 12345 + 67890)
-    
-    // Determine gender (50/50)
-    const isFemale = rand() > 0.5
+    // Use index-based selection to ensure variety
+    const genderIndex = i % 2
+    const isFemale = genderIndex === 0
     const firstNames = isFemale ? femaleFirstNames : maleFirstNames
     
-    const firstName = firstNames[Math.floor(rand() * firstNames.length)]
-    const lastName = lastNames[Math.floor(rand() * lastNames.length)]
-    const name = `${firstName} ${lastName}`
+    // Use different indices for each property to ensure variety
+    const firstNameIndex = (i * 7 + 3) % firstNames.length
+    const lastNameIndex = (i * 11 + 5) % lastNames.length
+    const firstName = firstNames[firstNameIndex]
+    const lastName = lastNames[lastNameIndex]
+    
+    // Ensure unique names by adding suffix if needed
+    let name = `${firstName} ${lastName}`
+    let suffix = 1
+    while (usedNames.has(name) && suffix < 100) {
+      name = `${firstName} ${lastName}${suffix > 1 ? ' ' + String.fromCharCode(64 + suffix) : ''}`
+      suffix++
+    }
+    usedNames.add(name)
     
     // Determine if review has image (70% have images)
-    const hasImage = rand() > 0.3
-    const photoIndex = Math.floor(rand() * 99) + 1 // 1-99
+    const hasImage = i % 10 < 7
+    const photoIndex = ((i * 13) % 99) + 1 // 1-99
     const photoGender = isFemale ? 'women' : 'men'
     
     // Rating: Only 4, 4.5, or 5 stars (70% 5-star, 15% 4.5-star, 15% 4-star)
-    const ratingRand = rand()
+    const ratingMod = i % 20
     let rating
-    if (ratingRand < 0.70) rating = 5
-    else if (ratingRand < 0.85) rating = 4.5
-    else rating = 4
+    if (ratingMod < 14) rating = 5 // 70%
+    else if (ratingMod < 17) rating = 4.5 // 15%
+    else rating = 4 // 15%
     
     // Generate date (spread over last 2 years)
-    const daysAgo = Math.floor(rand() * 730) // 0-730 days ago
+    const daysAgo = (i * 17) % 730
     const date = new Date()
     date.setDate(date.getDate() - daysAgo)
     const dateStr = date.toISOString().split('T')[0]
     
-    // Select service
-    const service = services[Math.floor(rand() * services.length)]
+    // Select service, role, location, title, review using different multipliers
+    const serviceIndex = (i * 3) % services.length
+    const roleIndex = (i * 5) % roles.length
+    const locationIndex = (i * 7) % locations.length
+    const titleIndex = (i * 11) % reviewTitles.length
+    const reviewIndex = (i * 13) % reviewTexts.length
+    
+    const service = services[serviceIndex]
     
     allReviews.push({
       id: i + 1,
       name,
-      role: roles[Math.floor(rand() * roles.length)],
-      location: locations[Math.floor(rand() * locations.length)],
+      role: roles[roleIndex],
+      location: locations[locationIndex],
       rating,
       date: dateStr,
-      title: reviewTitles[Math.floor(rand() * reviewTitles.length)],
-      review: reviewTexts[Math.floor(rand() * reviewTexts.length)],
+      title: reviewTitles[titleIndex],
+      review: reviewTexts[reviewIndex],
       img: hasImage ? `https://randomuser.me/api/portraits/${photoGender}/${photoIndex}.jpg` : null,
       initial: !hasImage ? `${firstName[0]}${lastName[0]}` : null,
-      verified: rand() > 0.05, // 95% verified
-      helpful: Math.floor(rand() * 300) + 1,
+      verified: i % 20 !== 0, // 95% verified
+      helpful: ((i * 37) % 300) + 1,
       service: service.name,
       serviceIcon: service.icon
     })
@@ -271,7 +277,7 @@ export default function Reviews() {
       </section>
 
       {/* Reviews Grid */}
-      <section className="py-16">
+      <section id="reviews-grid" className="py-16 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {paginatedReviews.map((review, i) => (
@@ -372,7 +378,7 @@ export default function Reviews() {
               </p>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 400, behavior: 'smooth' }) }}
+                  onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); document.getElementById('reviews-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
                   disabled={currentPage === 1}
                   className="p-2 rounded-lg bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -383,7 +389,7 @@ export default function Reviews() {
                 <div className="flex items-center gap-1">
                   {currentPage > 3 && (
                     <>
-                      <button onClick={() => { setCurrentPage(1); window.scrollTo({ top: 400, behavior: 'smooth' }) }} className="px-3 py-1.5 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-800">1</button>
+                      <button onClick={() => { setCurrentPage(1); document.getElementById('reviews-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} className="px-3 py-1.5 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-800">1</button>
                       {currentPage > 4 && <span className="px-2 text-dark-400">...</span>}
                     </>
                   )}
@@ -405,7 +411,7 @@ export default function Reviews() {
                     return (
                       <button
                         key={pageNum}
-                        onClick={() => { setCurrentPage(pageNum); window.scrollTo({ top: 400, behavior: 'smooth' }) }}
+                        onClick={() => { setCurrentPage(pageNum); document.getElementById('reviews-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
                         className={clsx(
                           "px-3 py-1.5 rounded-lg transition-colors",
                           currentPage === pageNum
@@ -421,13 +427,13 @@ export default function Reviews() {
                   {currentPage < totalPages - 2 && (
                     <>
                       {currentPage < totalPages - 3 && <span className="px-2 text-dark-400">...</span>}
-                      <button onClick={() => { setCurrentPage(totalPages); window.scrollTo({ top: 400, behavior: 'smooth' }) }} className="px-3 py-1.5 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-800">{totalPages}</button>
+                      <button onClick={() => { setCurrentPage(totalPages); document.getElementById('reviews-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }} className="px-3 py-1.5 rounded-lg hover:bg-dark-100 dark:hover:bg-dark-800">{totalPages}</button>
                     </>
                   )}
                 </div>
                 
                 <button
-                  onClick={() => { setCurrentPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 400, behavior: 'smooth' }) }}
+                  onClick={() => { setCurrentPage(p => Math.min(totalPages, p + 1)); document.getElementById('reviews-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
                   disabled={currentPage === totalPages}
                   className="p-2 rounded-lg bg-dark-100 dark:bg-dark-800 hover:bg-dark-200 dark:hover:bg-dark-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
