@@ -568,8 +568,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Reviews Section */}
-      <section className="section bg-dark-50 dark:bg-dark-900">
+      {/* Reviews Section - Animated Marquee */}
+      <section className="section bg-dark-50 dark:bg-dark-900 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <motion.h2
@@ -584,9 +584,11 @@ export default function Home() {
               Trusted by 50,000+ businesses worldwide
             </p>
           </div>
+        </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Reviews with comments */}
+        {/* Row 1 - Scrolling Left */}
+        <div className="relative mb-6">
+          <div className="flex animate-marquee-left">
             {[
               { name: 'Ahmed Wasim', role: 'CEO, Magnetic Clouds', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.' },
               { name: 'Hassan Sarwar', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/22.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.' },
@@ -594,40 +596,85 @@ export default function Home() {
               { name: 'Michael Brown', role: 'Startup Founder', img: 'https://randomuser.me/api/portraits/men/75.jpg', rating: 5, comment: 'The cloud servers are blazing fast. Perfect for our growing business needs.' },
               { name: 'Fatima Rahman', role: 'Blogger', img: 'https://randomuser.me/api/portraits/women/26.jpg', rating: 5, comment: 'Simple setup and great performance. My blog loads instantly now!' },
               { name: 'James Wilson', role: 'Agency Director', img: 'https://randomuser.me/api/portraits/men/52.jpg', rating: 5, comment: 'We host 50+ client sites here. Never had any issues. Premium quality service.' },
-              /* Star-only reviews */
-              { name: 'Priya Sharma', role: 'Designer', img: 'https://randomuser.me/api/portraits/women/89.jpg', rating: 5 },
-              { name: 'David Kim', role: 'Entrepreneur', img: 'https://randomuser.me/api/portraits/men/46.jpg', rating: 5 },
-            ].map((review, i) => (
-              <motion.div
-                key={review.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className={clsx(
-                  "p-6 rounded-2xl transition-all hover:shadow-xl",
-                  "bg-white dark:bg-dark-800 border border-gray-100 dark:border-dark-700"
-                )}
+              { name: 'Sophie Anderson', role: 'Marketing Manager', img: 'https://randomuser.me/api/portraits/women/44.jpg', rating: 5, comment: 'Incredible speed and reliability. Our campaigns run smoothly every time.' },
+              { name: 'Robert Taylor', role: 'Tech Lead', img: 'https://randomuser.me/api/portraits/men/67.jpg', rating: 5, comment: 'Best infrastructure I\'ve worked with. Scaling is effortless.' },
+            ].concat([
+              { name: 'Ahmed Wasim', role: 'CEO, Magnetic Clouds', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.' },
+              { name: 'Hassan Sarwar', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/22.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.' },
+              { name: 'Emily Chen', role: 'E-commerce Owner', img: 'https://randomuser.me/api/portraits/women/68.jpg', rating: 5, comment: 'Migrated from another host and the difference is night and day. Highly recommend!' },
+              { name: 'Michael Brown', role: 'Startup Founder', img: 'https://randomuser.me/api/portraits/men/75.jpg', rating: 5, comment: 'The cloud servers are blazing fast. Perfect for our growing business needs.' },
+              { name: 'Fatima Rahman', role: 'Blogger', img: 'https://randomuser.me/api/portraits/women/26.jpg', rating: 5, comment: 'Simple setup and great performance. My blog loads instantly now!' },
+              { name: 'James Wilson', role: 'Agency Director', img: 'https://randomuser.me/api/portraits/men/52.jpg', rating: 5, comment: 'We host 50+ client sites here. Never had any issues. Premium quality service.' },
+              { name: 'Sophie Anderson', role: 'Marketing Manager', img: 'https://randomuser.me/api/portraits/women/44.jpg', rating: 5, comment: 'Incredible speed and reliability. Our campaigns run smoothly every time.' },
+              { name: 'Robert Taylor', role: 'Tech Lead', img: 'https://randomuser.me/api/portraits/men/67.jpg', rating: 5, comment: 'Best infrastructure I\'ve worked with. Scaling is effortless.' },
+            ]).map((review, i) => (
+              <div
+                key={`row1-${i}`}
+                className="flex-shrink-0 w-80 mx-3 p-5 rounded-2xl bg-white dark:bg-dark-800 border border-gray-100 dark:border-dark-700 shadow-sm"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <img src={review.img} alt={review.name} className="w-12 h-12 rounded-full object-cover" />
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={review.img} alt={review.name} className="w-10 h-10 rounded-full object-cover" />
                   <div>
-                    <h4 className="font-semibold text-dark-900 dark:text-white">{review.name}</h4>
-                    <p className="text-sm text-dark-500">{review.role}</p>
+                    <h4 className="font-semibold text-dark-900 dark:text-white text-sm">{review.name}</h4>
+                    <p className="text-xs text-dark-500">{review.role}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 mb-3">
+                <div className="flex items-center gap-0.5 mb-2">
                   {[...Array(review.rating)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    <Star key={j} className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
                   ))}
                 </div>
-                {review.comment && (
-                  <p className="text-dark-600 dark:text-dark-400 text-sm">{review.comment}</p>
-                )}
-              </motion.div>
+                <p className="text-dark-600 dark:text-dark-400 text-sm line-clamp-2">{review.comment}</p>
+              </div>
             ))}
           </div>
+        </div>
 
+        {/* Row 2 - Scrolling Right */}
+        <div className="relative">
+          <div className="flex animate-marquee-right">
+            {[
+              { name: 'Priya Sharma', role: 'Designer', img: 'https://randomuser.me/api/portraits/women/89.jpg', rating: 5, comment: 'Beautiful dashboard and amazing performance. Love it!' },
+              { name: 'David Kim', role: 'Entrepreneur', img: 'https://randomuser.me/api/portraits/men/46.jpg', rating: 5, comment: 'Started my business here. Couldn\'t ask for better hosting.' },
+              { name: 'Lisa Wang', role: 'Product Manager', img: 'https://randomuser.me/api/portraits/women/55.jpg', rating: 5, comment: 'Seamless integration with our workflow. Highly recommended!' },
+              { name: 'Alex Johnson', role: 'CTO', img: 'https://randomuser.me/api/portraits/men/33.jpg', rating: 5, comment: 'Enterprise-grade security and performance. Top notch!' },
+              { name: 'Maria Garcia', role: 'Freelancer', img: 'https://randomuser.me/api/portraits/women/37.jpg', rating: 5, comment: 'Affordable and reliable. Perfect for freelancers like me.' },
+              { name: 'John Smith', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/55.jpg', rating: 5, comment: 'The API is fantastic. Integration was a breeze.' },
+              { name: 'Sarah Lee', role: 'Startup CEO', img: 'https://randomuser.me/api/portraits/women/72.jpg', rating: 5, comment: 'Migrated our entire infrastructure. Zero regrets!' },
+              { name: 'Chris Davis', role: 'DevOps Engineer', img: 'https://randomuser.me/api/portraits/men/28.jpg', rating: 5, comment: 'Best uptime I\'ve seen. Production-ready from day one.' },
+            ].concat([
+              { name: 'Priya Sharma', role: 'Designer', img: 'https://randomuser.me/api/portraits/women/89.jpg', rating: 5, comment: 'Beautiful dashboard and amazing performance. Love it!' },
+              { name: 'David Kim', role: 'Entrepreneur', img: 'https://randomuser.me/api/portraits/men/46.jpg', rating: 5, comment: 'Started my business here. Couldn\'t ask for better hosting.' },
+              { name: 'Lisa Wang', role: 'Product Manager', img: 'https://randomuser.me/api/portraits/women/55.jpg', rating: 5, comment: 'Seamless integration with our workflow. Highly recommended!' },
+              { name: 'Alex Johnson', role: 'CTO', img: 'https://randomuser.me/api/portraits/men/33.jpg', rating: 5, comment: 'Enterprise-grade security and performance. Top notch!' },
+              { name: 'Maria Garcia', role: 'Freelancer', img: 'https://randomuser.me/api/portraits/women/37.jpg', rating: 5, comment: 'Affordable and reliable. Perfect for freelancers like me.' },
+              { name: 'John Smith', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/55.jpg', rating: 5, comment: 'The API is fantastic. Integration was a breeze.' },
+              { name: 'Sarah Lee', role: 'Startup CEO', img: 'https://randomuser.me/api/portraits/women/72.jpg', rating: 5, comment: 'Migrated our entire infrastructure. Zero regrets!' },
+              { name: 'Chris Davis', role: 'DevOps Engineer', img: 'https://randomuser.me/api/portraits/men/28.jpg', rating: 5, comment: 'Best uptime I\'ve seen. Production-ready from day one.' },
+            ]).map((review, i) => (
+              <div
+                key={`row2-${i}`}
+                className="flex-shrink-0 w-80 mx-3 p-5 rounded-2xl bg-white dark:bg-dark-800 border border-gray-100 dark:border-dark-700 shadow-sm"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={review.img} alt={review.name} className="w-10 h-10 rounded-full object-cover" />
+                  <div>
+                    <h4 className="font-semibold text-dark-900 dark:text-white text-sm">{review.name}</h4>
+                    <p className="text-xs text-dark-500">{review.role}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-0.5 mb-2">
+                  {[...Array(review.rating)].map((_, j) => (
+                    <Star key={j} className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                  ))}
+                </div>
+                <p className="text-dark-600 dark:text-dark-400 text-sm line-clamp-2">{review.comment}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

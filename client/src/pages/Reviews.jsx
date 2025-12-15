@@ -163,14 +163,9 @@ const generateReviews = () => {
     const photoIndex = ((i * 13) % 99) + 1 // 1-99
     const photoGender = isFemale ? 'women' : 'men'
     
-    // Rating distribution: 65% 5-star, 15% 4-star, 10% 3-star, 6% 2-star, 4% 1-star
+    // Rating distribution: 92% 5-star, 8% 4-star
     const ratingMod = i % 100
-    let rating
-    if (ratingMod < 65) rating = 5
-    else if (ratingMod < 80) rating = 4
-    else if (ratingMod < 90) rating = 3
-    else if (ratingMod < 96) rating = 2
-    else rating = 1
+    const rating = ratingMod < 92 ? 5 : 4
     
     // Generate unique review by combining opening + middle + closing with different indices
     const openings = reviewOpenings[rating]
@@ -226,13 +221,10 @@ const reviews = generateReviews()
 
 const stats = {
   total: 2847,
-  average: 4.3,
+  average: 4.9,
   distribution: [
-    { stars: 5, count: 1851, percentage: 65 },
-    { stars: 4, count: 427, percentage: 15 },
-    { stars: 3, count: 285, percentage: 10 },
-    { stars: 2, count: 171, percentage: 6 },
-    { stars: 1, count: 113, percentage: 4 }
+    { stars: 5, count: 2619, percentage: 92 },
+    { stars: 4, count: 228, percentage: 8 }
   ]
 }
 
@@ -329,7 +321,7 @@ export default function Reviews() {
               <Filter className="w-5 h-5 text-dark-500" />
               <span className="text-sm font-medium">Filter:</span>
               <div className="flex gap-2">
-                {['all', '5', '4', '3', '2', '1'].map((f) => (
+                {['all', '5', '4'].map((f) => (
                   <button
                     key={f}
                     onClick={() => handleFilterChange(f)}
