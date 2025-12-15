@@ -23,18 +23,6 @@ const services = [
   { name: 'Web Development', icon: Globe },
 ]
 
-const reviewTitles = [
-  'Best hosting decision we ever made', 'Enterprise-grade performance', 'Incredible speed and uptime',
-  'Perfect for our business', 'Exceeded all expectations', 'Amazing customer support',
-  'Rock-solid infrastructure', 'Highly recommend!', 'Game changer for our website',
-  'Worth every penny', 'Fast, reliable, and secure', 'Outstanding service quality',
-  'Best value hosting provider', 'Seamless migration experience', 'Top-notch performance',
-  'Excellent for e-commerce', 'Perfect for developers', 'Great for agencies',
-  'Scalable and powerful', 'Security you can trust', 'Lightning fast servers',
-  'Professional and reliable', 'Best support team ever', 'Fantastic experience overall',
-  'Our website has never been faster', 'Flawless uptime record', 'Great for WordPress',
-  'Perfect for high-traffic sites', 'Affordable enterprise hosting', 'Simply the best'
-]
 
 // 5-star reviews (positive)
 const fiveStarTexts = [
@@ -218,8 +206,6 @@ const generateReviews = () => {
     const serviceIndex = (i * 3) % services.length
     const roleIndex = (i * 5) % roles.length
     const locationIndex = (i * 7) % locations.length
-    const titleIndex = (i * 11) % reviewTitles.length
-    const reviewIndex = (i * 13) % reviewTexts.length
     
     const service = services[serviceIndex]
     
