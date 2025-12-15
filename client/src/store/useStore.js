@@ -165,7 +165,7 @@ export const useSettingsStore = create(
   )
 )
 
-// Site Settings store (logo, favicon, site name)
+// Site Settings store (logo, favicon, site name, partner logos)
 export const useSiteSettingsStore = create(
   persist(
     (set) => ({
@@ -175,9 +175,17 @@ export const useSiteSettingsStore = create(
       favicon: null,
       contactEmail: 'support@magneticclouds.com',
       contactPhone: '',
+      partnerLogos: [],
       loaded: false,
       setSiteSettings: (data) => set({ ...data, loaded: true }),
-      updateSiteSetting: (key, value) => set({ [key]: value })
+      updateSiteSetting: (key, value) => set({ [key]: value }),
+      setPartnerLogos: (logos) => set({ partnerLogos: logos }),
+      addPartnerLogo: (logo) => set((state) => ({ 
+        partnerLogos: [...state.partnerLogos, logo] 
+      })),
+      removePartnerLogo: (index) => set((state) => ({ 
+        partnerLogos: state.partnerLogos.filter((_, i) => i !== index) 
+      }))
     }),
     {
       name: 'magnetic-site-settings'

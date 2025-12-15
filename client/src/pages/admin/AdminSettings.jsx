@@ -1,23 +1,25 @@
 import { useState, useRef, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Save, Palette, Globe, CreditCard, Image, Upload, X } from 'lucide-react'
+import { Save, Palette, Globe, CreditCard, Image, Upload, X, Plus, Trash2, Users } from 'lucide-react'
 import { useThemeStore, useSiteSettingsStore } from '../../store/useStore'
 import api from '../../lib/api'
 import toast from 'react-hot-toast'
 
 export default function AdminSettings() {
   const { themeStyle, setThemeStyle } = useThemeStore()
-  const { siteName, siteTagline, logo, favicon, contactEmail, setSiteSettings, updateSiteSetting } = useSiteSettingsStore()
+  const { siteName, siteTagline, logo, favicon, contactEmail, partnerLogos, setSiteSettings, setPartnerLogos } = useSiteSettingsStore()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     siteName: siteName || 'Magnetic Clouds',
     siteTagline: siteTagline || 'Premium Cloud Hosting',
     contactEmail: contactEmail || 'support@magneticclouds.com',
     logo: logo || null,
-    favicon: favicon || null
+    favicon: favicon || null,
+    partnerLogos: partnerLogos || []
   })
   const logoInputRef = useRef(null)
   const faviconInputRef = useRef(null)
+  const partnerLogoInputRef = useRef(null)
 
   // Load settings from server on mount
   useEffect(() => {
@@ -32,7 +34,8 @@ export default function AdminSettings() {
             siteTagline: s.site_tagline || prev.siteTagline,
             contactEmail: s.contact_email || prev.contactEmail,
             logo: s.site_logo || prev.logo,
-            favicon: s.site_favicon || prev.favicon
+            favicon: s.site_favicon || prev.favicon,
+            partnerLogos: s.partner_logos ? JSON.parse(s.partner_logos) : prev.partnerLogos
           }))
         }
       } catch (err) {
@@ -120,7 +123,8 @@ export default function AdminSettings() {
           site_tagline: formData.siteTagline,
           contact_email: formData.contactEmail,
           site_logo: formData.logo,
-          site_favicon: formData.favicon
+          site_favicon: formData.favicon,
+          partner_logos: JSON.stringify(formData.partnerLogos)
         }
       })
       
@@ -130,8 +134,10 @@ export default function AdminSettings() {
         siteTagline: formData.siteTagline,
         contactEmail: formData.contactEmail,
         logo: formData.logo,
-        favicon: formData.favicon
+        favicon: formData.favicon,
+        partnerLogos: formData.partnerLogos
       })
+      setPartnerLogos(formData.partnerLogos)
 
       // Update favicon in DOM
       if (formData.favicon) {
@@ -305,6 +311,95 @@ export default function AdminSettings() {
                   <p className="font-medium">Flat</p>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Partner Logos Section */}
+        <div className="card p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Users className="w-6 h-6 text-primary-500" />
+            <h2 className="text-lg font-bold">Partner Logos</h2>
+          </div>
+          <p className="text-sm text-dark-500 mb-4">Upload partner and payment method logos to display on the homepage.</p>
+          
+          {/* Current Partner Logos */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+            {formData.partnerLogos.map((partner, index) => (
+              <div key={index} className="relative group border border-dark-200 dark:border-dark-700 rounded-xl p-3 bg-dark-50 dark:bg-dark-800">
+                <img src={partner.logo} alt={partner.name} className="h-10 w-full object-contain" />
+                <p className="text-xs text-center mt-2 text-dark-600 dark:text-dark-400 truncate">{partner.name}</p>
+                <button
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      partnerLogos: prev.partnerLogos.filter((_, i) => i !== index)
+                    }))
+                  }}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Add New Partner Logo */}
+          <div className="border-2 border-dashed border-dark-300 dark:border-dark-600 rounded-xl p-6">
+            <div className="flex flex-col items-center gap-4">
+              <input
+                ref={partnerLogoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files[0]
+                  if (!file) return
+                  const name = prompt('Enter partner name:')
+                  if (!name) return
+                  
+                  const reader = new FileReader()
+                  reader.onloadend = () => {
+                    const img = new window.Image()
+                    img.onload = () => {
+                      const canvas = document.createElement('canvas')
+                      let width = img.width
+                      let height = img.height
+                      const maxHeight = 60
+                      const maxWidth = 200
+                      if (height > maxHeight) {
+                        width = (width * maxHeight) / height
+                        height = maxHeight
+                      }
+                      if (width > maxWidth) {
+                        height = (height * maxWidth) / width
+                        width = maxWidth
+                      }
+                      canvas.width = width
+                      canvas.height = height
+                      const ctx = canvas.getContext('2d')
+                      ctx.drawImage(img, 0, 0, width, height)
+                      const resized = canvas.toDataURL('image/png')
+                      setFormData(prev => ({
+                        ...prev,
+                        partnerLogos: [...prev.partnerLogos, { name, logo: resized }]
+                      }))
+                      toast.success(`${name} logo added!`)
+                    }
+                    img.src = reader.result
+                  }
+                  reader.readAsDataURL(file)
+                  e.target.value = ''
+                }}
+              />
+              <Upload className="w-8 h-8 text-dark-400" />
+              <p className="text-sm text-dark-500">Add partner logos (Visa, Mastercard, PayPal, etc.)</p>
+              <button
+                onClick={() => partnerLogoInputRef.current?.click()}
+                className="btn-outline text-sm"
+              >
+                <Plus className="w-4 h-4 mr-2" /> Add Partner Logo
+              </button>
             </div>
           </div>
         </div>
