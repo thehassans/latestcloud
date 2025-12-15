@@ -2,19 +2,19 @@ import { useState, useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ChevronDown, Moon, Sun, ShoppingCart, Globe, User, Server, Cloud, Database, HardDrive, Shield, Lock, Mail, Archive, Search, Bug, Zap, Wrench, Building2, Users, Gift, Globe2, Bot, Code, Hammer, ShieldCheck, BarChart3 } from 'lucide-react'
-import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSettingsStore, useLanguageStore } from '../../store/useStore'
+import { useThemeStore, useAuthStore, useCartStore, useCurrencyStore, useSiteSettingsStore } from '../../store/useStore'
 import GoogleTranslate from '../GoogleTranslate'
 import clsx from 'clsx'
 
-const getNavItems = (t) => [
+const navItems = [
   {
-    label: t('nav.hosting'),
+    label: 'Hosting',
     children: [
       { to: '/hosting', label: 'VPS Hosting', desc: 'High-performance virtual private servers', icon: Server },
     ]
   },
   {
-    label: t('nav.servers'),
+    label: 'Servers',
     children: [
       { to: '/vps', label: 'VPS Server', desc: 'Scalable virtual private servers', icon: Server },
       { to: '/bd-server', label: 'BD Server', desc: 'Premium Bangladesh datacenter servers', icon: Globe2 },
@@ -23,7 +23,7 @@ const getNavItems = (t) => [
     ]
   },
   {
-    label: t('nav.securityTools') || 'Security & Tools',
+    label: 'Security & Tools',
     megaMenu: true,
     children: [
       { to: '/ssl', label: 'SSL Certificates', desc: 'Secure your site with SSL', icon: Lock },
@@ -38,16 +38,16 @@ const getNavItems = (t) => [
     ]
   },
   {
-    label: t('nav.domains'),
+    label: 'Domains',
     children: [
       { to: '/domains', label: 'Domain Registration', desc: 'Register your perfect domain name', icon: Globe },
       { to: '/domain-transfer', label: 'Domain Transfer', desc: 'Transfer domains to us easily', icon: Globe },
     ]
   },
   {
-    label: t('nav.company') || 'Company',
+    label: 'Company',
     children: [
-      { to: '/about', label: t('nav.about'), desc: 'Learn about our mission', icon: Building2 },
+      { to: '/about', label: 'About Us', desc: 'Learn about our mission', icon: Building2 },
       { to: '/affiliate', label: 'Affiliate Program', desc: 'Earn with our affiliate program', icon: Users },
       { to: '/coupons', label: 'Coupons & Deals', desc: 'Get exclusive discounts', icon: Gift },
     ]
@@ -58,15 +58,12 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
-  const { t } = useLanguageStore()
   const { theme, toggleTheme } = useThemeStore()
   const { isAuthenticated, user } = useAuthStore()
   const { items: cartItems } = useCartStore()
   const { currency, setCurrency } = useCurrencyStore()
   const { siteName, logo } = useSiteSettingsStore()
   const navigate = useNavigate()
-  
-  const navItems = getNavItems(t)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -234,7 +231,7 @@ export default function Navbar() {
                 to="/login"
                 className="hidden sm:flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-primary-500/10 to-secondary-500/10 dark:from-primary-500/20 dark:to-secondary-500/20 border border-primary-500/30 text-primary-600 dark:text-primary-400 font-medium rounded-xl hover:from-primary-500 hover:to-secondary-500 hover:text-white hover:border-transparent transition-all"
               >
-                {t('nav.login')}
+                Login
               </Link>
             )}
 
@@ -320,7 +317,7 @@ export default function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                       className="block px-4 py-3 text-center text-dark-700 dark:text-dark-300 font-medium border border-dark-200 dark:border-dark-700 rounded-xl"
                     >
-                      {t('nav.login')}
+                      Login
                     </Link>
                   )}
                 </div>

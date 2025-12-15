@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import { Search, Globe, CheckCircle, XCircle, ShoppingCart, Shield, Zap, Lock, ArrowRight, Headphones, RefreshCw, Info, Server, Mail, ChevronDown, ChevronUp, Loader2, ExternalLink } from 'lucide-react'
 import { domainsAPI } from '../lib/api'
-import { useCurrencyStore, useThemeStore, useCartStore, useLanguageStore } from '../store/useStore'
+import { useCurrencyStore, useThemeStore, useCartStore } from '../store/useStore'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
@@ -25,7 +25,6 @@ export default function Domains() {
   const { format } = useCurrencyStore()
   const { themeStyle, theme } = useThemeStore()
   const { addItem } = useCartStore()
-  const { t } = useLanguageStore()
   const isGradient = themeStyle === 'gradient'
   const isDark = theme === 'dark'
 
@@ -119,7 +118,7 @@ export default function Domains() {
               )}
             >
               <Globe className="w-4 h-4" />
-              {t('nav.domains')}
+              Domains
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -130,7 +129,7 @@ export default function Domains() {
                 isDark ? "text-white" : "text-dark-900"
               )}
             >
-              {t('domains.title')}
+              Find Your Perfect Domain
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -138,7 +137,7 @@ export default function Domains() {
               transition={{ delay: 0.2 }}
               className={clsx("text-lg max-w-2xl mx-auto", isDark ? "text-dark-300" : "text-dark-600")}
             >
-              {t('domains.subtitle')}
+              Search from over 500+ domain extensions. Get the perfect domain for your business.
             </motion.p>
           </div>
 
@@ -162,7 +161,7 @@ export default function Domains() {
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder={t('domains.searchPlaceholder')}
+                    placeholder="Search your perfect domain..."
                     className={clsx(
                       "w-full bg-transparent pl-12 pr-4 py-4 focus:outline-none text-lg",
                       isDark ? "text-white placeholder-dark-400" : "text-dark-900 placeholder-dark-400"
@@ -174,7 +173,7 @@ export default function Domains() {
                   className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all flex items-center gap-2"
                 >
                   <Search className="w-5 h-5" />
-                  {t('domains.search')}
+                  Search
                 </button>
               </div>
             </div>
@@ -238,8 +237,8 @@ export default function Domains() {
                               : "text-red-600 dark:text-red-400"
                           )}>
                             {searchResults.primary.available
-                              ? `✓ ${searchResults.primary.domain} ${t('domains.available')}`
-                              : `✗ ${searchResults.primary.domain} ${t('domains.registered')}`}
+                              ? `✓ ${searchResults.primary.domain} is available!`
+                              : `✗ ${searchResults.primary.domain} is already registered`}
                           </p>
                         </div>
                       </div>
@@ -271,7 +270,7 @@ export default function Domains() {
                               className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-emerald-500/30 transition-all transform hover:scale-105"
                             >
                               <ShoppingCart className="w-5 h-5" />
-                              {t('domains.addToCart')}
+                              Add to Cart
                             </button>
                           </>
                         ) : (

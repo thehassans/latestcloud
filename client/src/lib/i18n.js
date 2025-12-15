@@ -60,4 +60,21 @@ i18n
 // Expose i18next globally for integration with zustand store
 window.i18next = i18n
 
+// Clear old language settings to default to English
+// This ensures the site shows English on first load
+const clearOldLanguageSettings = () => {
+  // Clear the old zustand language store
+  localStorage.removeItem('magnetic-language')
+  
+  // Clear Google Translate cookies if set to non-English
+  const googtrans = document.cookie.split(';').find(c => c.trim().startsWith('googtrans='))
+  if (googtrans && !googtrans.includes('/en/en')) {
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`
+  }
+}
+
+// Run once on load
+clearOldLanguageSettings()
+
 export default i18n

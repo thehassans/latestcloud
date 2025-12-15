@@ -9,7 +9,7 @@ import {
   ArrowRight, ChevronRight, Star, Users, Award, TrendingUp
 } from 'lucide-react'
 import { productsAPI, domainsAPI, settingsAPI } from '../lib/api'
-import { useCurrencyStore, useThemeStore, useSiteSettingsStore, useLanguageStore } from '../store/useStore'
+import { useCurrencyStore, useThemeStore, useSiteSettingsStore } from '../store/useStore'
 import clsx from 'clsx'
 
 const features = [
@@ -40,7 +40,6 @@ const stats = [
 ]
 
 export default function Home() {
-  const { t } = useLanguageStore()
   const navigate = useNavigate()
   const { format } = useCurrencyStore()
   const { themeStyle } = useThemeStore()
@@ -91,21 +90,21 @@ export default function Home() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full text-sm font-medium mb-6">
                 <Star className="w-4 h-4" />
-                {t('hero.trustedBy')}
+                Trusted by 50,000+ customers worldwide
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display leading-tight">
-                {t('hero.title')}
+                Premium Cloud Hosting
                 <span className={clsx(
                   "block mt-2",
                   isGradient ? "text-gradient" : "text-primary-500"
                 )}>
-                  {t('hero.titleHighlight')}
+                  Built for Speed
                 </span>
               </h1>
               
               <p className="mt-6 text-lg sm:text-xl text-dark-600 dark:text-dark-400 max-w-xl">
-                {t('hero.subtitle')}
+                Experience lightning-fast hosting with 99.9% uptime guarantee. From Bangladesh to the world.
               </p>
 
               {/* Domain search */}
@@ -117,12 +116,12 @@ export default function Home() {
                       type="text"
                       value={domainSearch}
                       onChange={(e) => setDomainSearch(e.target.value)}
-                      placeholder={t('hero.searchDomain')}
+                      placeholder="Search your perfect domain..."
                       className="input-lg pl-12"
                     />
                   </div>
                   <button type="submit" className="btn-primary px-8 py-4 text-lg">
-                    {t('hero.search')}
+                    Search
                   </button>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-dark-500">
@@ -143,11 +142,11 @@ export default function Home() {
               {/* CTA buttons */}
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link to="/hosting" className="btn-primary">
-                  {t('hero.getStarted')}
+                  Get Started
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
                 <Link to="/pricing" className="btn-outline">
-                  {t('hero.viewPlans')}
+                  View Plans
                 </Link>
               </div>
 

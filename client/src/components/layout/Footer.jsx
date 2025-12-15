@@ -6,8 +6,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { useSiteSettingsStore, useLanguageStore } from '../../store/useStore'
-import LanguageSwitcher from '../LanguageSwitcher'
+import { useSiteSettingsStore } from '../../store/useStore'
 
 const footerLinks = {
   services: [
@@ -59,7 +58,6 @@ const socialLinks = [
 ]
 
 export default function Footer() {
-  const { t } = useLanguageStore()
   const [email, setEmail] = useState('')
   const { siteName, logo, contactEmail } = useSiteSettingsStore()
 
@@ -78,10 +76,10 @@ export default function Footer() {
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="text-center lg:text-left">
               <h3 className="text-2xl font-bold font-display">
-                {t('footer.newsletter')}
+                Subscribe to Newsletter
               </h3>
               <p className="mt-2 text-dark-400">
-                {t('footer.newsletterText')}
+                Get the latest updates and offers
               </p>
             </div>
             <form onSubmit={handleSubscribe} className="flex w-full max-w-md gap-3">
@@ -99,7 +97,7 @@ export default function Footer() {
                 type="submit"
                 className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 rounded-xl font-semibold transition-all flex items-center gap-2"
               >
-                {t('footer.subscribe')}
+                Subscribe
                 <Send className="w-4 h-4" />
               </button>
             </form>
@@ -165,7 +163,7 @@ export default function Footer() {
 
           {/* Services */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">{t('footer.services')}</h4>
+            <h4 className="font-semibold text-lg mb-4">Services</h4>
             <ul className="space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.to}>
@@ -183,7 +181,7 @@ export default function Footer() {
 
           {/* Tools */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">{t('footer.tools')}</h4>
+            <h4 className="font-semibold text-lg mb-4">Tools</h4>
             <ul className="space-y-3">
               {footerLinks.tools.map((link) => (
                 <li key={link.to}>
@@ -201,7 +199,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">{t('footer.company')}</h4>
+            <h4 className="font-semibold text-lg mb-4">Company</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.to}>
@@ -219,7 +217,7 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">{t('footer.support')}</h4>
+            <h4 className="font-semibold text-lg mb-4">Support</h4>
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.to}>
@@ -237,7 +235,7 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">{t('footer.legal')}</h4>
+            <h4 className="font-semibold text-lg mb-4">Legal</h4>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.to}>

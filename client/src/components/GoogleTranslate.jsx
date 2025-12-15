@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Globe, ChevronDown } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Globe, ChevronDown, Check } from 'lucide-react'
 import clsx from 'clsx'
 
 // Language options with flags
@@ -21,45 +21,84 @@ const languages = [
   { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
 ]
 
+// Helper to get/set cookie
+const setCookie = (name, value, days = 365) => {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString()
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`
+}
+
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift())
+  return null
+}
+
+// Get current language from Google Translate cookie
+const getCurrentGoogleLang = () => {
+  const cookie = getCookie('googtrans')
+  if (cookie) {
+    const parts = cookie.split('/')
+    return parts[parts.length - 1] || 'en'
+  }
+  return 'en'
+}
+
 export default function GoogleTranslate({ variant = 'default' }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [currentLang, setCurrentLang] = useState('en')
+  const [currentLang, setCurrentLang] = useState(() => getCurrentGoogleLang())
   const [isLoaded, setIsLoaded] = useState(false)
+  const dropdownRef = useRef(null)
+  const initialized = useRef(false)
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
-    // Check if script already exists
-    if (document.getElementById('google-translate-script')) {
-      setIsLoaded(true)
-      return
-    }
+    if (initialized.current) return
+    initialized.current = true
 
-    // Add Google Translate script
-    const script = document.createElement('script')
-    script.id = 'google-translate-script'
-    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
-    script.async = true
-    document.body.appendChild(script)
+    // Check current language from cookie
+    const savedLang = getCurrentGoogleLang()
+    setCurrentLang(savedLang)
+
+    // Add Google Translate script if not exists
+    if (!document.getElementById('google-translate-script')) {
+      const script = document.createElement('script')
+      script.id = 'google-translate-script'
+      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
+      script.async = true
+      document.body.appendChild(script)
+    }
 
     // Initialize Google Translate
     window.googleTranslateElementInit = () => {
-      new window.google.translate.TranslateElement(
-        {
-          pageLanguage: 'en',
-          includedLanguages: languages.map(l => l.code).join(','),
-          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-          autoDisplay: false,
-        },
-        'google_translate_element'
-      )
-      setIsLoaded(true)
+      if (window.google?.translate?.TranslateElement) {
+        new window.google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            includedLanguages: languages.map(l => l.code).join(','),
+            layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+            multilanguagePage: true
+          },
+          'google_translate_element'
+        )
+        setIsLoaded(true)
+      }
     }
 
-    return () => {
-      // Cleanup
-      const existingScript = document.getElementById('google-translate-script')
-      if (existingScript) {
-        existingScript.remove()
-      }
+    // If script already loaded, try to init
+    if (window.google?.translate?.TranslateElement) {
+      setIsLoaded(true)
     }
   }, [])
 
@@ -68,11 +107,35 @@ export default function GoogleTranslate({ variant = 'default' }) {
     setCurrentLang(langCode)
     setIsOpen(false)
 
-    // Find and trigger Google Translate
+    // Set cookie for Google Translate
+    setCookie('googtrans', `/en/${langCode}`)
+    // Also set on domain
+    document.cookie = `googtrans=/en/${langCode}; path=/; domain=${window.location.hostname}`
+
+    // Try multiple methods to trigger translation
     const selectElement = document.querySelector('.goog-te-combo')
     if (selectElement) {
       selectElement.value = langCode
-      selectElement.dispatchEvent(new Event('change'))
+      selectElement.dispatchEvent(new Event('change', { bubbles: true }))
+      
+      // Trigger via iframe if available
+      const frame = document.querySelector('.goog-te-menu-frame')
+      if (frame) {
+        try {
+          const frameDoc = frame.contentDocument || frame.contentWindow.document
+          const items = frameDoc.querySelectorAll('.goog-te-menu2-item span.text')
+          items.forEach(item => {
+            if (item.textContent.includes(languages.find(l => l.code === langCode)?.name)) {
+              item.click()
+            }
+          })
+        } catch (e) {
+          // Cross-origin restriction, use fallback
+        }
+      }
+    } else {
+      // Fallback: reload with cookie set
+      window.location.reload()
     }
   }
 
