@@ -24,98 +24,118 @@ const services = [
 ]
 
 
-// 5-star reviews (positive)
-const fiveStarTexts = [
-  'Migrating to Magnetic Clouds was the best decision for our business. The speed improvement is noticeable and our customers love it.',
-  'The support team is incredibly responsive. They helped us optimize our server configuration and now our site loads in under 2 seconds.',
-  'We\'ve been hosting with them for over 2 years now. Zero downtime and consistent performance. Highly recommended!',
-  'The pricing is very competitive for the quality of service. NVMe storage, free SSL, and excellent support.',
-  'Our e-commerce store handles thousands of orders daily without any issues. The infrastructure scales beautifully.',
-  'As a developer, I appreciate the technical details. Latest PHP, MySQL 8, Redis caching - everything a modern app needs.',
-  'The migration was completely free and they handled everything. Our site was up and running in hours.',
-  'DDoS protection saved our business during a major attack. Their security team responded immediately.',
-  'We manage 50+ client websites on their platform. The reseller program is excellent with great margins.',
-  'The control panel is intuitive and powerful. Even non-technical team members can manage basic tasks.',
-  'Automatic backups have saved us multiple times. Peace of mind knowing our data is always safe.',
-  'The global CDN makes our website fast everywhere. Customers from Asia to Europe all get great speeds.',
-  'Started with a small VPS, now running dedicated servers. They grew with our business seamlessly.',
-  'Email deliverability improved significantly after switching. No more emails going to spam.',
-  'The staging environment feature is perfect for testing updates before going live.',
-  'Their API documentation is excellent. We integrated server management into our workflow easily.',
-  'WordPress hosting is optimized perfectly. Our blog loads instantly and handles traffic spikes well.',
-  'The money-back guarantee gave us confidence to try. After the first week, we knew we made the right choice.',
-  'Customer support actually understands technical issues. No scripted responses, just real solutions.',
-  'The uptime guarantee is real. We\'ve tracked 99.99% uptime over the past year.',
-  'Absolutely phenomenal service! Our website performance increased by 300% after migrating.',
-  'The best hosting decision we ever made. Fast, reliable, and the support is world-class.',
-  'Five stars isn\'t enough! They went above and beyond to help us during our launch.',
-  'Incredible value for money. Enterprise-level features at affordable prices.',
-  'Our clients are thrilled with the speed improvements. Thank you Magnetic Clouds!',
-]
+// Review templates - opening phrases
+const reviewOpenings = {
+  5: [
+    'Absolutely love this service!', 'Best decision we ever made.', 'Cannot recommend enough!',
+    'Exceeded all my expectations.', 'Phenomenal experience overall.', 'Top-notch in every way.',
+    'This is exactly what we needed.', 'Outstanding from start to finish.', 'Incredible value.',
+    'Simply amazing service.', 'Five stars is not enough!', 'Beyond impressed.',
+  ],
+  4: [
+    'Very good service overall.', 'Mostly satisfied with my experience.', 'Good hosting choice.',
+    'Happy with the service.', 'Solid performance.', 'Pretty good experience.',
+    'Would recommend with minor caveats.', 'Good value for money.', 'Generally pleased.',
+  ],
+  3: [
+    'It\'s an okay service.', 'Average experience overall.', 'Nothing special but works.',
+    'Mixed feelings about this.', 'Decent but not outstanding.', 'Gets the job done.',
+  ],
+  2: [
+    'Disappointed with the service.', 'Not what I expected.', 'Below my expectations.',
+    'Having second thoughts.', 'Frustrated with the experience.', 'Not satisfied.',
+  ],
+  1: [
+    'Terrible experience.', 'Avoid this service.', 'Complete disaster.', 'Worst hosting ever.',
+  ]
+}
 
-// 4-star reviews (good but minor issues)
-const fourStarTexts = [
-  'Great service overall. The only minor issue is the dashboard could be more intuitive for beginners.',
-  'Very satisfied with the hosting. Support is good but sometimes takes a few hours to respond.',
-  'Solid performance and good uptime. Would love to see more data center locations in the future.',
-  'Good value for money. The migration took a bit longer than expected but everything works great now.',
-  'Happy with the service. The control panel has a learning curve but support helped me through it.',
-  'Reliable hosting with good speeds. Documentation could be more detailed for advanced configurations.',
-  'Overall excellent experience. Pricing is fair, just wish there were more payment options.',
-  'Great servers and support. The only downside is the lack of phone support for quick issues.',
-]
+// Review templates - middle content
+const reviewMiddles = {
+  5: [
+    'The speed improvements are incredible - our site loads in under 1 second now.',
+    'Support team responded within minutes and solved my issue immediately.',
+    'Migration was seamless with zero downtime.',
+    'The uptime has been 100% since we started.',
+    'Our customers have noticed the speed difference.',
+    'The control panel is intuitive and powerful.',
+    'Security features are enterprise-grade.',
+    'Scaling was effortless as our traffic grew.',
+    'The NVMe storage makes everything blazing fast.',
+    'Free SSL and daily backups included.',
+    'Their team went above and beyond to help us.',
+    'Performance is consistently excellent.',
+  ],
+  4: [
+    'Performance is good, though the dashboard could be more intuitive.',
+    'Support is helpful but response times vary.',
+    'The servers are reliable with occasional minor hiccups.',
+    'Good features, just wish there were more payment options.',
+    'Migration had some bumps but ultimately successful.',
+    'Documentation could be more comprehensive.',
+  ],
+  3: [
+    'Servers work but nothing exceptional about the performance.',
+    'Support responses are hit or miss.',
+    'The interface feels a bit outdated.',
+    'Some features are missing compared to competitors.',
+    'Had some initial setup issues.',
+    'Works for basic needs.',
+  ],
+  2: [
+    'Multiple support tickets went unanswered.',
+    'Speeds don\'t match what was advertised.',
+    'Had unexpected downtime during peak hours.',
+    'Support feels automated and unhelpful.',
+    'Migration caused several problems.',
+  ],
+  1: [
+    'Lost data and support was useless.',
+    'Constant downtime with no explanation.',
+    'Hidden fees everywhere.',
+    'Billing issues and rude support.',
+  ]
+}
 
-// 3-star reviews (average)
-const threeStarTexts = [
-  'Average experience. The hosting works fine but nothing exceptional. Support response times vary.',
-  'Decent service for the price. Had some initial setup issues but they were eventually resolved.',
-  'It\'s okay. The servers are stable but the interface feels outdated compared to competitors.',
-  'Mixed feelings. Good uptime but the support team sometimes gives generic responses.',
-  'Satisfactory hosting. Does what it promises but lacks some advanced features I was hoping for.',
-  'Middle of the road experience. Not bad, not great. Gets the job done for basic websites.',
-]
+// Review templates - closing phrases
+const reviewClosings = {
+  5: [
+    'Highly recommend to everyone!', 'Will continue using for years to come.',
+    'Thank you for the excellent service!', 'Best investment for our business.',
+    'Already recommended to colleagues.', 'Couldn\'t be happier.',
+    'A game-changer for our online presence.', 'Worth every penny.',
+  ],
+  4: [
+    'Would recommend with minor reservations.', 'Good choice for most users.',
+    'Happy overall despite small issues.', 'Will likely continue using.',
+  ],
+  3: [
+    'Might look at alternatives eventually.', 'Acceptable for the price.',
+    'Not sure if I\'ll renew.', 'Could be better, could be worse.',
+  ],
+  2: [
+    'Looking for alternatives now.', 'Cannot recommend at this time.',
+    'Hope they improve.', 'Considering switching providers.',
+  ],
+  1: [
+    'Stay away!', 'Never again.', 'Save yourself the trouble.', 'Complete waste of money.',
+  ]
+}
 
-// 2-star reviews (unsatisfied)
-const twoStarTexts = [
-  'Disappointed with the service. Multiple support tickets went unanswered for days.',
-  'Not what I expected. The advertised speeds don\'t match reality. Looking for alternatives.',
-  'Frustrating experience. Migration caused several issues that took weeks to fully resolve.',
-  'Below expectations. The server had unexpected downtime during peak business hours.',
-  'Unsatisfied with the support quality. Felt like I was talking to bots, not real people.',
-]
-
-// 1-star reviews (bad)
-const oneStarTexts = [
-  'Terrible experience. Lost data during migration and support was unhelpful. Avoid!',
-  'Worst hosting I\'ve used. Constant downtime and no accountability from the team.',
-  'Complete disaster. Billing issues, slow servers, and rude support. Never again.',
-  'Do not recommend. Hidden fees and the service quality doesn\'t match the marketing.',
-]
-
-// Corresponding titles for each rating
-const fiveStarTitles = [
-  'Absolutely amazing!', 'Best hosting ever!', 'Exceeded all expectations', 'Highly recommend!',
-  'Perfect for our business', 'Outstanding service', 'Worth every penny', 'Simply the best'
-]
-const fourStarTitles = [
-  'Very good overall', 'Solid hosting choice', 'Good but room for improvement', 'Mostly satisfied'
-]
-const threeStarTitles = [
-  'Average experience', 'It\'s okay', 'Decent but not great', 'Mixed feelings'
-]
-const twoStarTitles = [
-  'Disappointed', 'Below expectations', 'Not satisfied', 'Could be much better'
-]
-const oneStarTitles = [
-  'Terrible experience', 'Avoid this service', 'Complete disaster', 'Very disappointed'
-]
+// Titles for each rating
+const reviewTitlesByRating = {
+  5: ['Absolutely amazing!', 'Best hosting ever!', 'Exceeded expectations', 'Highly recommend!', 'Perfect service', 'Outstanding!', 'Worth every penny', 'Simply the best', 'Incredible experience', 'Five stars!'],
+  4: ['Very good overall', 'Solid choice', 'Good service', 'Mostly satisfied', 'Recommended', 'Good value'],
+  3: ['Average experience', 'It\'s okay', 'Decent service', 'Mixed feelings', 'Nothing special'],
+  2: ['Disappointed', 'Below expectations', 'Not satisfied', 'Needs improvement'],
+  1: ['Terrible experience', 'Avoid!', 'Complete disaster', 'Very disappointed']
+}
 
 // Generate all 2847 reviews with unique names
 const generateReviews = () => {
   const allReviews = []
   const totalReviews = 2847
   const usedNames = new Set()
-  const usedReviewCombos = new Set()
   
   for (let i = 0; i < totalReviews; i++) {
     // Use index-based selection to ensure variety
@@ -145,56 +165,27 @@ const generateReviews = () => {
     
     // Rating distribution: 65% 5-star, 15% 4-star, 10% 3-star, 6% 2-star, 4% 1-star
     const ratingMod = i % 100
-    let rating, reviewText, reviewTitle
-    if (ratingMod < 65) {
-      rating = 5
-      const textIdx = (i * 7) % fiveStarTexts.length
-      const titleIdx = (i * 3) % fiveStarTitles.length
-      reviewText = fiveStarTexts[textIdx]
-      reviewTitle = fiveStarTitles[titleIdx]
-    } else if (ratingMod < 80) {
-      rating = 4
-      const textIdx = (i * 5) % fourStarTexts.length
-      const titleIdx = (i * 2) % fourStarTitles.length
-      reviewText = fourStarTexts[textIdx]
-      reviewTitle = fourStarTitles[titleIdx]
-    } else if (ratingMod < 90) {
-      rating = 3
-      const textIdx = (i * 3) % threeStarTexts.length
-      const titleIdx = (i * 2) % threeStarTitles.length
-      reviewText = threeStarTexts[textIdx]
-      reviewTitle = threeStarTitles[titleIdx]
-    } else if (ratingMod < 96) {
-      rating = 2
-      const textIdx = (i * 3) % twoStarTexts.length
-      const titleIdx = (i * 2) % twoStarTitles.length
-      reviewText = twoStarTexts[textIdx]
-      reviewTitle = twoStarTitles[titleIdx]
-    } else {
-      rating = 1
-      const textIdx = (i * 2) % oneStarTexts.length
-      const titleIdx = (i * 2) % oneStarTitles.length
-      reviewText = oneStarTexts[textIdx]
-      reviewTitle = oneStarTitles[titleIdx]
-    }
+    let rating
+    if (ratingMod < 65) rating = 5
+    else if (ratingMod < 80) rating = 4
+    else if (ratingMod < 90) rating = 3
+    else if (ratingMod < 96) rating = 2
+    else rating = 1
     
-    // Ensure unique review text + title combo by adding variation
-    let comboKey = `${reviewTitle}-${reviewText.substring(0, 50)}`
-    let variation = 0
-    while (usedReviewCombos.has(comboKey) && variation < 50) {
-      variation++
-      // Add slight variation to make it unique
-      const extraPhrases = [
-        ' Overall, a good experience.',
-        ' Would recommend to others.',
-        ' Time will tell if things improve.',
-        ' Hoping for better results.',
-        ' The team was responsive.',
-      ]
-      reviewText = reviewText + extraPhrases[variation % extraPhrases.length]
-      comboKey = `${reviewTitle}-${reviewText.substring(0, 50)}`
-    }
-    usedReviewCombos.add(comboKey)
+    // Generate unique review by combining opening + middle + closing with different indices
+    const openings = reviewOpenings[rating]
+    const middles = reviewMiddles[rating]
+    const closings = reviewClosings[rating]
+    const titles = reviewTitlesByRating[rating]
+    
+    // Use prime multipliers to create unique combinations
+    const openIdx = (i * 7) % openings.length
+    const midIdx = (i * 11) % middles.length
+    const closeIdx = (i * 13) % closings.length
+    const titleIdx = (i * 17) % titles.length
+    
+    const reviewText = `${openings[openIdx]} ${middles[midIdx]} ${closings[closeIdx]}`
+    const reviewTitle = titles[titleIdx]
     
     // Generate date (spread over last 2 years)
     const daysAgo = (i * 17) % 730
