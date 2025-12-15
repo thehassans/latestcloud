@@ -90,6 +90,7 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const selectedMethod = paymentMethods.find(m => m.id === paymentMethod)
 
@@ -118,6 +119,11 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
     // Validate required fields
     if (!email || !firstName || !lastName) {
       toast.error('Please fill in all required fields')
+      return
+    }
+    
+    if (!termsAccepted) {
+      toast.error('Please accept the Terms of Service to continue')
       return
     }
     
@@ -562,6 +568,22 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
                       <span className="text-primary-500">{format(total)}</span>
                     </div>
                   </div>
+
+                  {/* Terms Checkbox */}
+                  <label className="flex items-start gap-3 mb-4 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="w-5 h-5 mt-0.5 rounded border-dark-300 text-primary-500 focus:ring-primary-500"
+                    />
+                    <span className="text-sm text-dark-600 dark:text-dark-400">
+                      I agree to the{' '}
+                      <a href="/legal/terms" target="_blank" className="text-primary-500 hover:underline font-medium">Terms of Service</a>
+                      {' '}and{' '}
+                      <a href="/legal/privacy" target="_blank" className="text-primary-500 hover:underline font-medium">Privacy Policy</a>
+                    </span>
+                  </label>
 
                   <button 
                     onClick={handleCheckout} 

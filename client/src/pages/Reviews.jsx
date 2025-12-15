@@ -6,27 +6,27 @@ import clsx from 'clsx'
 const reviews = [
   {
     id: 1,
-    name: 'Sarah Mitchell',
-    role: 'CEO, TechStart Inc.',
-    location: 'New York, USA',
+    name: 'Ahmed Wasim',
+    role: 'CEO, Magnetic Clouds',
+    location: 'Dhaka, Bangladesh',
     rating: 5,
     date: '2024-12-01',
     title: 'Best hosting decision we ever made',
     review: 'Migrating our entire infrastructure to Magnetic Clouds was seamless. Their support team guided us through every step, and our site speed improved by 300%. The uptime has been flawless for over a year now.',
-    img: 'https://randomuser.me/api/portraits/women/44.jpg',
+    img: 'https://randomuser.me/api/portraits/men/32.jpg',
     verified: true,
     helpful: 234
   },
   {
     id: 2,
-    name: 'James Kim',
+    name: 'Hassan Sarwar',
     role: 'Lead Developer',
-    location: 'San Francisco, USA',
+    location: 'Dhaka, Bangladesh',
     rating: 5,
     date: '2024-11-28',
     title: 'Enterprise-grade performance at startup prices',
     review: 'As a developer, I appreciate the technical excellence. NVMe storage, latest PHP versions, free SSL, and their API is fantastic. Been using them for 3 years and never looked back.',
-    img: 'https://randomuser.me/api/portraits/men/32.jpg',
+    img: 'https://randomuser.me/api/portraits/men/22.jpg',
     verified: true,
     helpful: 189
   },
@@ -181,6 +181,14 @@ const stats = {
 export default function Reviews() {
   const [filter, setFilter] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
+  const [helpfulClicks, setHelpfulClicks] = useState({})
+
+  const handleHelpful = (reviewId) => {
+    setHelpfulClicks(prev => ({
+      ...prev,
+      [reviewId]: !prev[reviewId]
+    }))
+  }
 
   const filteredReviews = reviews
     .filter(r => filter === 'all' || r.rating === parseInt(filter))
@@ -349,9 +357,17 @@ export default function Reviews() {
 
                 {/* Footer */}
                 <div className="mt-4 pt-4 border-t border-dark-200 dark:border-dark-700 flex items-center justify-between">
-                  <button className="flex items-center gap-2 text-sm text-dark-500 hover:text-primary-500 transition-colors">
-                    <ThumbsUp className="w-4 h-4" />
-                    Helpful ({review.helpful})
+                  <button 
+                    onClick={() => handleHelpful(review.id)}
+                    className={clsx(
+                      "flex items-center gap-2 text-sm transition-colors",
+                      helpfulClicks[review.id] 
+                        ? "text-primary-500" 
+                        : "text-dark-500 hover:text-primary-500"
+                    )}
+                  >
+                    <ThumbsUp className={clsx("w-4 h-4", helpfulClicks[review.id] && "fill-primary-500")} />
+                    Helpful ({review.helpful + (helpfulClicks[review.id] ? 1 : 0)})
                   </button>
                   <Quote className="w-5 h-5 text-dark-300" />
                 </div>

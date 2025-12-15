@@ -588,8 +588,8 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Reviews with comments */}
             {[
-              { name: 'Sarah Mitchell', role: 'CEO, TechStart', img: 'https://randomuser.me/api/portraits/women/44.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.' },
-              { name: 'Ahmed Hassan', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.' },
+              { name: 'Ahmed Wasim', role: 'CEO, Magnetic Clouds', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.' },
+              { name: 'Hassan Sarwar', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/22.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.' },
               { name: 'Emily Chen', role: 'E-commerce Owner', img: 'https://randomuser.me/api/portraits/women/68.jpg', rating: 5, comment: 'Migrated from another host and the difference is night and day. Highly recommend!' },
               { name: 'Michael Brown', role: 'Startup Founder', img: 'https://randomuser.me/api/portraits/men/75.jpg', rating: 5, comment: 'The cloud servers are blazing fast. Perfect for our growing business needs.' },
               { name: 'Fatima Rahman', role: 'Blogger', img: 'https://randomuser.me/api/portraits/women/26.jpg', rating: 5, comment: 'Simple setup and great performance. My blog loads instantly now!' },
