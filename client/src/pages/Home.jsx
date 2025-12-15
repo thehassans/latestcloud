@@ -778,29 +778,29 @@ export default function Home() {
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
           <div className="flex animate-marquee-left items-center">
             {[
-              { name: 'Visa', color: '#1A1F71' },
-              { name: 'Mastercard', color: '#EB001B' },
-              { name: 'American Express', color: '#006FCF' },
-              { name: 'AWS', color: '#FF9900' },
-              { name: 'Cloudflare', color: '#F38020' },
-              { name: 'Google Cloud', color: '#4285F4' },
-              { name: 'Stripe', color: '#635BFF' },
-              { name: 'PayPal', color: '#003087' },
+              { name: 'Visa', icon: <svg className="w-16 h-8" viewBox="0 0 48 16"><path fill="#1A1F71" d="M19.5 1.5l-2.3 13h-2.8l2.3-13h2.8zm11.8 8.4l1.5-4 .8 4h-2.3zm3.1 4.6h2.6l-2.3-13h-2.4c-.5 0-1 .3-1.2.8l-4.2 12.2h2.9l.6-1.6h3.6l.4 1.6zm-7.2-4.2c0-3.4-4.7-3.6-4.7-5.1 0-.5.5-.9 1.4-.9 1.3 0 2.3.3 2.9.6l.5-2.4c-.7-.3-1.8-.5-3-.5-3.2 0-5.4 1.7-5.4 4.1 0 1.8 1.6 2.8 2.8 3.4 1.2.6 1.7 1 1.6 1.5 0 .8-1 1.2-1.9 1.2-1.6 0-2.5-.4-3.2-.8l-.6 2.5c.7.3 2.1.6 3.5.6 3.4 0 5.6-1.7 5.6-4.2h.5zM12.1 1.5L7.3 14.5H4.3L2 3.9c-.1-.6-.3-.7-.7-.9C.5 2.6-.1 2.3-.1 2.3l.1-.8h4.7c.6 0 1.1.4 1.3 1.1l1.2 6.2 2.9-7.3h3z"/></svg> },
+              { name: 'Mastercard', icon: <svg className="w-12 h-8" viewBox="0 0 48 32"><circle cx="16" cy="16" r="14" fill="#EB001B"/><circle cx="32" cy="16" r="14" fill="#F79E1B"/><path fill="#FF5F00" d="M24 5.5a14 14 0 000 21 14 14 0 000-21z"/></svg> },
+              { name: 'American Express', icon: <svg className="w-12 h-8" viewBox="0 0 48 16"><rect fill="#006FCF" width="48" height="16" rx="2"/><text x="24" y="11" fill="white" fontSize="8" fontWeight="bold" textAnchor="middle">AMEX</text></svg> },
+              { name: 'AWS', icon: <svg className="w-12 h-8" viewBox="0 0 48 20"><text x="0" y="14" fill="#FF9900" fontSize="12" fontWeight="bold">aws</text><path d="M0 16 Q24 22 48 16" stroke="#FF9900" strokeWidth="2" fill="none"/></svg> },
+              { name: 'Cloudflare', icon: <svg className="w-10 h-8" viewBox="0 0 32 16"><path fill="#F38020" d="M24 4c-1 0-2 .5-2.5 1.2l-12 2c-.3 0-.5.3-.5.6 0 .4.3.7.7.7h14.6c.8 0 1.5-.4 1.8-1.1.2-.4.3-.9.2-1.4-.3-1.2-1.3-2-2.3-2z"/><path fill="#FAAE40" d="M26.5 6c-.2 0-.4.1-.5.3l-.8 2.7c-.1.3 0 .6.2.8.2.2.5.3.8.2l3-1c.3-.1.4-.4.3-.7-.3-.8-.8-1.5-1.5-2-.4-.2-.9-.3-1.5-.3z"/></svg> },
+              { name: 'Google Cloud', icon: <svg className="w-10 h-8" viewBox="0 0 32 24"><circle cx="10" cy="12" r="4" fill="#EA4335"/><circle cx="22" cy="12" r="4" fill="#4285F4"/><circle cx="16" cy="6" r="4" fill="#FBBC05"/><circle cx="16" cy="18" r="4" fill="#34A853"/></svg> },
+              { name: 'Stripe', icon: <svg className="w-14 h-8" viewBox="0 0 48 20"><text x="0" y="15" fill="#635BFF" fontSize="14" fontWeight="bold">stripe</text></svg> },
+              { name: 'PayPal', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><text x="0" y="12" fill="#003087" fontSize="11" fontWeight="bold">Pay</text><text x="22" y="12" fill="#009CDE" fontSize="11" fontWeight="bold">Pal</text></svg> },
             ].concat([
-              { name: 'Visa', color: '#1A1F71' },
-              { name: 'Mastercard', color: '#EB001B' },
-              { name: 'American Express', color: '#006FCF' },
-              { name: 'AWS', color: '#FF9900' },
-              { name: 'Cloudflare', color: '#F38020' },
-              { name: 'Google Cloud', color: '#4285F4' },
-              { name: 'Stripe', color: '#635BFF' },
-              { name: 'PayPal', color: '#003087' },
+              { name: 'Visa', icon: <svg className="w-16 h-8" viewBox="0 0 48 16"><path fill="#1A1F71" d="M19.5 1.5l-2.3 13h-2.8l2.3-13h2.8zm11.8 8.4l1.5-4 .8 4h-2.3zm3.1 4.6h2.6l-2.3-13h-2.4c-.5 0-1 .3-1.2.8l-4.2 12.2h2.9l.6-1.6h3.6l.4 1.6zm-7.2-4.2c0-3.4-4.7-3.6-4.7-5.1 0-.5.5-.9 1.4-.9 1.3 0 2.3.3 2.9.6l.5-2.4c-.7-.3-1.8-.5-3-.5-3.2 0-5.4 1.7-5.4 4.1 0 1.8 1.6 2.8 2.8 3.4 1.2.6 1.7 1 1.6 1.5 0 .8-1 1.2-1.9 1.2-1.6 0-2.5-.4-3.2-.8l-.6 2.5c.7.3 2.1.6 3.5.6 3.4 0 5.6-1.7 5.6-4.2h.5zM12.1 1.5L7.3 14.5H4.3L2 3.9c-.1-.6-.3-.7-.7-.9C.5 2.6-.1 2.3-.1 2.3l.1-.8h4.7c.6 0 1.1.4 1.3 1.1l1.2 6.2 2.9-7.3h3z"/></svg> },
+              { name: 'Mastercard', icon: <svg className="w-12 h-8" viewBox="0 0 48 32"><circle cx="16" cy="16" r="14" fill="#EB001B"/><circle cx="32" cy="16" r="14" fill="#F79E1B"/><path fill="#FF5F00" d="M24 5.5a14 14 0 000 21 14 14 0 000-21z"/></svg> },
+              { name: 'American Express', icon: <svg className="w-12 h-8" viewBox="0 0 48 16"><rect fill="#006FCF" width="48" height="16" rx="2"/><text x="24" y="11" fill="white" fontSize="8" fontWeight="bold" textAnchor="middle">AMEX</text></svg> },
+              { name: 'AWS', icon: <svg className="w-12 h-8" viewBox="0 0 48 20"><text x="0" y="14" fill="#FF9900" fontSize="12" fontWeight="bold">aws</text><path d="M0 16 Q24 22 48 16" stroke="#FF9900" strokeWidth="2" fill="none"/></svg> },
+              { name: 'Cloudflare', icon: <svg className="w-10 h-8" viewBox="0 0 32 16"><path fill="#F38020" d="M24 4c-1 0-2 .5-2.5 1.2l-12 2c-.3 0-.5.3-.5.6 0 .4.3.7.7.7h14.6c.8 0 1.5-.4 1.8-1.1.2-.4.3-.9.2-1.4-.3-1.2-1.3-2-2.3-2z"/><path fill="#FAAE40" d="M26.5 6c-.2 0-.4.1-.5.3l-.8 2.7c-.1.3 0 .6.2.8.2.2.5.3.8.2l3-1c.3-.1.4-.4.3-.7-.3-.8-.8-1.5-1.5-2-.4-.2-.9-.3-1.5-.3z"/></svg> },
+              { name: 'Google Cloud', icon: <svg className="w-10 h-8" viewBox="0 0 32 24"><circle cx="10" cy="12" r="4" fill="#EA4335"/><circle cx="22" cy="12" r="4" fill="#4285F4"/><circle cx="16" cy="6" r="4" fill="#FBBC05"/><circle cx="16" cy="18" r="4" fill="#34A853"/></svg> },
+              { name: 'Stripe', icon: <svg className="w-14 h-8" viewBox="0 0 48 20"><text x="0" y="15" fill="#635BFF" fontSize="14" fontWeight="bold">stripe</text></svg> },
+              { name: 'PayPal', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><text x="0" y="12" fill="#003087" fontSize="11" fontWeight="bold">Pay</text><text x="22" y="12" fill="#009CDE" fontSize="11" fontWeight="bold">Pal</text></svg> },
             ]).map((partner, i) => (
               <div
                 key={`partner-${i}`}
-                className="flex-shrink-0 mx-6 px-6 py-3 bg-white dark:bg-dark-800 rounded-xl shadow-md border border-dark-100 dark:border-dark-700 hover:scale-105 hover:shadow-lg transition-all duration-300"
+                className="flex-shrink-0 mx-6 px-6 py-4 bg-white dark:bg-dark-800 rounded-2xl shadow-lg border border-dark-100 dark:border-dark-700 hover:scale-110 hover:shadow-xl transition-all duration-300"
               >
-                <span className="font-bold text-lg" style={{ color: partner.color }}>{partner.name}</span>
+                {partner.icon}
               </div>
             ))}
           </div>
@@ -812,29 +812,29 @@ export default function Home() {
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
           <div className="flex animate-marquee-right items-center">
             {[
-              { name: 'bKash', color: '#E2136E' },
-              { name: 'Nagad', color: '#F6921E' },
-              { name: 'Apple Pay', color: '#000000' },
-              { name: 'Google Pay', color: '#4285F4' },
-              { name: 'Bitcoin', color: '#F7931A' },
-              { name: 'Ethereum', color: '#627EEA' },
-              { name: 'USDT', color: '#50AF95' },
-              { name: 'Binance', color: '#F0B90B' },
+              { name: 'bKash', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><rect fill="#E2136E" width="48" height="16" rx="3"/><text x="24" y="11" fill="white" fontSize="8" fontWeight="bold" textAnchor="middle">bKash</text></svg> },
+              { name: 'Nagad', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><rect fill="#F6921E" width="48" height="16" rx="3"/><text x="24" y="11" fill="white" fontSize="8" fontWeight="bold" textAnchor="middle">Nagad</text></svg> },
+              { name: 'Apple Pay', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><path fill="#000" d="M8 3c-.8 0-1.5.3-2 .8-.4.4-.7 1-.6 1.6.8 0 1.5-.3 2-.8.4-.5.6-1.1.6-1.6zm.6 1.8c-1.1 0-2 .6-2.5.6s-1.3-.6-2.2-.6c-1.1 0-2.2.7-2.8 1.7-1.2 2-.3 5 .8 6.7.6.8 1.2 1.7 2.1 1.7s1.2-.5 2.2-.5 1.3.5 2.2.5 1.5-.8 2-1.6c.6-1 .9-1.9.9-2-.1 0-1.7-.7-1.7-2.6 0-1.6 1.3-2.4 1.4-2.5-.8-1.1-2-1.4-2.4-1.4z"/><text x="28" y="11" fill="#000" fontSize="7" fontWeight="600">Pay</text></svg> },
+              { name: 'Google Pay', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><text x="0" y="12" fontSize="10" fontWeight="bold"><tspan fill="#4285F4">G</tspan><tspan fill="#EA4335">o</tspan><tspan fill="#FBBC05">o</tspan><tspan fill="#4285F4">g</tspan><tspan fill="#34A853">l</tspan><tspan fill="#EA4335">e</tspan></text><text x="30" y="12" fill="#5F6368" fontSize="9" fontWeight="500">Pay</text></svg> },
+              { name: 'Bitcoin', icon: <svg className="w-10 h-8" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#F7931A"/><text x="16" y="21" fill="white" fontSize="14" fontWeight="bold" textAnchor="middle">₿</text></svg> },
+              { name: 'Ethereum', icon: <svg className="w-8 h-8" viewBox="0 0 32 32"><path fill="#627EEA" d="M16 0l-1 3.3v18.5l1 .9 7-4.1z"/><path fill="#8C8C8C" d="M16 0L9 18.6l7 4.1V0z"/><path fill="#627EEA" d="M16 24.5l-.5.6v5.4l.5 1.5 7-9.9z"/><path fill="#8C8C8C" d="M16 32V24.5l-7-4.4z"/><path fill="#3C3C3D" d="M16 22.7l7-4.1-7-3.2z"/><path fill="#8C8C8C" d="M9 18.6l7 4.1v-7.3z"/></svg> },
+              { name: 'USDT', icon: <svg className="w-10 h-8" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#50AF95"/><text x="16" y="20" fill="white" fontSize="10" fontWeight="bold" textAnchor="middle">₮</text></svg> },
+              { name: 'Binance', icon: <svg className="w-10 h-8" viewBox="0 0 32 32"><rect fill="#F0B90B" width="32" height="32" rx="6"/><path fill="#fff" d="M16 6l3 3-5 5-3-3zm-6 6l3 3-3 3-3-3zm12 0l3 3-3 3-3-3zm-6 6l3 3-3 3-3-3z"/></svg> },
             ].concat([
-              { name: 'bKash', color: '#E2136E' },
-              { name: 'Nagad', color: '#F6921E' },
-              { name: 'Apple Pay', color: '#000000' },
-              { name: 'Google Pay', color: '#4285F4' },
-              { name: 'Bitcoin', color: '#F7931A' },
-              { name: 'Ethereum', color: '#627EEA' },
-              { name: 'USDT', color: '#50AF95' },
-              { name: 'Binance', color: '#F0B90B' },
+              { name: 'bKash', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><rect fill="#E2136E" width="48" height="16" rx="3"/><text x="24" y="11" fill="white" fontSize="8" fontWeight="bold" textAnchor="middle">bKash</text></svg> },
+              { name: 'Nagad', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><rect fill="#F6921E" width="48" height="16" rx="3"/><text x="24" y="11" fill="white" fontSize="8" fontWeight="bold" textAnchor="middle">Nagad</text></svg> },
+              { name: 'Apple Pay', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><path fill="#000" d="M8 3c-.8 0-1.5.3-2 .8-.4.4-.7 1-.6 1.6.8 0 1.5-.3 2-.8.4-.5.6-1.1.6-1.6zm.6 1.8c-1.1 0-2 .6-2.5.6s-1.3-.6-2.2-.6c-1.1 0-2.2.7-2.8 1.7-1.2 2-.3 5 .8 6.7.6.8 1.2 1.7 2.1 1.7s1.2-.5 2.2-.5 1.3.5 2.2.5 1.5-.8 2-1.6.6-1 .9-1.9.9-2-.1 0-1.7-.7-1.7-2.6 0-1.6 1.3-2.4 1.4-2.5-.8-1.1-2-1.4-2.4-1.4z"/><text x="28" y="11" fill="#000" fontSize="7" fontWeight="600">Pay</text></svg> },
+              { name: 'Google Pay', icon: <svg className="w-14 h-8" viewBox="0 0 48 16"><text x="0" y="12" fontSize="10" fontWeight="bold"><tspan fill="#4285F4">G</tspan><tspan fill="#EA4335">o</tspan><tspan fill="#FBBC05">o</tspan><tspan fill="#4285F4">g</tspan><tspan fill="#34A853">l</tspan><tspan fill="#EA4335">e</tspan></text><text x="30" y="12" fill="#5F6368" fontSize="9" fontWeight="500">Pay</text></svg> },
+              { name: 'Bitcoin', icon: <svg className="w-10 h-8" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#F7931A"/><text x="16" y="21" fill="white" fontSize="14" fontWeight="bold" textAnchor="middle">₿</text></svg> },
+              { name: 'Ethereum', icon: <svg className="w-8 h-8" viewBox="0 0 32 32"><path fill="#627EEA" d="M16 0l-1 3.3v18.5l1 .9 7-4.1z"/><path fill="#8C8C8C" d="M16 0L9 18.6l7 4.1V0z"/><path fill="#627EEA" d="M16 24.5l-.5.6v5.4l.5 1.5 7-9.9z"/><path fill="#8C8C8C" d="M16 32V24.5l-7-4.4z"/><path fill="#3C3C3D" d="M16 22.7l7-4.1-7-3.2z"/><path fill="#8C8C8C" d="M9 18.6l7 4.1v-7.3z"/></svg> },
+              { name: 'USDT', icon: <svg className="w-10 h-8" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#50AF95"/><text x="16" y="20" fill="white" fontSize="10" fontWeight="bold" textAnchor="middle">₮</text></svg> },
+              { name: 'Binance', icon: <svg className="w-10 h-8" viewBox="0 0 32 32"><rect fill="#F0B90B" width="32" height="32" rx="6"/><path fill="#fff" d="M16 6l3 3-5 5-3-3zm-6 6l3 3-3 3-3-3zm12 0l3 3-3 3-3-3zm-6 6l3 3-3 3-3-3z"/></svg> },
             ]).map((partner, i) => (
               <div
                 key={`payment-${i}`}
-                className="flex-shrink-0 mx-6 px-6 py-3 bg-white dark:bg-dark-800 rounded-xl shadow-md border border-dark-100 dark:border-dark-700 hover:scale-105 hover:shadow-lg transition-all duration-300"
+                className="flex-shrink-0 mx-6 px-6 py-4 bg-white dark:bg-dark-800 rounded-2xl shadow-lg border border-dark-100 dark:border-dark-700 hover:scale-110 hover:shadow-xl transition-all duration-300"
               >
-                <span className="font-bold text-lg" style={{ color: partner.color }}>{partner.name}</span>
+                {partner.icon}
               </div>
             ))}
           </div>
