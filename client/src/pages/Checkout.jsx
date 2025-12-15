@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { loadStripe } from '@stripe/stripe-js'
@@ -10,11 +10,18 @@ import { ordersAPI, paymentsAPI, settingsAPI, authAPI } from '../lib/api'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 
-// Service reviews for checkout
+// Service reviews for checkout - expanded list for rotation
 const serviceReviews = [
-  { name: 'Sarah M.', service: 'VPS Hosting', rating: 5, comment: 'Blazing fast servers!', img: 'https://randomuser.me/api/portraits/women/44.jpg' },
-  { name: 'Ahmed H.', service: 'Dedicated Server', rating: 5, comment: 'Best support ever!', img: 'https://randomuser.me/api/portraits/men/32.jpg' },
-  { name: 'Emily C.', service: 'Cloud Server', rating: 5, comment: 'Seamless experience', img: 'https://randomuser.me/api/portraits/women/68.jpg' },
+  { name: 'Sarah M.', service: 'VPS Hosting', rating: 5, comment: 'Blazing fast servers! My website loads in under 1 second now.', img: 'https://randomuser.me/api/portraits/women/44.jpg' },
+  { name: 'Ahmed W.', service: 'Dedicated Server', rating: 5, comment: 'Best support team I\'ve ever worked with. 24/7 availability!', img: 'https://randomuser.me/api/portraits/men/32.jpg' },
+  { name: 'Emily C.', service: 'Cloud Server', rating: 5, comment: 'Seamless migration experience. Zero downtime during transfer.', img: 'https://randomuser.me/api/portraits/women/68.jpg' },
+  { name: 'Hassan S.', service: 'VPS Professional', rating: 5, comment: 'Incredible performance for the price. Highly recommended!', img: 'https://randomuser.me/api/portraits/men/22.jpg' },
+  { name: 'Lisa P.', service: 'Cloud Enterprise', rating: 5, comment: 'Scaled from 100 to 10,000 users without any issues.', img: 'https://randomuser.me/api/portraits/women/33.jpg' },
+  { name: 'Michael T.', service: 'Dedicated Server', rating: 5, comment: 'Security features are top-notch. DDoS protection works great.', img: 'https://randomuser.me/api/portraits/men/45.jpg' },
+  { name: 'Jennifer L.', service: 'Domain + Hosting', rating: 5, comment: 'One-stop shop for all my hosting needs. Love the bundle deals!', img: 'https://randomuser.me/api/portraits/women/55.jpg' },
+  { name: 'David C.', service: 'VPS Starter', rating: 5, comment: 'Perfect for my startup. Easy to upgrade as we grow.', img: 'https://randomuser.me/api/portraits/men/52.jpg' },
+  { name: 'Amanda F.', service: 'SSL + Hosting', rating: 5, comment: 'Free SSL certificate included. Great value for money!', img: 'https://randomuser.me/api/portraits/women/77.jpg' },
+  { name: 'Robert M.', service: 'Game Server', rating: 5, comment: 'Low latency gaming servers. My players are very happy!', img: 'https://randomuser.me/api/portraits/men/67.jpg' },
 ]
 
 const trustBadges = [
@@ -91,6 +98,15 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0)
+
+  // Auto-rotate reviews every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentReviewIndex(prev => (prev + 1) % serviceReviews.length)
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
 
   const selectedMethod = paymentMethods.find(m => m.id === paymentMethod)
 
@@ -579,9 +595,9 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
                     />
                     <span className="text-sm text-dark-600 dark:text-dark-400">
                       I agree to the{' '}
-                      <a href="/legal/terms" target="_blank" className="text-primary-500 hover:underline font-medium">Terms of Service</a>
+                      <Link to="/legal/terms" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:underline font-medium">Terms of Service</Link>
                       {' '}and{' '}
-                      <a href="/legal/privacy" target="_blank" className="text-primary-500 hover:underline font-medium">Privacy Policy</a>
+                      <Link to="/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:underline font-medium">Privacy Policy</Link>
                     </span>
                   </label>
 
@@ -620,33 +636,93 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
                   </div>
                 </motion.div>
 
-                {/* Customer Reviews */}
+                {/* Customer Reviews - Rotating with Premium Transitions */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="bg-white dark:bg-dark-800 rounded-2xl p-5 shadow-xl border border-dark-100 dark:border-dark-700"
+                  className="bg-white dark:bg-dark-800 rounded-2xl p-5 shadow-xl border border-dark-100 dark:border-dark-700 overflow-hidden"
                 >
                   <h3 className="font-bold mb-4 flex items-center gap-2">
                     <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
                     Customer Reviews
+                    <span className="ml-auto text-xs text-dark-400 font-normal">{currentReviewIndex + 1}/{serviceReviews.length}</span>
                   </h3>
-                  <div className="space-y-4">
+                  
+                  {/* Single rotating review with premium animation */}
+                  <div className="relative min-h-[120px]">
                     {serviceReviews.map((review, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <img src={review.img} alt={review.name} className="w-10 h-10 rounded-full object-cover" />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm">{review.name}</span>
-                            <div className="flex">
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: 50, scale: 0.95 }}
+                        animate={{ 
+                          opacity: i === currentReviewIndex ? 1 : 0,
+                          x: i === currentReviewIndex ? 0 : (i < currentReviewIndex ? -50 : 50),
+                          scale: i === currentReviewIndex ? 1 : 0.95
+                        }}
+                        transition={{ 
+                          duration: 0.6, 
+                          ease: [0.4, 0, 0.2, 1],
+                          opacity: { duration: 0.4 }
+                        }}
+                        className={clsx(
+                          "absolute inset-0 flex flex-col",
+                          i !== currentReviewIndex && "pointer-events-none"
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <motion.img 
+                            src={review.img} 
+                            alt={review.name} 
+                            className="w-12 h-12 rounded-full object-cover ring-2 ring-primary-500/20 shadow-lg"
+                            initial={{ scale: 0.8 }}
+                            animate={{ scale: i === currentReviewIndex ? 1 : 0.8 }}
+                            transition={{ duration: 0.4, delay: 0.1 }}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold text-sm">{review.name}</span>
+                              <span className="text-xs px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full">{review.service}</span>
+                            </div>
+                            <div className="flex mt-1">
                               {[...Array(review.rating)].map((_, j) => (
-                                <Star key={j} className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                <motion.div
+                                  key={j}
+                                  initial={{ opacity: 0, scale: 0 }}
+                                  animate={{ opacity: i === currentReviewIndex ? 1 : 0, scale: i === currentReviewIndex ? 1 : 0 }}
+                                  transition={{ duration: 0.3, delay: 0.2 + j * 0.05 }}
+                                >
+                                  <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                                </motion.div>
                               ))}
                             </div>
                           </div>
-                          <p className="text-xs text-dark-500 mt-0.5">{review.comment}</p>
                         </div>
-                      </div>
+                        <motion.p 
+                          className="text-sm text-dark-600 dark:text-dark-400 mt-3 leading-relaxed"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: i === currentReviewIndex ? 1 : 0, y: i === currentReviewIndex ? 0 : 10 }}
+                          transition={{ duration: 0.4, delay: 0.3 }}
+                        >
+                          "{review.comment}"
+                        </motion.p>
+                      </motion.div>
+                    ))}
+                  </div>
+                  
+                  {/* Progress dots */}
+                  <div className="flex justify-center gap-1.5 mt-4">
+                    {serviceReviews.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentReviewIndex(i)}
+                        className={clsx(
+                          "w-2 h-2 rounded-full transition-all duration-300",
+                          i === currentReviewIndex 
+                            ? "bg-primary-500 w-6" 
+                            : "bg-dark-200 dark:bg-dark-600 hover:bg-primary-300"
+                        )}
+                      />
                     ))}
                   </div>
                 </motion.div>
