@@ -82,13 +82,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            {logo && logo.startsWith('data:image') ? (
+            {logo ? (
               <motion.div 
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
                 className="h-10 overflow-hidden flex items-center justify-center"
               >
-                <img src={logo} alt="" className="h-full w-auto object-contain" />
+                <img src={logo} alt={siteName || 'Logo'} className="h-full w-auto object-contain" />
               </motion.div>
             ) : (
               <motion.div 

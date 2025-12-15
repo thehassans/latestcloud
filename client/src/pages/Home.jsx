@@ -568,63 +568,114 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Reviews Section - Animated Marquee */}
-      <section className="section bg-dark-50 dark:bg-dark-900 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+      {/* Reviews Section - Ultra Premium with Google Badge */}
+      <section className="section bg-gradient-to-b from-dark-50 to-white dark:from-dark-900 dark:to-dark-950 overflow-hidden relative">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary-500/5 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 rounded-full shadow-lg border border-dark-100 dark:border-dark-700 mb-6"
+            >
+              {/* Google Icon */}
+              <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              <div className="flex items-center gap-1">
+                {[1,2,3,4,5].map(i => (
+                  <Star key={i} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                ))}
+              </div>
+              <span className="text-sm font-semibold text-dark-700 dark:text-dark-300">328 Reviews on Google</span>
+            </motion.div>
+
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="section-heading"
+              transition={{ delay: 0.1 }}
+              className="text-4xl md:text-5xl font-bold font-display mb-4"
             >
-              What Our <span className={isGradient ? "text-gradient" : "text-primary-500"}>Customers</span> Say
+              Loved by <span className={isGradient ? "text-gradient" : "text-primary-500"}>50,000+</span> Customers
             </motion.h2>
-            <p className="section-subheading mx-auto">
-              Trusted by 50,000+ businesses worldwide
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-xl text-dark-500 dark:text-dark-400 max-w-2xl mx-auto"
+            >
+              Join thousands of businesses who trust us for their cloud infrastructure
+            </motion.p>
           </div>
         </div>
 
         {/* Row 1 - Scrolling Left */}
         <div className="relative mb-6">
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-dark-50 dark:from-dark-900 to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-dark-50 dark:from-dark-900 to-transparent z-10" />
           <div className="flex animate-marquee-left">
             {[
-              { name: 'Ahmed Wasim', role: 'CEO, Magnetic Clouds', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.' },
-              { name: 'Hassan Sarwar', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/22.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.' },
-              { name: 'Emily Chen', role: 'E-commerce Owner', img: 'https://randomuser.me/api/portraits/women/68.jpg', rating: 5, comment: 'Migrated from another host and the difference is night and day. Highly recommend!' },
-              { name: 'Michael Brown', role: 'Startup Founder', img: 'https://randomuser.me/api/portraits/men/75.jpg', rating: 5, comment: 'The cloud servers are blazing fast. Perfect for our growing business needs.' },
-              { name: 'Fatima Rahman', role: 'Blogger', img: 'https://randomuser.me/api/portraits/women/26.jpg', rating: 5, comment: 'Simple setup and great performance. My blog loads instantly now!' },
-              { name: 'James Wilson', role: 'Agency Director', img: 'https://randomuser.me/api/portraits/men/52.jpg', rating: 5, comment: 'We host 50+ client sites here. Never had any issues. Premium quality service.' },
-              { name: 'Sophie Anderson', role: 'Marketing Manager', img: 'https://randomuser.me/api/portraits/women/44.jpg', rating: 5, comment: 'Incredible speed and reliability. Our campaigns run smoothly every time.' },
-              { name: 'Robert Taylor', role: 'Tech Lead', img: 'https://randomuser.me/api/portraits/men/67.jpg', rating: 5, comment: 'Best infrastructure I\'ve worked with. Scaling is effortless.' },
+              { name: 'Ahmed Wasim', role: 'CEO, Magnetic Clouds', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.', verified: true },
+              { name: 'Hassan Sarwar', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/22.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.', verified: true },
+              { name: 'Emily Chen', role: 'E-commerce Owner', img: 'https://randomuser.me/api/portraits/women/68.jpg', rating: 5, comment: 'Migrated from another host and the difference is night and day. Highly recommend!', verified: true },
+              { name: 'Michael Brown', role: 'Startup Founder', img: 'https://randomuser.me/api/portraits/men/75.jpg', rating: 5, comment: 'The cloud servers are blazing fast. Perfect for our growing business needs.', verified: true },
+              { name: 'Fatima Rahman', role: 'Blogger', img: 'https://randomuser.me/api/portraits/women/26.jpg', rating: 5, comment: 'Simple setup and great performance. My blog loads instantly now!', verified: true },
+              { name: 'James Wilson', role: 'Agency Director', img: 'https://randomuser.me/api/portraits/men/52.jpg', rating: 5, comment: 'We host 50+ client sites here. Never had any issues. Premium quality service.', verified: true },
+              { name: 'Sophie Anderson', role: 'Marketing Manager', img: 'https://randomuser.me/api/portraits/women/44.jpg', rating: 5, comment: 'Incredible speed and reliability. Our campaigns run smoothly every time.', verified: true },
+              { name: 'Robert Taylor', role: 'Tech Lead', img: 'https://randomuser.me/api/portraits/men/67.jpg', rating: 5, comment: 'Best infrastructure I\'ve worked with. Scaling is effortless.', verified: true },
             ].concat([
-              { name: 'Ahmed Wasim', role: 'CEO, Magnetic Clouds', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.' },
-              { name: 'Hassan Sarwar', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/22.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.' },
-              { name: 'Emily Chen', role: 'E-commerce Owner', img: 'https://randomuser.me/api/portraits/women/68.jpg', rating: 5, comment: 'Migrated from another host and the difference is night and day. Highly recommend!' },
-              { name: 'Michael Brown', role: 'Startup Founder', img: 'https://randomuser.me/api/portraits/men/75.jpg', rating: 5, comment: 'The cloud servers are blazing fast. Perfect for our growing business needs.' },
-              { name: 'Fatima Rahman', role: 'Blogger', img: 'https://randomuser.me/api/portraits/women/26.jpg', rating: 5, comment: 'Simple setup and great performance. My blog loads instantly now!' },
-              { name: 'James Wilson', role: 'Agency Director', img: 'https://randomuser.me/api/portraits/men/52.jpg', rating: 5, comment: 'We host 50+ client sites here. Never had any issues. Premium quality service.' },
-              { name: 'Sophie Anderson', role: 'Marketing Manager', img: 'https://randomuser.me/api/portraits/women/44.jpg', rating: 5, comment: 'Incredible speed and reliability. Our campaigns run smoothly every time.' },
-              { name: 'Robert Taylor', role: 'Tech Lead', img: 'https://randomuser.me/api/portraits/men/67.jpg', rating: 5, comment: 'Best infrastructure I\'ve worked with. Scaling is effortless.' },
+              { name: 'Ahmed Wasim', role: 'CEO, Magnetic Clouds', img: 'https://randomuser.me/api/portraits/men/32.jpg', rating: 5, comment: 'Exceptional service! Our website has never been faster. The support team is incredible.', verified: true },
+              { name: 'Hassan Sarwar', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/22.jpg', rating: 5, comment: 'Best hosting provider in Bangladesh. Reliable servers and amazing uptime.', verified: true },
+              { name: 'Emily Chen', role: 'E-commerce Owner', img: 'https://randomuser.me/api/portraits/women/68.jpg', rating: 5, comment: 'Migrated from another host and the difference is night and day. Highly recommend!', verified: true },
+              { name: 'Michael Brown', role: 'Startup Founder', img: 'https://randomuser.me/api/portraits/men/75.jpg', rating: 5, comment: 'The cloud servers are blazing fast. Perfect for our growing business needs.', verified: true },
+              { name: 'Fatima Rahman', role: 'Blogger', img: 'https://randomuser.me/api/portraits/women/26.jpg', rating: 5, comment: 'Simple setup and great performance. My blog loads instantly now!', verified: true },
+              { name: 'James Wilson', role: 'Agency Director', img: 'https://randomuser.me/api/portraits/men/52.jpg', rating: 5, comment: 'We host 50+ client sites here. Never had any issues. Premium quality service.', verified: true },
+              { name: 'Sophie Anderson', role: 'Marketing Manager', img: 'https://randomuser.me/api/portraits/women/44.jpg', rating: 5, comment: 'Incredible speed and reliability. Our campaigns run smoothly every time.', verified: true },
+              { name: 'Robert Taylor', role: 'Tech Lead', img: 'https://randomuser.me/api/portraits/men/67.jpg', rating: 5, comment: 'Best infrastructure I\'ve worked with. Scaling is effortless.', verified: true },
             ]).map((review, i) => (
               <div
                 key={`row1-${i}`}
-                className="flex-shrink-0 w-80 mx-3 p-5 rounded-2xl bg-white dark:bg-dark-800 border border-gray-100 dark:border-dark-700 shadow-sm"
+                className="flex-shrink-0 w-[340px] mx-3 p-6 rounded-2xl bg-white dark:bg-dark-800 border border-dark-100 dark:border-dark-700 shadow-xl shadow-dark-900/5 dark:shadow-dark-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <img src={review.img} alt={review.name} className="w-10 h-10 rounded-full object-cover" />
-                  <div>
-                    <h4 className="font-semibold text-dark-900 dark:text-white text-sm">{review.name}</h4>
-                    <p className="text-xs text-dark-500">{review.role}</p>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <img src={review.img} alt={review.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-primary-500/20" />
+                      {review.verified && (
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-dark-900 dark:text-white">{review.name}</h4>
+                      <p className="text-xs text-dark-500">{review.role}</p>
+                    </div>
                   </div>
+                  <svg className="w-6 h-6 opacity-60" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
                 </div>
-                <div className="flex items-center gap-0.5 mb-2">
+                <div className="flex items-center gap-0.5 mb-3">
                   {[...Array(review.rating)].map((_, j) => (
-                    <Star key={j} className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                    <Star key={j} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                   ))}
                 </div>
-                <p className="text-dark-600 dark:text-dark-400 text-sm line-clamp-2">{review.comment}</p>
+                <p className="text-dark-600 dark:text-dark-300 text-sm leading-relaxed">{review.comment}</p>
               </div>
             ))}
           </div>
@@ -632,59 +683,161 @@ export default function Home() {
 
         {/* Row 2 - Scrolling Right */}
         <div className="relative">
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white dark:from-dark-950 to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
           <div className="flex animate-marquee-right">
             {[
-              { name: 'Priya Sharma', role: 'Designer', img: 'https://randomuser.me/api/portraits/women/89.jpg', rating: 5, comment: 'Beautiful dashboard and amazing performance. Love it!' },
-              { name: 'David Kim', role: 'Entrepreneur', img: 'https://randomuser.me/api/portraits/men/46.jpg', rating: 5, comment: 'Started my business here. Couldn\'t ask for better hosting.' },
-              { name: 'Lisa Wang', role: 'Product Manager', img: 'https://randomuser.me/api/portraits/women/55.jpg', rating: 5, comment: 'Seamless integration with our workflow. Highly recommended!' },
-              { name: 'Alex Johnson', role: 'CTO', img: 'https://randomuser.me/api/portraits/men/33.jpg', rating: 5, comment: 'Enterprise-grade security and performance. Top notch!' },
-              { name: 'Maria Garcia', role: 'Freelancer', img: 'https://randomuser.me/api/portraits/women/37.jpg', rating: 5, comment: 'Affordable and reliable. Perfect for freelancers like me.' },
-              { name: 'John Smith', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/55.jpg', rating: 5, comment: 'The API is fantastic. Integration was a breeze.' },
-              { name: 'Sarah Lee', role: 'Startup CEO', img: 'https://randomuser.me/api/portraits/women/72.jpg', rating: 5, comment: 'Migrated our entire infrastructure. Zero regrets!' },
-              { name: 'Chris Davis', role: 'DevOps Engineer', img: 'https://randomuser.me/api/portraits/men/28.jpg', rating: 5, comment: 'Best uptime I\'ve seen. Production-ready from day one.' },
+              { name: 'Priya Sharma', role: 'Designer', img: 'https://randomuser.me/api/portraits/women/89.jpg', rating: 5, comment: 'Beautiful dashboard and amazing performance. Love it!', verified: true },
+              { name: 'David Kim', role: 'Entrepreneur', img: 'https://randomuser.me/api/portraits/men/46.jpg', rating: 5, comment: 'Started my business here. Couldn\'t ask for better hosting.', verified: true },
+              { name: 'Lisa Wang', role: 'Product Manager', img: 'https://randomuser.me/api/portraits/women/55.jpg', rating: 5, comment: 'Seamless integration with our workflow. Highly recommended!', verified: true },
+              { name: 'Alex Johnson', role: 'CTO', img: 'https://randomuser.me/api/portraits/men/33.jpg', rating: 5, comment: 'Enterprise-grade security and performance. Top notch!', verified: true },
+              { name: 'Maria Garcia', role: 'Freelancer', img: 'https://randomuser.me/api/portraits/women/37.jpg', rating: 5, comment: 'Affordable and reliable. Perfect for freelancers like me.', verified: true },
+              { name: 'John Smith', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/55.jpg', rating: 5, comment: 'The API is fantastic. Integration was a breeze.', verified: true },
+              { name: 'Sarah Lee', role: 'Startup CEO', img: 'https://randomuser.me/api/portraits/women/72.jpg', rating: 5, comment: 'Migrated our entire infrastructure. Zero regrets!', verified: true },
+              { name: 'Chris Davis', role: 'DevOps Engineer', img: 'https://randomuser.me/api/portraits/men/28.jpg', rating: 5, comment: 'Best uptime I\'ve seen. Production-ready from day one.', verified: true },
             ].concat([
-              { name: 'Priya Sharma', role: 'Designer', img: 'https://randomuser.me/api/portraits/women/89.jpg', rating: 5, comment: 'Beautiful dashboard and amazing performance. Love it!' },
-              { name: 'David Kim', role: 'Entrepreneur', img: 'https://randomuser.me/api/portraits/men/46.jpg', rating: 5, comment: 'Started my business here. Couldn\'t ask for better hosting.' },
-              { name: 'Lisa Wang', role: 'Product Manager', img: 'https://randomuser.me/api/portraits/women/55.jpg', rating: 5, comment: 'Seamless integration with our workflow. Highly recommended!' },
-              { name: 'Alex Johnson', role: 'CTO', img: 'https://randomuser.me/api/portraits/men/33.jpg', rating: 5, comment: 'Enterprise-grade security and performance. Top notch!' },
-              { name: 'Maria Garcia', role: 'Freelancer', img: 'https://randomuser.me/api/portraits/women/37.jpg', rating: 5, comment: 'Affordable and reliable. Perfect for freelancers like me.' },
-              { name: 'John Smith', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/55.jpg', rating: 5, comment: 'The API is fantastic. Integration was a breeze.' },
-              { name: 'Sarah Lee', role: 'Startup CEO', img: 'https://randomuser.me/api/portraits/women/72.jpg', rating: 5, comment: 'Migrated our entire infrastructure. Zero regrets!' },
-              { name: 'Chris Davis', role: 'DevOps Engineer', img: 'https://randomuser.me/api/portraits/men/28.jpg', rating: 5, comment: 'Best uptime I\'ve seen. Production-ready from day one.' },
+              { name: 'Priya Sharma', role: 'Designer', img: 'https://randomuser.me/api/portraits/women/89.jpg', rating: 5, comment: 'Beautiful dashboard and amazing performance. Love it!', verified: true },
+              { name: 'David Kim', role: 'Entrepreneur', img: 'https://randomuser.me/api/portraits/men/46.jpg', rating: 5, comment: 'Started my business here. Couldn\'t ask for better hosting.', verified: true },
+              { name: 'Lisa Wang', role: 'Product Manager', img: 'https://randomuser.me/api/portraits/women/55.jpg', rating: 5, comment: 'Seamless integration with our workflow. Highly recommended!', verified: true },
+              { name: 'Alex Johnson', role: 'CTO', img: 'https://randomuser.me/api/portraits/men/33.jpg', rating: 5, comment: 'Enterprise-grade security and performance. Top notch!', verified: true },
+              { name: 'Maria Garcia', role: 'Freelancer', img: 'https://randomuser.me/api/portraits/women/37.jpg', rating: 5, comment: 'Affordable and reliable. Perfect for freelancers like me.', verified: true },
+              { name: 'John Smith', role: 'Developer', img: 'https://randomuser.me/api/portraits/men/55.jpg', rating: 5, comment: 'The API is fantastic. Integration was a breeze.', verified: true },
+              { name: 'Sarah Lee', role: 'Startup CEO', img: 'https://randomuser.me/api/portraits/women/72.jpg', rating: 5, comment: 'Migrated our entire infrastructure. Zero regrets!', verified: true },
+              { name: 'Chris Davis', role: 'DevOps Engineer', img: 'https://randomuser.me/api/portraits/men/28.jpg', rating: 5, comment: 'Best uptime I\'ve seen. Production-ready from day one.', verified: true },
             ]).map((review, i) => (
               <div
                 key={`row2-${i}`}
-                className="flex-shrink-0 w-80 mx-3 p-5 rounded-2xl bg-white dark:bg-dark-800 border border-gray-100 dark:border-dark-700 shadow-sm"
+                className="flex-shrink-0 w-[340px] mx-3 p-6 rounded-2xl bg-white dark:bg-dark-800 border border-dark-100 dark:border-dark-700 shadow-xl shadow-dark-900/5 dark:shadow-dark-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <img src={review.img} alt={review.name} className="w-10 h-10 rounded-full object-cover" />
-                  <div>
-                    <h4 className="font-semibold text-dark-900 dark:text-white text-sm">{review.name}</h4>
-                    <p className="text-xs text-dark-500">{review.role}</p>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <img src={review.img} alt={review.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-primary-500/20" />
+                      {review.verified && (
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-dark-900 dark:text-white">{review.name}</h4>
+                      <p className="text-xs text-dark-500">{review.role}</p>
+                    </div>
                   </div>
+                  <svg className="w-6 h-6 opacity-60" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
                 </div>
-                <div className="flex items-center gap-0.5 mb-2">
+                <div className="flex items-center gap-0.5 mb-3">
                   {[...Array(review.rating)].map((_, j) => (
-                    <Star key={j} className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                    <Star key={j} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                   ))}
                 </div>
-                <p className="text-dark-600 dark:text-dark-400 text-sm line-clamp-2">{review.comment}</p>
+                <p className="text-dark-600 dark:text-dark-300 text-sm leading-relaxed">{review.comment}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-10 text-center"
+            className="mt-12 text-center"
           >
-            <Link to="/reviews" className="inline-flex items-center gap-2 text-primary-500 font-semibold hover:text-primary-600 transition-colors">
-              View All Reviews <ArrowRight className="w-4 h-4" />
+            <Link to="/reviews" className="inline-flex items-center gap-2 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl shadow-lg shadow-primary-500/30 transition-all">
+              View All 2,847 Reviews <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Partners Section - Animated Marquee */}
+      <section className="py-16 bg-white dark:bg-dark-950 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+          <div className="text-center">
+            <motion.h3
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-2xl md:text-3xl font-bold font-display mb-3"
+            >
+              Trusted <span className={isGradient ? "text-gradient" : "text-primary-500"}>Partners</span> & Payment Methods
+            </motion.h3>
+            <p className="text-dark-500 dark:text-dark-400">Secure payments powered by industry leaders</p>
+          </div>
+        </div>
+
+        {/* Partners Row - Scrolling Left */}
+        <div className="relative mb-6">
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white dark:from-dark-950 to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
+          <div className="flex animate-marquee-left">
+            {[
+              { name: 'Google Cloud', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/Google_Cloud_logo.svg' },
+              { name: 'Stripe', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg' },
+              { name: 'PayPal', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg' },
+              { name: 'Visa', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg' },
+              { name: 'Mastercard', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg' },
+              { name: 'American Express', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg' },
+              { name: 'AWS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg' },
+              { name: 'Cloudflare', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/94/Cloudflare_Logo.svg' },
+            ].concat([
+              { name: 'Google Cloud', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/Google_Cloud_logo.svg' },
+              { name: 'Stripe', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg' },
+              { name: 'PayPal', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg' },
+              { name: 'Visa', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg' },
+              { name: 'Mastercard', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg' },
+              { name: 'American Express', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg' },
+              { name: 'AWS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg' },
+              { name: 'Cloudflare', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/94/Cloudflare_Logo.svg' },
+            ]).map((partner, i) => (
+              <div
+                key={`partner-${i}`}
+                className="flex-shrink-0 mx-8 flex items-center justify-center h-16 w-40 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300"
+              >
+                <img src={partner.logo} alt={partner.name} className="h-8 w-auto object-contain dark:invert" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Payment Methods Row - Scrolling Right */}
+        <div className="relative">
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white dark:from-dark-950 to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
+          <div className="flex animate-marquee-right">
+            {[
+              { name: 'bKash', logo: 'https://www.logo.wine/a/logo/BKash/BKash-bKash-Logo.wine.svg' },
+              { name: 'Nagad', logo: 'https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png' },
+              { name: 'Rocket', logo: 'https://www.dutchbanglabank.com/img/svg/rocket-logo.svg' },
+              { name: 'Apple Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg' },
+              { name: 'Google Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg' },
+              { name: 'Bitcoin', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg' },
+              { name: 'Ethereum', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg' },
+              { name: 'USDT', logo: 'https://cryptologos.cc/logos/tether-usdt-logo.svg' },
+            ].concat([
+              { name: 'bKash', logo: 'https://www.logo.wine/a/logo/BKash/BKash-bKash-Logo.wine.svg' },
+              { name: 'Nagad', logo: 'https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png' },
+              { name: 'Rocket', logo: 'https://www.dutchbanglabank.com/img/svg/rocket-logo.svg' },
+              { name: 'Apple Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg' },
+              { name: 'Google Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg' },
+              { name: 'Bitcoin', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg' },
+              { name: 'Ethereum', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg' },
+              { name: 'USDT', logo: 'https://cryptologos.cc/logos/tether-usdt-logo.svg' },
+            ]).map((partner, i) => (
+              <div
+                key={`payment-${i}`}
+                className="flex-shrink-0 mx-8 flex items-center justify-center h-16 w-40 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300"
+              >
+                <img src={partner.logo} alt={partner.name} className="h-10 w-auto object-contain" />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
