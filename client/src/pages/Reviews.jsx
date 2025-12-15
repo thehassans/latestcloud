@@ -59,10 +59,14 @@ const reviewTexts = [
   'The uptime guarantee is real. We\'ve tracked 99.99% uptime over the past year.',
 ]
 
-// Seeded random number generator for consistency
-const seededRandom = (seed) => {
-  const x = Math.sin(seed) * 10000
-  return x - Math.floor(x)
+// Mulberry32 seeded random number generator for better distribution
+const mulberry32 = (seed) => {
+  return () => {
+    let t = seed += 0x6D2B79F5
+    t = Math.imul(t ^ t >>> 15, t | 1)
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61)
+    return ((t ^ t >>> 14) >>> 0) / 4294967296
+  }
 }
 
 // Generate all 2847 reviews
@@ -70,13 +74,9 @@ const generateReviews = () => {
   const allReviews = []
   const totalReviews = 2847
   
-  // Rating distribution: 86% 5-star, 10% 4-star, 3% 3-star, 1% 2-star, 0% 1-star
-  const ratingDist = { 5: 2456, 4: 285, 3: 71, 2: 28, 1: 7 }
-  let ratingCounts = { ...ratingDist }
-  
   for (let i = 0; i < totalReviews; i++) {
-    const seed = i + 1
-    const rand = () => seededRandom(seed * (allReviews.length + 1))
+    // Create unique random generator for each review
+    const rand = mulberry32(i * 12345 + 67890)
     
     // Determine gender (50/50)
     const isFemale = rand() > 0.5
@@ -91,14 +91,12 @@ const generateReviews = () => {
     const photoIndex = Math.floor(rand() * 99) + 1 // 1-99
     const photoGender = isFemale ? 'women' : 'men'
     
-    // Determine rating based on remaining distribution
-    let rating = 5
+    // Rating: Only 4, 4.5, or 5 stars (70% 5-star, 15% 4.5-star, 15% 4-star)
     const ratingRand = rand()
-    if (ratingCounts[1] > 0 && ratingRand < 0.002) { rating = 1; ratingCounts[1]-- }
-    else if (ratingCounts[2] > 0 && ratingRand < 0.01) { rating = 2; ratingCounts[2]-- }
-    else if (ratingCounts[3] > 0 && ratingRand < 0.04) { rating = 3; ratingCounts[3]-- }
-    else if (ratingCounts[4] > 0 && ratingRand < 0.14) { rating = 4; ratingCounts[4]-- }
-    else { rating = 5; ratingCounts[5] = Math.max(0, ratingCounts[5] - 1) }
+    let rating
+    if (ratingRand < 0.70) rating = 5
+    else if (ratingRand < 0.85) rating = 4.5
+    else rating = 4
     
     // Generate date (spread over last 2 years)
     const daysAgo = Math.floor(rand() * 730) // 0-730 days ago
@@ -120,7 +118,7 @@ const generateReviews = () => {
       review: reviewTexts[Math.floor(rand() * reviewTexts.length)],
       img: hasImage ? `https://randomuser.me/api/portraits/${photoGender}/${photoIndex}.jpg` : null,
       initial: !hasImage ? `${firstName[0]}${lastName[0]}` : null,
-      verified: rand() > 0.1, // 90% verified
+      verified: rand() > 0.05, // 95% verified
       helpful: Math.floor(rand() * 300) + 1,
       service: service.name,
       serviceIcon: service.icon
@@ -135,13 +133,11 @@ const reviews = generateReviews()
 
 const stats = {
   total: 2847,
-  average: 4.9,
+  average: 4.8,
   distribution: [
-    { stars: 5, count: 2456, percentage: 86 },
-    { stars: 4, count: 285, percentage: 10 },
-    { stars: 3, count: 71, percentage: 3 },
-    { stars: 2, count: 28, percentage: 1 },
-    { stars: 1, count: 7, percentage: 0 }
+    { stars: 5, count: 1993, percentage: 70 },
+    { stars: 4.5, count: 427, percentage: 15 },
+    { stars: 4, count: 427, percentage: 15 }
   ]
 }
 
@@ -162,7 +158,7 @@ export default function Reviews() {
 
   const filteredReviews = useMemo(() => {
     return reviews
-      .filter(r => filter === 'all' || r.rating === parseInt(filter))
+      .filter(r => filter === 'all' || r.rating === parseFloat(filter))
       .sort((a, b) => {
         if (sortBy === 'recent') return new Date(b.date) - new Date(a.date)
         if (sortBy === 'helpful') return b.helpful - a.helpful
@@ -238,7 +234,7 @@ export default function Reviews() {
               <Filter className="w-5 h-5 text-dark-500" />
               <span className="text-sm font-medium">Filter:</span>
               <div className="flex gap-2">
-                {['all', '5', '4', '3', '2', '1'].map((f) => (
+                {['all', '5', '4.5', '4'].map((f) => (
                   <button
                     key={f}
                     onClick={() => handleFilterChange(f)}
@@ -312,17 +308,20 @@ export default function Reviews() {
                 {/* Rating */}
                 <div className="mt-4 flex items-center gap-2">
                   <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={clsx(
-                          'w-4 h-4',
-                          star <= review.rating
-                            ? 'text-yellow-500 fill-yellow-500'
-                            : 'text-dark-300'
-                        )}
-                      />
-                    ))}
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const isFull = star <= Math.floor(review.rating)
+                      const isHalf = star === Math.ceil(review.rating) && review.rating % 1 !== 0
+                      return (
+                        <div key={star} className="relative">
+                          <Star className={clsx('w-4 h-4', isFull || isHalf ? 'text-yellow-500' : 'text-dark-300', isFull && 'fill-yellow-500')} />
+                          {isHalf && (
+                            <div className="absolute inset-0 overflow-hidden w-1/2">
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                   <span className="text-xs text-dark-400">
                     {new Date(review.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
