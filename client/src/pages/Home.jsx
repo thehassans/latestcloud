@@ -776,31 +776,31 @@ export default function Home() {
         <div className="relative mb-6">
           <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white dark:from-dark-950 to-transparent z-10" />
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
-          <div className="flex animate-marquee-left">
+          <div className="flex animate-marquee-left items-center">
             {[
-              { name: 'Google Cloud', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/Google_Cloud_logo.svg' },
-              { name: 'Stripe', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg' },
-              { name: 'PayPal', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg' },
-              { name: 'Visa', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg' },
-              { name: 'Mastercard', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg' },
-              { name: 'American Express', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg' },
-              { name: 'AWS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg' },
-              { name: 'Cloudflare', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/94/Cloudflare_Logo.svg' },
+              { name: 'Visa', color: '#1A1F71' },
+              { name: 'Mastercard', color: '#EB001B' },
+              { name: 'American Express', color: '#006FCF' },
+              { name: 'AWS', color: '#FF9900' },
+              { name: 'Cloudflare', color: '#F38020' },
+              { name: 'Google Cloud', color: '#4285F4' },
+              { name: 'Stripe', color: '#635BFF' },
+              { name: 'PayPal', color: '#003087' },
             ].concat([
-              { name: 'Google Cloud', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/Google_Cloud_logo.svg' },
-              { name: 'Stripe', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg' },
-              { name: 'PayPal', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg' },
-              { name: 'Visa', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg' },
-              { name: 'Mastercard', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg' },
-              { name: 'American Express', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg' },
-              { name: 'AWS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg' },
-              { name: 'Cloudflare', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/94/Cloudflare_Logo.svg' },
+              { name: 'Visa', color: '#1A1F71' },
+              { name: 'Mastercard', color: '#EB001B' },
+              { name: 'American Express', color: '#006FCF' },
+              { name: 'AWS', color: '#FF9900' },
+              { name: 'Cloudflare', color: '#F38020' },
+              { name: 'Google Cloud', color: '#4285F4' },
+              { name: 'Stripe', color: '#635BFF' },
+              { name: 'PayPal', color: '#003087' },
             ]).map((partner, i) => (
               <div
                 key={`partner-${i}`}
-                className="flex-shrink-0 mx-8 flex items-center justify-center h-16 w-40 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300"
+                className="flex-shrink-0 mx-6 px-6 py-3 bg-white dark:bg-dark-800 rounded-xl shadow-md border border-dark-100 dark:border-dark-700 hover:scale-105 hover:shadow-lg transition-all duration-300"
               >
-                <img src={partner.logo} alt={partner.name} className="h-8 w-auto object-contain dark:invert" />
+                <span className="font-bold text-lg" style={{ color: partner.color }}>{partner.name}</span>
               </div>
             ))}
           </div>
@@ -810,31 +810,31 @@ export default function Home() {
         <div className="relative">
           <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white dark:from-dark-950 to-transparent z-10" />
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
-          <div className="flex animate-marquee-right">
+          <div className="flex animate-marquee-right items-center">
             {[
-              { name: 'bKash', logo: 'https://www.logo.wine/a/logo/BKash/BKash-bKash-Logo.wine.svg' },
-              { name: 'Nagad', logo: 'https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png' },
-              { name: 'Rocket', logo: 'https://www.dutchbanglabank.com/img/svg/rocket-logo.svg' },
-              { name: 'Apple Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg' },
-              { name: 'Google Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg' },
-              { name: 'Bitcoin', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg' },
-              { name: 'Ethereum', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg' },
-              { name: 'USDT', logo: 'https://cryptologos.cc/logos/tether-usdt-logo.svg' },
+              { name: 'bKash', color: '#E2136E' },
+              { name: 'Nagad', color: '#F6921E' },
+              { name: 'Apple Pay', color: '#000000' },
+              { name: 'Google Pay', color: '#4285F4' },
+              { name: 'Bitcoin', color: '#F7931A' },
+              { name: 'Ethereum', color: '#627EEA' },
+              { name: 'USDT', color: '#50AF95' },
+              { name: 'Binance', color: '#F0B90B' },
             ].concat([
-              { name: 'bKash', logo: 'https://www.logo.wine/a/logo/BKash/BKash-bKash-Logo.wine.svg' },
-              { name: 'Nagad', logo: 'https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png' },
-              { name: 'Rocket', logo: 'https://www.dutchbanglabank.com/img/svg/rocket-logo.svg' },
-              { name: 'Apple Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg' },
-              { name: 'Google Pay', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg' },
-              { name: 'Bitcoin', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg' },
-              { name: 'Ethereum', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg' },
-              { name: 'USDT', logo: 'https://cryptologos.cc/logos/tether-usdt-logo.svg' },
+              { name: 'bKash', color: '#E2136E' },
+              { name: 'Nagad', color: '#F6921E' },
+              { name: 'Apple Pay', color: '#000000' },
+              { name: 'Google Pay', color: '#4285F4' },
+              { name: 'Bitcoin', color: '#F7931A' },
+              { name: 'Ethereum', color: '#627EEA' },
+              { name: 'USDT', color: '#50AF95' },
+              { name: 'Binance', color: '#F0B90B' },
             ]).map((partner, i) => (
               <div
                 key={`payment-${i}`}
-                className="flex-shrink-0 mx-8 flex items-center justify-center h-16 w-40 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300"
+                className="flex-shrink-0 mx-6 px-6 py-3 bg-white dark:bg-dark-800 rounded-xl shadow-md border border-dark-100 dark:border-dark-700 hover:scale-105 hover:shadow-lg transition-all duration-300"
               >
-                <img src={partner.logo} alt={partner.name} className="h-10 w-auto object-contain" />
+                <span className="font-bold text-lg" style={{ color: partner.color }}>{partner.name}</span>
               </div>
             ))}
           </div>
