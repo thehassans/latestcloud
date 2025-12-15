@@ -778,29 +778,29 @@ export default function Home() {
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
           <div className="flex animate-marquee-left items-center">
             {[
-              { name: 'Visa', color: '#1A1F71', textColor: 'white', bg: 'bg-[#1A1F71]' },
-              { name: 'Mastercard', color: '#EB001B', textColor: 'white', bg: 'bg-gradient-to-r from-[#EB001B] to-[#F79E1B]' },
-              { name: 'AMEX', color: '#006FCF', textColor: 'white', bg: 'bg-[#006FCF]' },
-              { name: 'AWS', color: '#FF9900', textColor: 'white', bg: 'bg-[#232F3E]' },
-              { name: 'Cloudflare', color: '#F38020', textColor: 'white', bg: 'bg-[#F38020]' },
-              { name: 'Google Cloud', color: '#4285F4', textColor: 'white', bg: 'bg-[#4285F4]' },
-              { name: 'Stripe', color: '#635BFF', textColor: 'white', bg: 'bg-[#635BFF]' },
-              { name: 'PayPal', color: '#003087', textColor: 'white', bg: 'bg-[#003087]' },
+              { name: 'Visa', logo: 'https://cdn.worldvectorlogo.com/logos/visa-2.svg' },
+              { name: 'Mastercard', logo: 'https://cdn.worldvectorlogo.com/logos/mastercard-2.svg' },
+              { name: 'American Express', logo: 'https://cdn.worldvectorlogo.com/logos/american-express-1.svg' },
+              { name: 'AWS', logo: 'https://cdn.worldvectorlogo.com/logos/aws-2.svg' },
+              { name: 'Cloudflare', logo: 'https://cdn.worldvectorlogo.com/logos/cloudflare-1.svg' },
+              { name: 'Google Cloud', logo: 'https://cdn.worldvectorlogo.com/logos/google-cloud-1.svg' },
+              { name: 'Stripe', logo: 'https://cdn.worldvectorlogo.com/logos/stripe-4.svg' },
+              { name: 'PayPal', logo: 'https://cdn.worldvectorlogo.com/logos/paypal-2.svg' },
             ].concat([
-              { name: 'Visa', color: '#1A1F71', textColor: 'white', bg: 'bg-[#1A1F71]' },
-              { name: 'Mastercard', color: '#EB001B', textColor: 'white', bg: 'bg-gradient-to-r from-[#EB001B] to-[#F79E1B]' },
-              { name: 'AMEX', color: '#006FCF', textColor: 'white', bg: 'bg-[#006FCF]' },
-              { name: 'AWS', color: '#FF9900', textColor: 'white', bg: 'bg-[#232F3E]' },
-              { name: 'Cloudflare', color: '#F38020', textColor: 'white', bg: 'bg-[#F38020]' },
-              { name: 'Google Cloud', color: '#4285F4', textColor: 'white', bg: 'bg-[#4285F4]' },
-              { name: 'Stripe', color: '#635BFF', textColor: 'white', bg: 'bg-[#635BFF]' },
-              { name: 'PayPal', color: '#003087', textColor: 'white', bg: 'bg-[#003087]' },
+              { name: 'Visa', logo: 'https://cdn.worldvectorlogo.com/logos/visa-2.svg' },
+              { name: 'Mastercard', logo: 'https://cdn.worldvectorlogo.com/logos/mastercard-2.svg' },
+              { name: 'American Express', logo: 'https://cdn.worldvectorlogo.com/logos/american-express-1.svg' },
+              { name: 'AWS', logo: 'https://cdn.worldvectorlogo.com/logos/aws-2.svg' },
+              { name: 'Cloudflare', logo: 'https://cdn.worldvectorlogo.com/logos/cloudflare-1.svg' },
+              { name: 'Google Cloud', logo: 'https://cdn.worldvectorlogo.com/logos/google-cloud-1.svg' },
+              { name: 'Stripe', logo: 'https://cdn.worldvectorlogo.com/logos/stripe-4.svg' },
+              { name: 'PayPal', logo: 'https://cdn.worldvectorlogo.com/logos/paypal-2.svg' },
             ]).map((partner, i) => (
               <div
                 key={`partner-${i}`}
-                className={`flex-shrink-0 mx-4 px-6 py-3 ${partner.bg} rounded-xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300`}
+                className="flex-shrink-0 mx-6 px-8 py-4 bg-white dark:bg-dark-800 rounded-2xl shadow-lg border border-dark-100 dark:border-dark-700 hover:scale-105 hover:shadow-xl transition-all duration-300"
               >
-                <span className="font-bold text-white text-sm tracking-wide">{partner.name}</span>
+                <img src={partner.logo} alt={partner.name} className="h-8 w-auto object-contain" />
               </div>
             ))}
           </div>
@@ -812,29 +812,29 @@ export default function Home() {
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-dark-950 to-transparent z-10" />
           <div className="flex animate-marquee-right items-center">
             {[
-              { name: 'bKash', bg: 'bg-[#E2136E]' },
-              { name: 'Nagad', bg: 'bg-[#F6921E]' },
-              { name: 'Apple Pay', bg: 'bg-black' },
-              { name: 'Google Pay', bg: 'bg-white border-2 border-gray-200', textClass: 'text-gray-800' },
-              { name: 'Bitcoin', bg: 'bg-[#F7931A]' },
-              { name: 'Ethereum', bg: 'bg-[#627EEA]' },
-              { name: 'USDT', bg: 'bg-[#50AF95]' },
-              { name: 'Binance', bg: 'bg-[#F0B90B]', textClass: 'text-black' },
+              { name: 'bKash', logo: 'https://cdn.worldvectorlogo.com/logos/bkash.svg' },
+              { name: 'Nagad', logo: 'https://seeklogo.com/images/N/nagad-logo-AA1F28D8F7-seeklogo.com.png' },
+              { name: 'Apple Pay', logo: 'https://cdn.worldvectorlogo.com/logos/apple-pay.svg' },
+              { name: 'Google Pay', logo: 'https://cdn.worldvectorlogo.com/logos/google-pay-primary-logo-1.svg' },
+              { name: 'Bitcoin', logo: 'https://cdn.worldvectorlogo.com/logos/bitcoin.svg' },
+              { name: 'Ethereum', logo: 'https://cdn.worldvectorlogo.com/logos/ethereum-1.svg' },
+              { name: 'Tether', logo: 'https://cdn.worldvectorlogo.com/logos/tether-1.svg' },
+              { name: 'Binance', logo: 'https://cdn.worldvectorlogo.com/logos/binance-coin-bnb.svg' },
             ].concat([
-              { name: 'bKash', bg: 'bg-[#E2136E]' },
-              { name: 'Nagad', bg: 'bg-[#F6921E]' },
-              { name: 'Apple Pay', bg: 'bg-black' },
-              { name: 'Google Pay', bg: 'bg-white border-2 border-gray-200', textClass: 'text-gray-800' },
-              { name: 'Bitcoin', bg: 'bg-[#F7931A]' },
-              { name: 'Ethereum', bg: 'bg-[#627EEA]' },
-              { name: 'USDT', bg: 'bg-[#50AF95]' },
-              { name: 'Binance', bg: 'bg-[#F0B90B]', textClass: 'text-black' },
+              { name: 'bKash', logo: 'https://cdn.worldvectorlogo.com/logos/bkash.svg' },
+              { name: 'Nagad', logo: 'https://seeklogo.com/images/N/nagad-logo-AA1F28D8F7-seeklogo.com.png' },
+              { name: 'Apple Pay', logo: 'https://cdn.worldvectorlogo.com/logos/apple-pay.svg' },
+              { name: 'Google Pay', logo: 'https://cdn.worldvectorlogo.com/logos/google-pay-primary-logo-1.svg' },
+              { name: 'Bitcoin', logo: 'https://cdn.worldvectorlogo.com/logos/bitcoin.svg' },
+              { name: 'Ethereum', logo: 'https://cdn.worldvectorlogo.com/logos/ethereum-1.svg' },
+              { name: 'Tether', logo: 'https://cdn.worldvectorlogo.com/logos/tether-1.svg' },
+              { name: 'Binance', logo: 'https://cdn.worldvectorlogo.com/logos/binance-coin-bnb.svg' },
             ]).map((partner, i) => (
               <div
                 key={`payment-${i}`}
-                className={`flex-shrink-0 mx-4 px-6 py-3 ${partner.bg} rounded-xl shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300`}
+                className="flex-shrink-0 mx-6 px-8 py-4 bg-white dark:bg-dark-800 rounded-2xl shadow-lg border border-dark-100 dark:border-dark-700 hover:scale-105 hover:shadow-xl transition-all duration-300"
               >
-                <span className={`font-bold text-sm tracking-wide ${partner.textClass || 'text-white'}`}>{partner.name}</span>
+                <img src={partner.logo} alt={partner.name} className="h-8 w-auto object-contain" />
               </div>
             ))}
           </div>
