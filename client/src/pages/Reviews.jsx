@@ -36,7 +36,8 @@ const reviewTitles = [
   'Perfect for high-traffic sites', 'Affordable enterprise hosting', 'Simply the best'
 ]
 
-const reviewTexts = [
+// 5-star reviews (positive)
+const fiveStarTexts = [
   'Migrating to Magnetic Clouds was the best decision for our business. The speed improvement is noticeable and our customers love it.',
   'The support team is incredibly responsive. They helped us optimize our server configuration and now our site loads in under 2 seconds.',
   'We\'ve been hosting with them for over 2 years now. Zero downtime and consistent performance. Highly recommended!',
@@ -57,6 +58,68 @@ const reviewTexts = [
   'The money-back guarantee gave us confidence to try. After the first week, we knew we made the right choice.',
   'Customer support actually understands technical issues. No scripted responses, just real solutions.',
   'The uptime guarantee is real. We\'ve tracked 99.99% uptime over the past year.',
+  'Absolutely phenomenal service! Our website performance increased by 300% after migrating.',
+  'The best hosting decision we ever made. Fast, reliable, and the support is world-class.',
+  'Five stars isn\'t enough! They went above and beyond to help us during our launch.',
+  'Incredible value for money. Enterprise-level features at affordable prices.',
+  'Our clients are thrilled with the speed improvements. Thank you Magnetic Clouds!',
+]
+
+// 4-star reviews (good but minor issues)
+const fourStarTexts = [
+  'Great service overall. The only minor issue is the dashboard could be more intuitive for beginners.',
+  'Very satisfied with the hosting. Support is good but sometimes takes a few hours to respond.',
+  'Solid performance and good uptime. Would love to see more data center locations in the future.',
+  'Good value for money. The migration took a bit longer than expected but everything works great now.',
+  'Happy with the service. The control panel has a learning curve but support helped me through it.',
+  'Reliable hosting with good speeds. Documentation could be more detailed for advanced configurations.',
+  'Overall excellent experience. Pricing is fair, just wish there were more payment options.',
+  'Great servers and support. The only downside is the lack of phone support for quick issues.',
+]
+
+// 3-star reviews (average)
+const threeStarTexts = [
+  'Average experience. The hosting works fine but nothing exceptional. Support response times vary.',
+  'Decent service for the price. Had some initial setup issues but they were eventually resolved.',
+  'It\'s okay. The servers are stable but the interface feels outdated compared to competitors.',
+  'Mixed feelings. Good uptime but the support team sometimes gives generic responses.',
+  'Satisfactory hosting. Does what it promises but lacks some advanced features I was hoping for.',
+  'Middle of the road experience. Not bad, not great. Gets the job done for basic websites.',
+]
+
+// 2-star reviews (unsatisfied)
+const twoStarTexts = [
+  'Disappointed with the service. Multiple support tickets went unanswered for days.',
+  'Not what I expected. The advertised speeds don\'t match reality. Looking for alternatives.',
+  'Frustrating experience. Migration caused several issues that took weeks to fully resolve.',
+  'Below expectations. The server had unexpected downtime during peak business hours.',
+  'Unsatisfied with the support quality. Felt like I was talking to bots, not real people.',
+]
+
+// 1-star reviews (bad)
+const oneStarTexts = [
+  'Terrible experience. Lost data during migration and support was unhelpful. Avoid!',
+  'Worst hosting I\'ve used. Constant downtime and no accountability from the team.',
+  'Complete disaster. Billing issues, slow servers, and rude support. Never again.',
+  'Do not recommend. Hidden fees and the service quality doesn\'t match the marketing.',
+]
+
+// Corresponding titles for each rating
+const fiveStarTitles = [
+  'Absolutely amazing!', 'Best hosting ever!', 'Exceeded all expectations', 'Highly recommend!',
+  'Perfect for our business', 'Outstanding service', 'Worth every penny', 'Simply the best'
+]
+const fourStarTitles = [
+  'Very good overall', 'Solid hosting choice', 'Good but room for improvement', 'Mostly satisfied'
+]
+const threeStarTitles = [
+  'Average experience', 'It\'s okay', 'Decent but not great', 'Mixed feelings'
+]
+const twoStarTitles = [
+  'Disappointed', 'Below expectations', 'Not satisfied', 'Could be much better'
+]
+const oneStarTitles = [
+  'Terrible experience', 'Avoid this service', 'Complete disaster', 'Very disappointed'
 ]
 
 // Generate all 2847 reviews with unique names
@@ -64,6 +127,7 @@ const generateReviews = () => {
   const allReviews = []
   const totalReviews = 2847
   const usedNames = new Set()
+  const usedReviewCombos = new Set()
   
   for (let i = 0; i < totalReviews; i++) {
     // Use index-based selection to ensure variety
@@ -91,12 +155,58 @@ const generateReviews = () => {
     const photoIndex = ((i * 13) % 99) + 1 // 1-99
     const photoGender = isFemale ? 'women' : 'men'
     
-    // Rating: Only 4, 4.5, or 5 stars (70% 5-star, 15% 4.5-star, 15% 4-star)
-    const ratingMod = i % 20
-    let rating
-    if (ratingMod < 14) rating = 5 // 70%
-    else if (ratingMod < 17) rating = 4.5 // 15%
-    else rating = 4 // 15%
+    // Rating distribution: 65% 5-star, 15% 4-star, 10% 3-star, 6% 2-star, 4% 1-star
+    const ratingMod = i % 100
+    let rating, reviewText, reviewTitle
+    if (ratingMod < 65) {
+      rating = 5
+      const textIdx = (i * 7) % fiveStarTexts.length
+      const titleIdx = (i * 3) % fiveStarTitles.length
+      reviewText = fiveStarTexts[textIdx]
+      reviewTitle = fiveStarTitles[titleIdx]
+    } else if (ratingMod < 80) {
+      rating = 4
+      const textIdx = (i * 5) % fourStarTexts.length
+      const titleIdx = (i * 2) % fourStarTitles.length
+      reviewText = fourStarTexts[textIdx]
+      reviewTitle = fourStarTitles[titleIdx]
+    } else if (ratingMod < 90) {
+      rating = 3
+      const textIdx = (i * 3) % threeStarTexts.length
+      const titleIdx = (i * 2) % threeStarTitles.length
+      reviewText = threeStarTexts[textIdx]
+      reviewTitle = threeStarTitles[titleIdx]
+    } else if (ratingMod < 96) {
+      rating = 2
+      const textIdx = (i * 3) % twoStarTexts.length
+      const titleIdx = (i * 2) % twoStarTitles.length
+      reviewText = twoStarTexts[textIdx]
+      reviewTitle = twoStarTitles[titleIdx]
+    } else {
+      rating = 1
+      const textIdx = (i * 2) % oneStarTexts.length
+      const titleIdx = (i * 2) % oneStarTitles.length
+      reviewText = oneStarTexts[textIdx]
+      reviewTitle = oneStarTitles[titleIdx]
+    }
+    
+    // Ensure unique review text + title combo by adding variation
+    let comboKey = `${reviewTitle}-${reviewText.substring(0, 50)}`
+    let variation = 0
+    while (usedReviewCombos.has(comboKey) && variation < 50) {
+      variation++
+      // Add slight variation to make it unique
+      const extraPhrases = [
+        ' Overall, a good experience.',
+        ' Would recommend to others.',
+        ' Time will tell if things improve.',
+        ' Hoping for better results.',
+        ' The team was responsive.',
+      ]
+      reviewText = reviewText + extraPhrases[variation % extraPhrases.length]
+      comboKey = `${reviewTitle}-${reviewText.substring(0, 50)}`
+    }
+    usedReviewCombos.add(comboKey)
     
     // Generate date (spread over last 2 years)
     const daysAgo = (i * 17) % 730
@@ -104,7 +214,7 @@ const generateReviews = () => {
     date.setDate(date.getDate() - daysAgo)
     const dateStr = date.toISOString().split('T')[0]
     
-    // Select service, role, location, title, review using different multipliers
+    // Select service, role, location using different multipliers
     const serviceIndex = (i * 3) % services.length
     const roleIndex = (i * 5) % roles.length
     const locationIndex = (i * 7) % locations.length
@@ -120,11 +230,11 @@ const generateReviews = () => {
       location: locations[locationIndex],
       rating,
       date: dateStr,
-      title: reviewTitles[titleIndex],
-      review: reviewTexts[reviewIndex],
+      title: reviewTitle,
+      review: reviewText,
       img: hasImage ? `https://randomuser.me/api/portraits/${photoGender}/${photoIndex}.jpg` : null,
       initial: !hasImage ? `${firstName[0]}${lastName[0]}` : null,
-      verified: i % 20 !== 0, // 95% verified
+      verified: rating >= 4 ? (i % 20 !== 0) : (i % 5 === 0), // Higher ratings more likely verified
       helpful: ((i * 37) % 300) + 1,
       service: service.name,
       serviceIcon: service.icon
@@ -139,11 +249,13 @@ const reviews = generateReviews()
 
 const stats = {
   total: 2847,
-  average: 4.8,
+  average: 4.3,
   distribution: [
-    { stars: 5, count: 1993, percentage: 70 },
-    { stars: 4.5, count: 427, percentage: 15 },
-    { stars: 4, count: 427, percentage: 15 }
+    { stars: 5, count: 1851, percentage: 65 },
+    { stars: 4, count: 427, percentage: 15 },
+    { stars: 3, count: 285, percentage: 10 },
+    { stars: 2, count: 171, percentage: 6 },
+    { stars: 1, count: 113, percentage: 4 }
   ]
 }
 
@@ -164,7 +276,7 @@ export default function Reviews() {
 
   const filteredReviews = useMemo(() => {
     return reviews
-      .filter(r => filter === 'all' || r.rating === parseFloat(filter))
+      .filter(r => filter === 'all' || r.rating === parseInt(filter))
       .sort((a, b) => {
         if (sortBy === 'recent') return new Date(b.date) - new Date(a.date)
         if (sortBy === 'helpful') return b.helpful - a.helpful
@@ -240,7 +352,7 @@ export default function Reviews() {
               <Filter className="w-5 h-5 text-dark-500" />
               <span className="text-sm font-medium">Filter:</span>
               <div className="flex gap-2">
-                {['all', '5', '4.5', '4'].map((f) => (
+                {['all', '5', '4', '3', '2', '1'].map((f) => (
                   <button
                     key={f}
                     onClick={() => handleFilterChange(f)}
@@ -314,20 +426,17 @@ export default function Reviews() {
                 {/* Rating */}
                 <div className="mt-4 flex items-center gap-2">
                   <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => {
-                      const isFull = star <= Math.floor(review.rating)
-                      const isHalf = star === Math.ceil(review.rating) && review.rating % 1 !== 0
-                      return (
-                        <div key={star} className="relative">
-                          <Star className={clsx('w-4 h-4', isFull || isHalf ? 'text-yellow-500' : 'text-dark-300', isFull && 'fill-yellow-500')} />
-                          {isHalf && (
-                            <div className="absolute inset-0 overflow-hidden w-1/2">
-                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={clsx(
+                          'w-4 h-4',
+                          star <= review.rating
+                            ? 'text-yellow-500 fill-yellow-500'
+                            : 'text-dark-300'
+                        )}
+                      />
+                    ))}
                   </div>
                   <span className="text-xs text-dark-400">
                     {new Date(review.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}

@@ -99,6 +99,8 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
   const [country, setCountry] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0)
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
   // Auto-rotate reviews every 4 seconds
   useEffect(() => {
@@ -595,9 +597,9 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
                     />
                     <span className="text-sm text-dark-600 dark:text-dark-400">
                       I agree to the{' '}
-                      <Link to="/legal/terms" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:underline font-medium">Terms of Service</Link>
+                      <button type="button" onClick={() => setShowTermsModal(true)} className="text-primary-500 hover:underline font-medium">Terms of Service</button>
                       {' '}and{' '}
-                      <Link to="/legal/privacy" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:underline font-medium">Privacy Policy</Link>
+                      <button type="button" onClick={() => setShowPrivacyModal(true)} className="text-primary-500 hover:underline font-medium">Privacy Policy</button>
                     </span>
                   </label>
 
@@ -744,6 +746,115 @@ function CheckoutFormInner({ stripeEnabled, stripe = null, elements = null, paym
           </div>
         </div>
       </section>
+
+      {/* Terms of Service Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowTermsModal(false)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-dark-200 dark:border-dark-700">
+              <h2 className="text-xl font-bold">Terms of Service</h2>
+              <button onClick={() => setShowTermsModal(false)} className="p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh] prose dark:prose-invert prose-sm">
+              <h3>1. Acceptance of Terms</h3>
+              <p>By accessing and using Magnetic Clouds services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
+              
+              <h3>2. Service Description</h3>
+              <p>Magnetic Clouds provides web hosting, cloud computing, domain registration, and related services. We reserve the right to modify, suspend, or discontinue any service at any time.</p>
+              
+              <h3>3. User Responsibilities</h3>
+              <p>You are responsible for maintaining the security of your account and password. You agree not to use our services for any illegal or unauthorized purpose.</p>
+              
+              <h3>4. Payment Terms</h3>
+              <p>All fees are due in advance and are non-refundable except as specified in our Refund Policy. We reserve the right to change our pricing at any time with 30 days notice.</p>
+              
+              <h3>5. Service Level Agreement</h3>
+              <p>We guarantee 99.9% uptime for all hosting services. Downtime due to scheduled maintenance or circumstances beyond our control is excluded from this guarantee.</p>
+              
+              <h3>6. Data Protection</h3>
+              <p>We implement industry-standard security measures to protect your data. However, you are responsible for maintaining backups of your own data.</p>
+              
+              <h3>7. Limitation of Liability</h3>
+              <p>Magnetic Clouds shall not be liable for any indirect, incidental, or consequential damages arising from the use of our services.</p>
+              
+              <h3>8. Termination</h3>
+              <p>We may terminate or suspend your account at any time for violation of these terms. You may cancel your account at any time through your dashboard.</p>
+              
+              <h3>9. Contact</h3>
+              <p>For questions about these terms, please contact us at legal@magneticclouds.com</p>
+            </div>
+            <div className="p-4 border-t border-dark-200 dark:border-dark-700 flex justify-end">
+              <button onClick={() => setShowTermsModal(false)} className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Privacy Policy Modal */}
+      {showPrivacyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowPrivacyModal(false)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-dark-200 dark:border-dark-700">
+              <h2 className="text-xl font-bold">Privacy Policy</h2>
+              <button onClick={() => setShowPrivacyModal(false)} className="p-2 hover:bg-dark-100 dark:hover:bg-dark-700 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh] prose dark:prose-invert prose-sm">
+              <h3>1. Information We Collect</h3>
+              <p>We collect information you provide directly, including name, email, billing address, and payment information. We also collect usage data and technical information about your devices.</p>
+              
+              <h3>2. How We Use Your Information</h3>
+              <p>We use your information to provide and improve our services, process payments, communicate with you, and ensure security of our platform.</p>
+              
+              <h3>3. Information Sharing</h3>
+              <p>We do not sell your personal information. We may share data with service providers who assist in our operations, or when required by law.</p>
+              
+              <h3>4. Data Security</h3>
+              <p>We implement industry-standard security measures including encryption, firewalls, and secure data centers to protect your information.</p>
+              
+              <h3>5. Cookies and Tracking</h3>
+              <p>We use cookies and similar technologies to enhance your experience, analyze usage, and personalize content. You can control cookie settings in your browser.</p>
+              
+              <h3>6. Your Rights</h3>
+              <p>You have the right to access, correct, or delete your personal data. You may also opt out of marketing communications at any time.</p>
+              
+              <h3>7. Data Retention</h3>
+              <p>We retain your data for as long as your account is active or as needed to provide services. We may retain certain information as required by law.</p>
+              
+              <h3>8. International Transfers</h3>
+              <p>Your data may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place for such transfers.</p>
+              
+              <h3>9. Updates to This Policy</h3>
+              <p>We may update this policy from time to time. We will notify you of significant changes via email or through our services.</p>
+              
+              <h3>10. Contact Us</h3>
+              <p>For privacy-related inquiries, please contact us at privacy@magneticclouds.com</p>
+            </div>
+            <div className="p-4 border-t border-dark-200 dark:border-dark-700 flex justify-end">
+              <button onClick={() => setShowPrivacyModal(false)} className="px-6 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors">
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </>
   )
 }

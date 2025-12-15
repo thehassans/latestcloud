@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { 
   Facebook, Twitter, Linkedin, Instagram, Youtube,
@@ -7,6 +7,23 @@ import {
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useSiteSettingsStore } from '../../store/useStore'
+
+// Custom Link component that scrolls to top
+const FooterLink = ({ to, children, className }) => {
+  const navigate = useNavigate()
+  
+  const handleClick = (e) => {
+    e.preventDefault()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setTimeout(() => navigate(to), 100)
+  }
+  
+  return (
+    <a href={to} onClick={handleClick} className={className}>
+      {children}
+    </a>
+  )
+}
 
 const footerLinks = {
   services: [
@@ -167,13 +184,13 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.to}>
-                  <Link
+                  <FooterLink
                     to={link.to}
                     className="text-dark-400 hover:text-white transition-colors inline-flex items-center gap-1 group"
                   >
                     <ArrowRight className="w-4 h-4 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     {link.label}
-                  </Link>
+                  </FooterLink>
                 </li>
               ))}
             </ul>
@@ -185,13 +202,13 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.tools.map((link) => (
                 <li key={link.to}>
-                  <Link
+                  <FooterLink
                     to={link.to}
                     className="text-dark-400 hover:text-white transition-colors inline-flex items-center gap-1 group"
                   >
                     <ArrowRight className="w-4 h-4 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     {link.label}
-                  </Link>
+                  </FooterLink>
                 </li>
               ))}
             </ul>
@@ -203,13 +220,13 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.to}>
-                  <Link
+                  <FooterLink
                     to={link.to}
                     className="text-dark-400 hover:text-white transition-colors inline-flex items-center gap-1 group"
                   >
                     <ArrowRight className="w-4 h-4 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     {link.label}
-                  </Link>
+                  </FooterLink>
                 </li>
               ))}
             </ul>
@@ -221,13 +238,13 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.support.map((link) => (
                 <li key={link.to}>
-                  <Link
+                  <FooterLink
                     to={link.to}
                     className="text-dark-400 hover:text-white transition-colors inline-flex items-center gap-1 group"
                   >
                     <ArrowRight className="w-4 h-4 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     {link.label}
-                  </Link>
+                  </FooterLink>
                 </li>
               ))}
             </ul>
@@ -239,13 +256,13 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
                 <li key={link.to}>
-                  <Link
+                  <FooterLink
                     to={link.to}
                     className="text-dark-400 hover:text-white transition-colors inline-flex items-center gap-1 group"
                   >
                     <ArrowRight className="w-4 h-4 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     {link.label}
-                  </Link>
+                  </FooterLink>
                 </li>
               ))}
             </ul>
