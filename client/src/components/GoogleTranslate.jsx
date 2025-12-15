@@ -107,32 +107,48 @@ export default function GoogleTranslate({ variant = 'default' }) {
     setCurrentLang(langCode)
     setIsOpen(false)
 
-    // Set cookie for Google Translate
-    setCookie('googtrans', `/en/${langCode}`)
-    // Also set on domain
-    document.cookie = `googtrans=/en/${langCode}; path=/; domain=${window.location.hostname}`
+    // Clear existing googtrans cookies
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}`
 
-    // Try multiple methods to trigger translation
+    // Set new cookie for Google Translate
+    const cookieValue = `/en/${langCode}`
+    setCookie('googtrans', cookieValue)
+    document.cookie = `googtrans=${cookieValue}; path=/`
+    document.cookie = `googtrans=${cookieValue}; path=/; domain=${window.location.hostname}`
+    
+    // For subdomains
+    const hostParts = window.location.hostname.split('.')
+    if (hostParts.length >= 2) {
+      const rootDomain = hostParts.slice(-2).join('.')
+      document.cookie = `googtrans=${cookieValue}; path=/; domain=.${rootDomain}`
+    }
+
+    // Try to trigger translation via the Google Translate select element
     const selectElement = document.querySelector('.goog-te-combo')
     if (selectElement) {
       selectElement.value = langCode
-      selectElement.dispatchEvent(new Event('change', { bubbles: true }))
       
-      // Trigger via iframe if available
-      const frame = document.querySelector('.goog-te-menu-frame')
-      if (frame) {
-        try {
-          const frameDoc = frame.contentDocument || frame.contentWindow.document
-          const items = frameDoc.querySelectorAll('.goog-te-menu2-item span.text')
-          items.forEach(item => {
-            if (item.textContent.includes(languages.find(l => l.code === langCode)?.name)) {
-              item.click()
-            }
-          })
-        } catch (e) {
-          // Cross-origin restriction, use fallback
-        }
+      // Create and dispatch change event
+      const event = new Event('change', { bubbles: true, cancelable: true })
+      selectElement.dispatchEvent(event)
+      
+      // Also try triggering via the native setter
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set
+      if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(selectElement, langCode)
+        selectElement.dispatchEvent(new Event('change', { bubbles: true }))
       }
+      
+      // Small delay then check if translation applied
+      setTimeout(() => {
+        const currentCookie = getCookie('googtrans')
+        if (!currentCookie || !currentCookie.includes(langCode)) {
+          // Translation didn't apply, reload
+          window.location.reload()
+        }
+      }, 500)
     } else {
       // Fallback: reload with cookie set
       window.location.reload()

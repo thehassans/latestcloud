@@ -182,6 +182,7 @@ export default function Reviews() {
   const [filter, setFilter] = useState('all')
   const [sortBy, setSortBy] = useState('recent')
   const [helpfulClicks, setHelpfulClicks] = useState({})
+  const [visibleCount, setVisibleCount] = useState(6)
 
   const handleHelpful = (reviewId) => {
     setHelpfulClicks(prev => ({
@@ -296,7 +297,7 @@ export default function Reviews() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredReviews.map((review, i) => (
+            {filteredReviews.slice(0, visibleCount).map((review, i) => (
               <motion.div
                 key={review.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -376,11 +377,27 @@ export default function Reviews() {
           </div>
 
           {/* Load More */}
-          <div className="mt-12 text-center">
-            <button className="btn-outline">
-              Load More Reviews
-            </button>
-          </div>
+          {visibleCount < filteredReviews.length && (
+            <div className="mt-12 text-center">
+              <button 
+                onClick={() => setVisibleCount(prev => Math.min(prev + 6, filteredReviews.length))}
+                className="btn-outline"
+              >
+                Load More Reviews ({filteredReviews.length - visibleCount} remaining)
+              </button>
+            </div>
+          )}
+          
+          {visibleCount >= filteredReviews.length && filteredReviews.length > 6 && (
+            <div className="mt-12 text-center">
+              <button 
+                onClick={() => setVisibleCount(6)}
+                className="btn-outline"
+              >
+                Show Less
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
