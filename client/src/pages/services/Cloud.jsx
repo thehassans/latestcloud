@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import { Cloud as CloudIcon, CheckCircle, ArrowRight, Cpu, HardDrive, Gauge, Globe, Shield, Zap, Headphones, Lock, RefreshCw, Check, X } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const cloudPlans = [
+const defaultCloudPlans = [
   {
     name: 'Starter',
     price: 19.99,
@@ -78,6 +80,13 @@ export default function Cloud() {
   const { addItem } = useCartStore()
   const isGradient = themeStyle === 'gradient'
   const isDark = theme === 'dark'
+
+  const { data: pricingData } = useQuery({
+    queryKey: ['pricing'],
+    queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
+  })
+
+  const cloudPlans = pricingData?.cloud || defaultCloudPlans
 
   const handleAddToCart = (plan) => {
     addItem({

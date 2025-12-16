@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
+import { useQuery } from '@tanstack/react-query'
 import { Server, CheckCircle, ArrowRight, Cpu, HardDrive, Gauge, Globe, Shield, Zap, Headphones, Lock, MapPin, Clock, Wifi, Check, X } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
+import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 
-const bdPlans = [
+const defaultBdPlans = [
   {
     name: 'BD Starter',
     price: 29.99,
@@ -75,6 +77,13 @@ export default function BDServer() {
   const { theme } = useThemeStore()
   const { addItem } = useCartStore()
   const isDark = theme === 'dark'
+
+  const { data: pricingData } = useQuery({
+    queryKey: ['pricing'],
+    queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
+  })
+
+  const bdPlans = pricingData?.bdserver || defaultBdPlans
 
   const handleAddToCart = (plan) => {
     addItem({

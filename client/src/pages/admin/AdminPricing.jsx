@@ -8,6 +8,8 @@ const categories = [
   { id: 'hosting', name: 'Web Hosting', icon: Server },
   { id: 'ssl', name: 'SSL Certificates', icon: Shield },
   { id: 'vps', name: 'VPS Servers', icon: Cloud },
+  { id: 'bdserver', name: 'BD Server', icon: Server },
+  { id: 'cloud', name: 'Cloud Server', icon: Cloud },
   { id: 'dedicated', name: 'Dedicated Servers', icon: HardDrive },
   { id: 'nobot', name: 'NoBot AI', icon: Bot },
 ]
@@ -22,8 +24,20 @@ const defaultPlans = {
   vps: [
     { name: 'VPS Starter', price: 5.99, cpu: '1 vCPU', ram: '1 GB', storage: '25 GB SSD', bandwidth: '1 TB', color: 'from-blue-500 to-cyan-500' }
   ],
+  bdserver: [
+    { name: 'BD Starter', price: 29.99, cpu: '2 vCPU', ram: '4 GB', storage: '80 GB NVMe', bandwidth: '2 TB', latency: '<5ms', features: ['Ultra Low Latency', 'Local Support', 'Daily Backups', 'DDoS Protection'], color: 'from-green-500 to-emerald-500' },
+    { name: 'BD Pro', price: 59.99, cpu: '4 vCPU', ram: '8 GB', storage: '160 GB NVMe', bandwidth: '5 TB', latency: '<3ms', features: ['Ultra Low Latency', 'Dedicated IP', 'Local Support', 'Premium DDoS'], color: 'from-green-500 to-emerald-500', popular: true },
+    { name: 'BD Enterprise', price: 119.99, cpu: '8 vCPU', ram: '16 GB', storage: '320 GB NVMe', bandwidth: '10 TB', latency: '<1ms', features: ['Lowest Latency', 'Multiple IPs', 'Hourly Backups', 'SLA 99.99%'], color: 'from-green-500 to-emerald-500' }
+  ],
+  cloud: [
+    { name: 'Cloud Starter', price: 19.99, cpu: '2 vCPU', ram: '4 GB', storage: '80 GB NVMe', bandwidth: '4 TB', features: ['Auto Scaling', 'Load Balancer', 'Daily Backups', '24/7 Support'], color: 'from-cyan-500 to-blue-500' },
+    { name: 'Cloud Pro', price: 49.99, cpu: '4 vCPU', ram: '8 GB', storage: '160 GB NVMe', bandwidth: '8 TB', features: ['Auto Scaling', 'Load Balancer', 'Daily Backups', 'DDoS Protection', 'Priority Support'], color: 'from-cyan-500 to-blue-500', popular: true },
+    { name: 'Cloud Business', price: 99.99, cpu: '8 vCPU', ram: '16 GB', storage: '320 GB NVMe', bandwidth: '16 TB', features: ['Auto Scaling', 'Load Balancer', 'Hourly Backups', 'DDoS Protection', 'Dedicated Support'], color: 'from-cyan-500 to-blue-500' }
+  ],
   dedicated: [
-    { name: 'Entry Server', price: 79.99, cpu: 'Intel Xeon E3', ram: '16 GB DDR4', storage: '500 GB SSD', bandwidth: '10 TB', color: 'from-blue-500 to-cyan-500' }
+    { name: 'Entry Server', price: 79.99, cpu: 'Intel Xeon E3', ram: '16 GB DDR4', storage: '500 GB SSD', bandwidth: '10 TB', color: 'from-orange-500 to-red-500' },
+    { name: 'Professional', price: 199.99, cpu: 'Intel Xeon E-2288G', ram: '64 GB DDR4', storage: '2 TB NVMe', bandwidth: '20 TB', features: ['Full Root Access', 'IPMI Access', 'Advanced DDoS', 'Priority Support', 'Hardware RAID'], color: 'from-orange-500 to-red-500', popular: true },
+    { name: 'Enterprise', price: 399.99, cpu: 'Dual Xeon Gold', ram: '128 GB DDR4', storage: '4 TB RAID', bandwidth: 'Unlimited', features: ['Full Root Access', 'IPMI Access', 'Premium DDoS', 'Dedicated Support', 'Hardware RAID', 'SLA 99.99%'], color: 'from-orange-500 to-red-500' }
   ],
   nobot: [
     { name: 'Starter', description: 'Perfect for small businesses', price: 29, channel_limit: 1, messages: '5,000', languages: '3', features: ['1 Channel (Any One)', '5,000 messages/mo', '3 languages', 'Basic training'], color: 'from-blue-500 to-cyan-500' },
@@ -51,6 +65,8 @@ export default function AdminPricing() {
         hosting: data.hosting || defaultPlans.hosting,
         ssl: data.ssl || defaultPlans.ssl,
         vps: data.vps || defaultPlans.vps,
+        bdserver: data.bdserver || defaultPlans.bdserver,
+        cloud: data.cloud || defaultPlans.cloud,
         dedicated: data.dedicated || defaultPlans.dedicated,
         nobot: data.nobot || defaultPlans.nobot,
       })
@@ -62,6 +78,8 @@ export default function AdminPricing() {
         hosting: defaultPlans.hosting,
         ssl: defaultPlans.ssl,
         vps: defaultPlans.vps,
+        bdserver: defaultPlans.bdserver,
+        cloud: defaultPlans.cloud,
         dedicated: defaultPlans.dedicated,
         nobot: defaultPlans.nobot,
       })
@@ -89,6 +107,12 @@ export default function AdminPricing() {
       newPlan = { name: 'New Plan', description: '', price: 0, channel_limit: 1, messages: '5,000', languages: '3', features: [], color: 'from-blue-500 to-cyan-500' }
     } else if (activeCategory === 'hosting' || activeCategory === 'ssl') {
       newPlan = { name: 'New Plan', price: 0, features: [], color: 'from-blue-500 to-cyan-500' }
+    } else if (activeCategory === 'bdserver') {
+      newPlan = { name: 'New Plan', price: 0, cpu: '', ram: '', storage: '', bandwidth: '', latency: '', features: [], color: 'from-green-500 to-emerald-500' }
+    } else if (activeCategory === 'cloud') {
+      newPlan = { name: 'New Plan', price: 0, cpu: '', ram: '', storage: '', bandwidth: '', features: [], color: 'from-cyan-500 to-blue-500' }
+    } else if (activeCategory === 'dedicated') {
+      newPlan = { name: 'New Plan', price: 0, cpu: '', ram: '', storage: '', bandwidth: '', features: [], color: 'from-orange-500 to-red-500' }
     } else {
       newPlan = { name: 'New Plan', price: 0, cpu: '', ram: '', storage: '', bandwidth: '', color: 'from-blue-500 to-cyan-500' }
     }
