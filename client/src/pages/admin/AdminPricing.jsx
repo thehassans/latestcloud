@@ -264,8 +264,8 @@ export default function AdminPricing() {
               </div>
             </div>
 
-            {/* VPS/Dedicated specific fields */}
-            {(activeCategory === 'vps' || activeCategory === 'dedicated') && (
+            {/* Server specific fields (VPS, BD Server, Cloud, Dedicated) */}
+            {(activeCategory === 'vps' || activeCategory === 'bdserver' || activeCategory === 'cloud' || activeCategory === 'dedicated') && (
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">CPU</label>
@@ -307,6 +307,180 @@ export default function AdminPricing() {
                     placeholder="e.g., 3 TB"
                   />
                 </div>
+              </div>
+            )}
+
+            {/* BD Server specific latency field */}
+            {activeCategory === 'bdserver' && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Latency</label>
+                  <input
+                    type="text"
+                    value={plan.latency || ''}
+                    onChange={(e) => updatePlan(index, 'latency', e.target.value)}
+                    className="input"
+                    placeholder="e.g., <5ms"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Backup</label>
+                  <input
+                    type="text"
+                    value={plan.backup || ''}
+                    onChange={(e) => updatePlan(index, 'backup', e.target.value)}
+                    className="input"
+                    placeholder="e.g., Daily"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Support Level</label>
+                  <input
+                    type="text"
+                    value={plan.support || ''}
+                    onChange={(e) => updatePlan(index, 'support', e.target.value)}
+                    className="input"
+                    placeholder="e.g., Priority"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Cloud Server specific fields */}
+            {activeCategory === 'cloud' && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Backup</label>
+                  <input
+                    type="text"
+                    value={plan.backup || ''}
+                    onChange={(e) => updatePlan(index, 'backup', e.target.value)}
+                    className="input"
+                    placeholder="e.g., Daily"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Support Level</label>
+                  <input
+                    type="text"
+                    value={plan.support || ''}
+                    onChange={(e) => updatePlan(index, 'support', e.target.value)}
+                    className="input"
+                    placeholder="e.g., Standard"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Auto Scale</label>
+                  <select
+                    value={plan.autoScale ? 'yes' : 'no'}
+                    onChange={(e) => updatePlan(index, 'autoScale', e.target.value === 'yes')}
+                    className="input"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Load Balancer</label>
+                  <select
+                    value={plan.loadBalancer ? 'yes' : 'no'}
+                    onChange={(e) => updatePlan(index, 'loadBalancer', e.target.value === 'yes')}
+                    className="input"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Dedicated Server specific fields */}
+            {activeCategory === 'dedicated' && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Support Level</label>
+                  <input
+                    type="text"
+                    value={plan.support || ''}
+                    onChange={(e) => updatePlan(index, 'support', e.target.value)}
+                    className="input"
+                    placeholder="e.g., Standard"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Root Access</label>
+                  <select
+                    value={plan.rootAccess ? 'yes' : 'no'}
+                    onChange={(e) => updatePlan(index, 'rootAccess', e.target.value === 'yes')}
+                    className="input"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">IPMI Access</label>
+                  <select
+                    value={plan.ipmi ? 'yes' : 'no'}
+                    onChange={(e) => updatePlan(index, 'ipmi', e.target.value === 'yes')}
+                    className="input"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Hardware RAID</label>
+                  <select
+                    value={plan.raid ? 'yes' : 'no'}
+                    onChange={(e) => updatePlan(index, 'raid', e.target.value === 'yes')}
+                    className="input"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* DDoS and SLA for server types */}
+            {(activeCategory === 'bdserver' || activeCategory === 'cloud' || activeCategory === 'dedicated') && (
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">DDoS Protection</label>
+                  <select
+                    value={plan.ddos ? 'yes' : 'no'}
+                    onChange={(e) => updatePlan(index, 'ddos', e.target.value === 'yes')}
+                    className="input"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">SLA 99.99%</label>
+                  <select
+                    value={plan.sla ? 'yes' : 'no'}
+                    onChange={(e) => updatePlan(index, 'sla', e.target.value === 'yes')}
+                    className="input"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                {activeCategory === 'bdserver' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Dedicated IP</label>
+                    <select
+                      value={plan.dedicatedIp ? 'yes' : 'no'}
+                      onChange={(e) => updatePlan(index, 'dedicatedIp', e.target.value === 'yes')}
+                      className="input"
+                    >
+                      <option value="no">No</option>
+                      <option value="yes">Yes</option>
+                    </select>
+                  </div>
+                )}
               </div>
             )}
 
