@@ -176,10 +176,12 @@ export const useSiteSettingsStore = create(
       contactEmail: 'support@magneticclouds.com',
       contactPhone: '',
       partnerLogos: [],
+      showPartnerLogos: true,
       loaded: false,
       setSiteSettings: (data) => set({ ...data, loaded: true }),
       updateSiteSetting: (key, value) => set({ [key]: value }),
       setPartnerLogos: (logos) => set({ partnerLogos: logos }),
+      setShowPartnerLogos: (show) => set({ showPartnerLogos: show }),
       addPartnerLogo: (logo) => set((state) => ({ 
         partnerLogos: [...state.partnerLogos, logo] 
       })),

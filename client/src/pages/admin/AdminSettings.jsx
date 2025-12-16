@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Save, Palette, Globe, CreditCard, Image, Upload, X, Plus, Trash2, Users } from 'lucide-react'
+import { Save, Palette, Globe, CreditCard, Image, Upload, X, Plus, Trash2, Users, ToggleLeft, ToggleRight, Pencil } from 'lucide-react'
 import { useThemeStore, useSiteSettingsStore } from '../../store/useStore'
 import api from '../../lib/api'
 import toast from 'react-hot-toast'
 
 export default function AdminSettings() {
   const { themeStyle, setThemeStyle } = useThemeStore()
-  const { siteName, siteTagline, logo, favicon, contactEmail, partnerLogos, setSiteSettings, setPartnerLogos } = useSiteSettingsStore()
+  const { siteName, siteTagline, logo, favicon, contactEmail, partnerLogos, showPartnerLogos, setSiteSettings, setPartnerLogos } = useSiteSettingsStore()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     siteName: siteName || 'Magnetic Clouds',
@@ -15,11 +15,14 @@ export default function AdminSettings() {
     contactEmail: contactEmail || 'support@magneticclouds.com',
     logo: logo || null,
     favicon: favicon || null,
-    partnerLogos: partnerLogos || []
+    partnerLogos: partnerLogos || [],
+    showPartnerLogos: showPartnerLogos !== false
   })
   const logoInputRef = useRef(null)
   const faviconInputRef = useRef(null)
   const partnerLogoInputRef = useRef(null)
+  const [editingLogoIndex, setEditingLogoIndex] = useState(null)
+  const editLogoInputRef = useRef(null)
 
   // Load settings from server on mount
   useEffect(() => {
@@ -35,7 +38,8 @@ export default function AdminSettings() {
             contactEmail: s.contact_email || prev.contactEmail,
             logo: s.site_logo || prev.logo,
             favicon: s.site_favicon || prev.favicon,
-            partnerLogos: s.partner_logos ? JSON.parse(s.partner_logos) : prev.partnerLogos
+            partnerLogos: s.partner_logos ? JSON.parse(s.partner_logos) : prev.partnerLogos,
+            showPartnerLogos: s.show_partner_logos !== 'false' && s.show_partner_logos !== false
           }))
         }
       } catch (err) {
@@ -124,7 +128,8 @@ export default function AdminSettings() {
           contact_email: formData.contactEmail,
           site_logo: formData.logo,
           site_favicon: formData.favicon,
-          partner_logos: JSON.stringify(formData.partnerLogos)
+          partner_logos: JSON.stringify(formData.partnerLogos),
+          show_partner_logos: formData.showPartnerLogos.toString()
         }
       })
       
@@ -135,7 +140,8 @@ export default function AdminSettings() {
         contactEmail: formData.contactEmail,
         logo: formData.logo,
         favicon: formData.favicon,
-        partnerLogos: formData.partnerLogos
+        partnerLogos: formData.partnerLogos,
+        showPartnerLogos: formData.showPartnerLogos
       })
       setPartnerLogos(formData.partnerLogos)
 
@@ -317,11 +323,78 @@ export default function AdminSettings() {
 
         {/* Partner Logos Section */}
         <div className="card p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Users className="w-6 h-6 text-primary-500" />
-            <h2 className="text-lg font-bold">Partner Logos</h2>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Users className="w-6 h-6 text-primary-500" />
+              <h2 className="text-lg font-bold">Partner Logos</h2>
+            </div>
+            {/* Toggle On/Off */}
+            <button
+              onClick={() => setFormData(prev => ({ ...prev, showPartnerLogos: !prev.showPartnerLogos }))}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${formData.showPartnerLogos ? 'bg-green-100 dark:bg-green-900/30 text-green-600' : 'bg-dark-100 dark:bg-dark-700 text-dark-500'}`}
+            >
+              {formData.showPartnerLogos ? (
+                <>
+                  <ToggleRight className="w-5 h-5" />
+                  <span className="text-sm font-medium">Enabled</span>
+                </>
+              ) : (
+                <>
+                  <ToggleLeft className="w-5 h-5" />
+                  <span className="text-sm font-medium">Disabled</span>
+                </>
+              )}
+            </button>
           </div>
           <p className="text-sm text-dark-500 mb-4">Upload partner and payment method logos to display on the homepage.</p>
+          
+          {/* Hidden input for editing logos */}
+          <input
+            ref={editLogoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files[0]
+              if (!file || editingLogoIndex === null) return
+              
+              const reader = new FileReader()
+              reader.onloadend = () => {
+                const img = new window.Image()
+                img.onload = () => {
+                  const canvas = document.createElement('canvas')
+                  let width = img.width
+                  let height = img.height
+                  const maxHeight = 60
+                  const maxWidth = 200
+                  if (height > maxHeight) {
+                    width = (width * maxHeight) / height
+                    height = maxHeight
+                  }
+                  if (width > maxWidth) {
+                    height = (height * maxWidth) / width
+                    width = maxWidth
+                  }
+                  canvas.width = width
+                  canvas.height = height
+                  const ctx = canvas.getContext('2d')
+                  ctx.drawImage(img, 0, 0, width, height)
+                  const resized = canvas.toDataURL('image/png')
+                  setFormData(prev => ({
+                    ...prev,
+                    partnerLogos: prev.partnerLogos.map((p, i) => 
+                      i === editingLogoIndex ? { ...p, logo: resized } : p
+                    )
+                  }))
+                  toast.success('Logo updated!')
+                  setEditingLogoIndex(null)
+                }
+                img.src = reader.result
+              }
+              reader.readAsDataURL(file)
+              e.target.value = ''
+            }}
+          />
           
           {/* Current Partner Logos */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
@@ -329,6 +402,18 @@ export default function AdminSettings() {
               <div key={index} className="relative group border border-dark-200 dark:border-dark-700 rounded-xl p-3 bg-dark-50 dark:bg-dark-800">
                 <img src={partner.logo} alt={partner.name} className="h-10 w-full object-contain" />
                 <p className="text-xs text-center mt-2 text-dark-600 dark:text-dark-400 truncate">{partner.name}</p>
+                {/* Edit button */}
+                <button
+                  onClick={() => {
+                    setEditingLogoIndex(index)
+                    editLogoInputRef.current?.click()
+                  }}
+                  className="absolute -top-2 -left-2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Update logo"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+                {/* Delete button */}
                 <button
                   onClick={() => {
                     setFormData(prev => ({
@@ -337,6 +422,7 @@ export default function AdminSettings() {
                     }))
                   }}
                   className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Remove logo"
                 >
                   <X className="w-3 h-3" />
                 </button>

@@ -43,7 +43,7 @@ export default function Home() {
   const navigate = useNavigate()
   const { format } = useCurrencyStore()
   const { themeStyle } = useThemeStore()
-  const { logo, siteName, partnerLogos } = useSiteSettingsStore()
+  const { logo, siteName, partnerLogos, showPartnerLogos } = useSiteSettingsStore()
   const [domainSearch, setDomainSearch] = useState('')
 
   const { data: datacenters } = useQuery({
@@ -757,6 +757,7 @@ export default function Home() {
       </section>
 
       {/* Partners Section - Animated Marquee */}
+      {showPartnerLogos !== false && (
       <section className="py-16 bg-white dark:bg-dark-950 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
           <div className="text-center">
@@ -821,6 +822,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* CTA Section */}
       <section className="section">
