@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
-import { Database, CheckCircle, ArrowRight, Cpu, HardDrive, Shield, Zap, Globe, Server, Headphones, Lock, Check, X } from 'lucide-react'
+import { Database, CheckCircle, ArrowRight, Cpu, HardDrive, Shield, Zap, Globe, Server, Headphones, Lock, Check, X, Settings, Plus, Minus, Gauge } from 'lucide-react'
 import { useCurrencyStore, useThemeStore, useCartStore } from '../../store/useStore'
 import { settingsAPI } from '../../lib/api'
 import clsx from 'clsx'
@@ -39,10 +40,97 @@ export default function Dedicated() {
   const isGradient = themeStyle === 'gradient'
   const isDark = theme === 'dark'
 
+  // Custom Dedicated Server configurator state
+  const [customConfig, setCustomConfig] = useState({
+    cpu: 8,
+    ram: 32,
+    storage: 500,
+    bandwidth: 10,
+    raid: true,
+    ipmi: true,
+    ddos: true
+  })
+
   const { data: pricingData } = useQuery({
     queryKey: ['pricing'],
     queryFn: () => settingsAPI.getPricing().then(res => res.data.pricing)
   })
+
+  const { data: customPricing } = useQuery({
+    queryKey: ['custom-dedicated-pricing'],
+    queryFn: () => settingsAPI.getCustomVPSPricing().then(res => res.data.pricing)
+  })
+
+  // Dedicated server pricing (much higher than VPS)
+  const pricing = customPricing ? {
+    cpu_price_per_core: 8.00,
+    ram_price_per_gb: 2.50,
+    storage_price_per_gb: 0.10,
+    bandwidth_price_per_tb: 2.00,
+    min_cpu: 4, min_ram: 16, min_storage: 250, min_bandwidth: 5,
+    max_cpu: 64, max_ram: 512, max_storage: 8000, max_bandwidth: 100,
+    cpu_step: 4, ram_step: 8, storage_step: 250, bandwidth_step: 5,
+    base_fee: 50.00,
+    raid_price: 20.00,
+    ipmi_price: 10.00,
+    ddos_protection_price: 15.00
+  } : {
+    cpu_price_per_core: 8.00,
+    ram_price_per_gb: 2.50,
+    storage_price_per_gb: 0.10,
+    bandwidth_price_per_tb: 2.00,
+    min_cpu: 4, min_ram: 16, min_storage: 250, min_bandwidth: 5,
+    max_cpu: 64, max_ram: 512, max_storage: 8000, max_bandwidth: 100,
+    cpu_step: 4, ram_step: 8, storage_step: 250, bandwidth_step: 5,
+    base_fee: 50.00,
+    raid_price: 20.00,
+    ipmi_price: 10.00,
+    ddos_protection_price: 15.00
+  }
+
+  const calculateCustomPrice = () => {
+    let total = pricing.base_fee
+    total += customConfig.cpu * pricing.cpu_price_per_core
+    total += customConfig.ram * pricing.ram_price_per_gb
+    total += customConfig.storage * pricing.storage_price_per_gb
+    total += customConfig.bandwidth * pricing.bandwidth_price_per_tb
+    if (customConfig.raid) total += pricing.raid_price
+    if (customConfig.ipmi) total += pricing.ipmi_price
+    if (customConfig.ddos) total += pricing.ddos_protection_price
+    return total
+  }
+
+  const handleAddCustomToCart = () => {
+    const price = calculateCustomPrice()
+    addItem({
+      id: `custom-dedicated-${Date.now()}`,
+      type: 'product',
+      name: `Custom Dedicated (${customConfig.cpu} Cores, ${customConfig.ram}GB RAM, ${customConfig.storage}GB NVMe)`,
+      price: price,
+      billingCycle: 'monthly',
+      product_type: 'dedicated',
+      customConfig: customConfig
+    })
+    toast.success('Custom Dedicated Server added to cart!')
+  }
+
+  const updateConfig = (key, value) => {
+    setCustomConfig(prev => ({ ...prev, [key]: value }))
+  }
+
+  const incrementConfig = (key, step, max) => {
+    setCustomConfig(prev => ({
+      ...prev,
+      [key]: Math.min(prev[key] + step, max)
+    }))
+  }
+
+  const decrementConfig = (key, step, min) => {
+    setCustomConfig(prev => ({
+      ...prev,
+      [key]: Math.max(prev[key] - step, min)
+    }))
+  }
 
   const dedicatedPlans = pricingData?.dedicated || defaultPlans
 
@@ -329,6 +417,331 @@ export default function Dedicated() {
             <div className="flex items-center gap-2">
               <Headphones className="w-5 h-5 text-red-500" />
               Dedicated Support
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Custom Dedicated Server Configurator */}
+      <section className="py-24 bg-dark-50 dark:bg-dark-950">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/10 border border-orange-500/30 text-orange-600 dark:text-orange-400 rounded-full text-sm font-medium mb-6"
+            >
+              <Settings className="w-4 h-4" />
+              Build Your Own
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-3xl md:text-4xl font-bold font-display"
+            >
+              Customize Your{' '}
+              <span className="text-gradient">Dedicated Server</span>
+            </motion.h2>
+            <p className="mt-4 text-dark-500 max-w-2xl mx-auto">
+              Configure your perfect bare-metal server with enterprise-grade hardware
+            </p>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="card p-8 border-2 border-orange-500/20"
+          >
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Configuration Controls */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* CPU Cores */}
+                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Cpu className="w-5 h-5 text-orange-500" />
+                      <span className="font-medium">CPU Cores</span>
+                    </div>
+                    <span className="text-sm text-dark-500">${pricing.cpu_price_per_core.toFixed(2)}/core</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => decrementConfig('cpu', pricing.cpu_step, pricing.min_cpu)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-orange-500 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={pricing.min_cpu}
+                        max={pricing.max_cpu}
+                        step={pricing.cpu_step}
+                        value={customConfig.cpu}
+                        onChange={(e) => updateConfig('cpu', parseInt(e.target.value))}
+                        className="w-full accent-orange-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => incrementConfig('cpu', pricing.cpu_step, pricing.max_cpu)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-orange-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div className="w-20 text-center">
+                      <span className="text-2xl font-bold text-orange-600">{customConfig.cpu}</span>
+                      <span className="text-sm text-dark-500 ml-1">cores</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RAM */}
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Gauge className="w-5 h-5 text-red-500" />
+                      <span className="font-medium">DDR4 RAM</span>
+                    </div>
+                    <span className="text-sm text-dark-500">${pricing.ram_price_per_gb.toFixed(2)}/GB</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => decrementConfig('ram', pricing.ram_step, pricing.min_ram)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-red-500 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={pricing.min_ram}
+                        max={pricing.max_ram}
+                        step={pricing.ram_step}
+                        value={customConfig.ram}
+                        onChange={(e) => updateConfig('ram', parseInt(e.target.value))}
+                        className="w-full accent-red-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => incrementConfig('ram', pricing.ram_step, pricing.max_ram)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-red-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div className="w-20 text-center">
+                      <span className="text-2xl font-bold text-red-600">{customConfig.ram}</span>
+                      <span className="text-sm text-dark-500 ml-1">GB</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Storage */}
+                <div className="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <HardDrive className="w-5 h-5 text-pink-500" />
+                      <span className="font-medium">NVMe Storage</span>
+                    </div>
+                    <span className="text-sm text-dark-500">${pricing.storage_price_per_gb.toFixed(2)}/GB</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => decrementConfig('storage', pricing.storage_step, pricing.min_storage)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-pink-500 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={pricing.min_storage}
+                        max={pricing.max_storage}
+                        step={pricing.storage_step}
+                        value={customConfig.storage}
+                        onChange={(e) => updateConfig('storage', parseInt(e.target.value))}
+                        className="w-full accent-pink-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => incrementConfig('storage', pricing.storage_step, pricing.max_storage)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-pink-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div className="w-24 text-center">
+                      <span className="text-2xl font-bold text-pink-600">{customConfig.storage >= 1000 ? `${(customConfig.storage / 1000).toFixed(1)}` : customConfig.storage}</span>
+                      <span className="text-sm text-dark-500 ml-1">{customConfig.storage >= 1000 ? 'TB' : 'GB'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bandwidth */}
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-5 h-5 text-purple-500" />
+                      <span className="font-medium">Bandwidth</span>
+                    </div>
+                    <span className="text-sm text-dark-500">${pricing.bandwidth_price_per_tb.toFixed(2)}/TB</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => decrementConfig('bandwidth', pricing.bandwidth_step, pricing.min_bandwidth)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-purple-500 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={pricing.min_bandwidth}
+                        max={pricing.max_bandwidth}
+                        step={pricing.bandwidth_step}
+                        value={customConfig.bandwidth}
+                        onChange={(e) => updateConfig('bandwidth', parseInt(e.target.value))}
+                        className="w-full accent-purple-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => incrementConfig('bandwidth', pricing.bandwidth_step, pricing.max_bandwidth)}
+                      className="w-10 h-10 rounded-full bg-white dark:bg-dark-800 border border-dark-200 dark:border-dark-700 flex items-center justify-center hover:border-purple-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <div className="w-20 text-center">
+                      <span className="text-2xl font-bold text-purple-600">{customConfig.bandwidth}</span>
+                      <span className="text-sm text-dark-500 ml-1">TB</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add-ons */}
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <label className={clsx(
+                    "p-4 rounded-xl border-2 cursor-pointer transition-all",
+                    customConfig.raid 
+                      ? "border-orange-500 bg-orange-50 dark:bg-orange-900/20" 
+                      : "border-dark-200 dark:border-dark-700 hover:border-orange-500/50"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={customConfig.raid}
+                      onChange={(e) => updateConfig('raid', e.target.checked)}
+                      className="hidden"
+                    />
+                    <HardDrive className="w-6 h-6 text-orange-500 mb-2" />
+                    <div className="font-medium text-sm">Hardware RAID</div>
+                    <div className="text-xs text-dark-500">+${pricing.raid_price.toFixed(2)}/mo</div>
+                  </label>
+
+                  <label className={clsx(
+                    "p-4 rounded-xl border-2 cursor-pointer transition-all",
+                    customConfig.ipmi 
+                      ? "border-red-500 bg-red-50 dark:bg-red-900/20" 
+                      : "border-dark-200 dark:border-dark-700 hover:border-red-500/50"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={customConfig.ipmi}
+                      onChange={(e) => updateConfig('ipmi', e.target.checked)}
+                      className="hidden"
+                    />
+                    <Server className="w-6 h-6 text-red-500 mb-2" />
+                    <div className="font-medium text-sm">IPMI Access</div>
+                    <div className="text-xs text-dark-500">+${pricing.ipmi_price.toFixed(2)}/mo</div>
+                  </label>
+
+                  <label className={clsx(
+                    "p-4 rounded-xl border-2 cursor-pointer transition-all",
+                    customConfig.ddos 
+                      ? "border-green-500 bg-green-50 dark:bg-green-900/20" 
+                      : "border-dark-200 dark:border-dark-700 hover:border-green-500/50"
+                  )}>
+                    <input
+                      type="checkbox"
+                      checked={customConfig.ddos}
+                      onChange={(e) => updateConfig('ddos', e.target.checked)}
+                      className="hidden"
+                    />
+                    <Shield className="w-6 h-6 text-green-500 mb-2" />
+                    <div className="font-medium text-sm">DDoS Protection</div>
+                    <div className="text-xs text-dark-500">+${pricing.ddos_protection_price.toFixed(2)}/mo</div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Price Summary */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-24 p-6 bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-2xl border border-orange-500/20">
+                  <h3 className="text-lg font-bold mb-4">Your Configuration</h3>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">Base Fee</span>
+                      <span>${pricing.base_fee.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">{customConfig.cpu} CPU Cores</span>
+                      <span>${(customConfig.cpu * pricing.cpu_price_per_core).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">{customConfig.ram} GB DDR4</span>
+                      <span>${(customConfig.ram * pricing.ram_price_per_gb).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">{customConfig.storage >= 1000 ? `${(customConfig.storage / 1000).toFixed(1)} TB` : `${customConfig.storage} GB`} Storage</span>
+                      <span>${(customConfig.storage * pricing.storage_price_per_gb).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-dark-500">{customConfig.bandwidth} TB Bandwidth</span>
+                      <span>${(customConfig.bandwidth * pricing.bandwidth_price_per_tb).toFixed(2)}</span>
+                    </div>
+                    {customConfig.raid && (
+                      <div className="flex justify-between text-sm text-orange-600">
+                        <span>Hardware RAID</span>
+                        <span>+${pricing.raid_price.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {customConfig.ipmi && (
+                      <div className="flex justify-between text-sm text-red-600">
+                        <span>IPMI Access</span>
+                        <span>+${pricing.ipmi_price.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {customConfig.ddos && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>DDoS Protection</span>
+                        <span>+${pricing.ddos_protection_price.toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t border-dark-200 dark:border-dark-700 pt-4 mb-6">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-lg font-medium">Total</span>
+                      <div>
+                        <span className="text-3xl font-bold text-gradient">${calculateCustomPrice().toFixed(2)}</span>
+                        <span className="text-dark-500">/mo</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleAddCustomToCart}
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Server className="w-5 h-5" />
+                    Deploy Custom Dedicated
+                  </button>
+
+                  <p className="text-xs text-dark-500 text-center mt-4">
+                    Bare-metal • Full root access
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
