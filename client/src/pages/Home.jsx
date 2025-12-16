@@ -781,9 +781,9 @@ export default function Home() {
             {(partnerLogos && partnerLogos.length > 0 
               ? [...partnerLogos, ...partnerLogos]
               : [
-                  { name: 'Visa', logo: 'https://cdn.worldvectorlogo.com/logos/visa-2.svg' },
-                  { name: 'Mastercard', logo: 'https://cdn.worldvectorlogo.com/logos/mastercard-2.svg' },
-                  { name: 'American Express', logo: 'https://cdn.worldvectorlogo.com/logos/american-express-1.svg' },
+                  { name: 'Visa', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg' },
+                  { name: 'Mastercard', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg' },
+                  { name: 'American Express', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg' },
                   { name: 'AWS', logo: 'https://cdn.worldvectorlogo.com/logos/aws-2.svg' },
                   { name: 'Cloudflare', logo: 'https://cdn.worldvectorlogo.com/logos/cloudflare-1.svg' },
                   { name: 'Google Cloud', logo: 'https://cdn.worldvectorlogo.com/logos/google-cloud-1.svg' },
@@ -796,9 +796,9 @@ export default function Home() {
                   { name: 'Ethereum', logo: 'https://cdn.worldvectorlogo.com/logos/ethereum-1.svg' },
                   { name: 'Binance', logo: 'https://cdn.worldvectorlogo.com/logos/binance-coin-bnb.svg' },
                 ].concat([
-                  { name: 'Visa', logo: 'https://cdn.worldvectorlogo.com/logos/visa-2.svg' },
-                  { name: 'Mastercard', logo: 'https://cdn.worldvectorlogo.com/logos/mastercard-2.svg' },
-                  { name: 'American Express', logo: 'https://cdn.worldvectorlogo.com/logos/american-express-1.svg' },
+                  { name: 'Visa', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg' },
+                  { name: 'Mastercard', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg' },
+                  { name: 'American Express', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg' },
                   { name: 'AWS', logo: 'https://cdn.worldvectorlogo.com/logos/aws-2.svg' },
                   { name: 'Cloudflare', logo: 'https://cdn.worldvectorlogo.com/logos/cloudflare-1.svg' },
                   { name: 'Google Cloud', logo: 'https://cdn.worldvectorlogo.com/logos/google-cloud-1.svg' },
